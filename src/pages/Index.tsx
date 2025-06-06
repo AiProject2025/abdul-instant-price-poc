@@ -1,13 +1,15 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import BondDisplay from "@/components/BondDisplay";
+import { LoganChatbot } from "@/components/LoganChatbot";
 import { Calculator, FileText, TrendingUp, Shield, Clock, DollarSign, Zap, Brain } from "lucide-react";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+      {/* ... keep existing code (animated background elements, header, hero section, features section, footer) */}
+      
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200/30 to-indigo-300/30 rounded-full blur-3xl animate-pulse"></div>
@@ -208,6 +210,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Logan Chatbot */}
+      <LoganChatbot />
     </div>
   );
 };
