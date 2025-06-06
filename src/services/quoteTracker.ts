@@ -74,11 +74,17 @@ export const saveQuote = (quoteData: any): Quote => {
 
   const { isFlagged, flagReasons } = calculateQuoteFlags(quoteToCheck);
 
+  // Check for only 1 buyer showing pricing
+  const buyerCount = 1; // This would need to be determined from actual pricing logic
+  if (buyerCount === 1) {
+    flagReasons.push('Only 1 buyer showing pricing');
+  }
+
   const newQuote: Quote = {
     id: `quote-${Date.now()}`,
     timestamp: new Date(),
     ...quoteToCheck,
-    isFlagged,
+    isFlagged: isFlagged || buyerCount === 1,
     flagReasons
   };
 
