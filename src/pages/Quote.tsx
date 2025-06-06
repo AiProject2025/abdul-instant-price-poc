@@ -19,33 +19,49 @@ const Quote = () => {
 
   const generatePricingResults = (data: any) => {
     const loanAmount = parseFloat(data.baseLoanAmount) || parseFloat(data.loanAmount) || 400000;
+    const appraisedValue = parseFloat(data.appraisedValue) || parseFloat(data.propertyValue) || 500000;
+    const ltv = Math.round((loanAmount / appraisedValue) * 100);
     
-    // Generate mock pricing results based on form data
-    const mockResults = [
-      {
-        lender: "Dominion Financial",
-        rate: 7.250,
-        monthlyPayment: Math.round((loanAmount * 0.00725) / 12 * loanAmount / 1000),
-        totalInterest: Math.round(loanAmount * 0.65),
-        loanAmount: loanAmount
-      },
-      {
-        lender: "Capital Investment Partners",
-        rate: 7.125,
-        monthlyPayment: Math.round((loanAmount * 0.007125) / 12 * loanAmount / 1000),
-        totalInterest: Math.round(loanAmount * 0.62),
-        loanAmount: loanAmount
-      },
-      {
-        lender: "Real Estate Lending Co",
-        rate: 7.375,
-        monthlyPayment: Math.round((loanAmount * 0.007375) / 12 * loanAmount / 1000),
-        totalInterest: Math.round(loanAmount * 0.68),
-        loanAmount: loanAmount
-      }
+    // Calculate DSCR
+    const monthlyRent = parseFloat(data.marketRent) || 0;
+    const monthlyExpenses = (parseFloat(data.monthlyTaxes) || 0) + 
+                           (parseFloat(data.monthlyInsurance) || 0) + 
+                           (parseFloat(data.monthlyHOA) || 0) + 
+                           (parseFloat(data.monthlyFloodInsurance) || 0);
+    const netIncome = monthlyRent - monthlyExpenses;
+    const estimatedPayment = (loanAmount * 0.006);
+    const dscr = estimatedPayment > 0 ? netIncome / estimatedPayment : 1.25;
+
+    const noteBuyers = [
+      { product: "Product A", noteBuyer: "Blackstone", baseRate: 7.125 },
+      { product: "Product B", noteBuyer: "Bayview", baseRate: 7.250 },
+      { product: "Product C", noteBuyer: "Corevest", baseRate: 7.375 },
+      { product: "Product D", noteBuyer: "Maxes", baseRate: 7.500 },
+      { product: "Product E", noteBuyer: "Onslow", baseRate: 7.625 }
     ];
 
-    return mockResults;
+    const mockResults = noteBuyers.map((buyer, index) => {
+      const rate = buyer.baseRate + (Math.random() * 0.5 - 0.25); // Add some variation
+      const monthlyPayment = Math.round((loanAmount * (rate / 100)) / 12);
+      
+      return {
+        lender: "Dominion Financial",
+        noteBuyer: buyer.noteBuyer,
+        product: buyer.product,
+        rate: rate,
+        monthlyPayment: monthlyPayment,
+        totalInterest: Math.round(loanAmount * 0.65),
+        loanAmount: loanAmount,
+        dscr: dscr,
+        propertyType: data.propertyType || "Single Family",
+        loanType: "DSCR Investment",
+        pppDuration: "2 Years",
+        ltv: ltv,
+        isLocked: false
+      };
+    });
+
+    return mockResults.slice(0, 3); // Return top 3 offers
   };
 
   const handleFileUpload = async (file: File) => {
@@ -91,7 +107,7 @@ const Quote = () => {
     const savedQuote = saveQuote(data);
     console.log("Quote saved:", savedQuote);
     
-    // Generate pricing results
+    // Generate pricing results with enhanced data
     const results = generatePricingResults(data);
     setPricingResults(results);
     
