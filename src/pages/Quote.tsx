@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -15,18 +14,35 @@ const Quote = () => {
     setUploadedFile(file);
     setIsProcessing(true);
     
-    // Simulate AI processing
+    // Simulate AI processing to extract comprehensive data
     setTimeout(() => {
       const mockExtractedData = {
         borrowerName: "John Doe",
         propertyAddress: "123 Main St",
+        propertyCity: "Los Angeles",
+        propertyState: "California",
+        propertyZip: "90210",
         loanAmount: "400000",
-        // Add more mock data as needed
+        appraisedValue: "500000",
+        marketRent: "3500",
+        monthlyTaxes: "500",
+        monthlyInsurance: "200",
+        creditScore: "740",
+        monthsOfReserves: "12",
+        propertyType: "Single Family",
+        numberOfUnits: "1",
+        // Add more comprehensive mock data to auto-populate as much as possible
       };
       setExtractedData(mockExtractedData);
       setCurrentStep("form");
       setIsProcessing(false);
     }, 3000);
+  };
+
+  const handleManualEntry = () => {
+    // Go directly to form with no extracted data - user enters everything manually
+    setExtractedData(null);
+    setCurrentStep("form");
   };
 
   const handleFormSubmit = async (data: any) => {
@@ -74,6 +90,7 @@ const Quote = () => {
           {currentStep === "upload" && (
             <QuestionnaireUpload
               onFileUpload={handleFileUpload}
+              onManualEntry={handleManualEntry}
               isLoading={isProcessing}
             />
           )}
