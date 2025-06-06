@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
 import LoanPassView from "@/components/LoanPassView";
 import PricingResults from "@/components/PricingResults";
 import RiskTracker from "@/components/RiskTracker";
+import BondDisplay from "@/components/BondDisplay";
 import { Button } from "@/components/ui/button";
 import QuoteTracker from "@/components/QuoteTracker";
 import { saveQuote } from "@/services/quoteTracker";
@@ -190,6 +192,13 @@ const Quote = () => {
           </div>
         </div>
       </nav>
+
+      {/* Bond Display - Visible on all screens */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <BondDisplay />
+        </div>
+      </div>
 
       <main className="py-12 px-4">
         <div className="max-w-4xl mx-auto">
