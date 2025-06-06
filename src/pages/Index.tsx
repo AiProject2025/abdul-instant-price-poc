@@ -4,10 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
 import { Calculator, FileText, TrendingUp, Shield, Clock, DollarSign, Zap, Brain } from "lucide-react";
-
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       {/* ... keep existing code (animated background elements, header, hero section, features section, footer) */}
       
       {/* Animated background elements */}
@@ -22,11 +20,7 @@ const Index = () => {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <div className="relative">
-                <img 
-                  src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" 
-                  alt="Dominion Financial" 
-                  className="h-10 mr-3 drop-shadow-lg"
-                />
+                <img src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" alt="Dominion Financial" className="h-10 mr-3 drop-shadow-lg" />
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-transparent rounded blur-sm"></div>
               </div>
             </div>
@@ -84,7 +78,7 @@ const Index = () => {
             <h2 className="text-4xl font-bold text-dominion-blue mb-4">
               Next-Generation Lending Platform
             </h2>
-            <p className="text-xl text-slate-600">Powered by artificial intelligence and advanced analytics</p>
+            <p className="text-xl text-slate-600">Powered by docIQ 1.0 Beta and advanced analytics</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -213,8 +207,6 @@ const Index = () => {
 
       {/* Logan Chatbot */}
       <LoganChatbot />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
