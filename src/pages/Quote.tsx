@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -6,6 +5,7 @@ import LoanPassView from "@/components/LoanPassView";
 import PricingResults from "@/components/PricingResults";
 import RiskTracker from "@/components/RiskTracker";
 import BondDisplay from "@/components/BondDisplay";
+import { LoganChatbot } from "@/components/LoganChatbot";
 import { Button } from "@/components/ui/button";
 import QuoteTracker from "@/components/QuoteTracker";
 import { saveQuote } from "@/services/quoteTracker";
@@ -245,6 +245,9 @@ const Quote = () => {
           )}
         </div>
       </main>
+
+      {/* Logan Chatbot - Available on all Quote screens */}
+      <LoganChatbot />
     </div>
   );
 };

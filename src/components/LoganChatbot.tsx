@@ -111,13 +111,12 @@ export const LoganChatbot: React.FC = () => {
             )}
             
             <img 
-              src="/lovable-uploads/969f1ac9-69b5-41cd-93e2-23bdcd49c486.png" 
+              src="/lovable-uploads/12d1eec6-25de-486a-9bb5-74c5d247d649.png" 
               alt="Logan Assistant" 
               className="h-24 w-24 rounded-full object-cover shadow-lg relative z-10"
               style={{ 
-                objectPosition: "center bottom", 
+                objectPosition: "center top", 
                 objectFit: "cover",
-                transform: "scale(1.3)",
                 filter: "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))"
               }}
             />
@@ -135,12 +134,12 @@ export const LoganChatbot: React.FC = () => {
             <div className="flex items-center gap-2">
               <Avatar className="h-10 w-10 border-2 border-white/50 ring-2 ring-blue-400/30 overflow-hidden">
                 <AvatarImage 
-                  src="/lovable-uploads/969f1ac9-69b5-41cd-93e2-23bdcd49c486.png" 
+                  src="/lovable-uploads/12d1eec6-25de-486a-9bb5-74c5d247d649.png" 
                   alt="LOGAN" 
                   className="object-cover"
                   style={{ 
-                    objectPosition: "center bottom", 
-                    transform: "scale(1.3)",
+                    objectPosition: "center top", 
+                    objectFit: "cover",
                     filter: "drop-shadow(0px 2px 3px rgba(0,0,0,0.5))"
                   }}
                 />
@@ -174,12 +173,12 @@ export const LoganChatbot: React.FC = () => {
                     {!message.isUser && (
                       <Avatar className="h-7 w-7 mt-1 border border-blue-100 overflow-hidden flex-shrink-0">
                         <AvatarImage 
-                          src="/lovable-uploads/969f1ac9-69b5-41cd-93e2-23bdcd49c486.png" 
+                          src="/lovable-uploads/12d1eec6-25de-486a-9bb5-74c5d247d649.png" 
                           alt="LOGAN" 
                           className="object-cover"
                           style={{ 
-                            objectPosition: "center bottom", 
-                            transform: "scale(1.3)",
+                            objectPosition: "center top", 
+                            objectFit: "cover",
                             filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.4))"
                           }}
                         />
@@ -202,12 +201,12 @@ export const LoganChatbot: React.FC = () => {
                   <div className="mr-auto bg-white border-gray-200 text-gray-800 max-w-[85%] p-3 rounded-xl border shadow-sm flex items-start gap-2">
                     <Avatar className="h-7 w-7 mt-1 border border-blue-100 overflow-hidden">
                       <AvatarImage 
-                        src="/lovable-uploads/969f1ac9-69b5-41cd-93e2-23bdcd49c486.png" 
+                        src="/lovable-uploads/12d1eec6-25de-486a-9bb5-74c5d247d649.png" 
                         alt="LOGAN" 
                         className="object-cover"
                         style={{ 
                           objectPosition: "center top", 
-                          transform: "scale(1.4)",
+                          objectFit: "cover",
                           filter: "drop-shadow(0px 2px 2px rgba(0,0,0,0.4))"
                         }}
                       />
