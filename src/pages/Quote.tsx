@@ -14,7 +14,39 @@ const Quote = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [extractedData, setExtractedData] = useState<any>(null);
   const [formData, setFormData] = useState<any>(null);
+  const [pricingResults, setPricingResults] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const generatePricingResults = (data: any) => {
+    const loanAmount = parseFloat(data.baseLoanAmount) || parseFloat(data.loanAmount) || 400000;
+    
+    // Generate mock pricing results based on form data
+    const mockResults = [
+      {
+        lender: "Dominion Financial",
+        rate: 7.250,
+        monthlyPayment: Math.round((loanAmount * 0.00725) / 12 * loanAmount / 1000),
+        totalInterest: Math.round(loanAmount * 0.65),
+        loanAmount: loanAmount
+      },
+      {
+        lender: "Capital Investment Partners",
+        rate: 7.125,
+        monthlyPayment: Math.round((loanAmount * 0.007125) / 12 * loanAmount / 1000),
+        totalInterest: Math.round(loanAmount * 0.62),
+        loanAmount: loanAmount
+      },
+      {
+        lender: "Real Estate Lending Co",
+        rate: 7.375,
+        monthlyPayment: Math.round((loanAmount * 0.007375) / 12 * loanAmount / 1000),
+        totalInterest: Math.round(loanAmount * 0.68),
+        loanAmount: loanAmount
+      }
+    ];
+
+    return mockResults;
+  };
 
   const handleFileUpload = async (file: File) => {
     setUploadedFile(file);
@@ -58,6 +90,10 @@ const Quote = () => {
     // Save the quote with flagging
     const savedQuote = saveQuote(data);
     console.log("Quote saved:", savedQuote);
+    
+    // Generate pricing results
+    const results = generatePricingResults(data);
+    setPricingResults(results);
     
     // Simulate API call for pricing
     setTimeout(() => {
@@ -174,7 +210,7 @@ const Quote = () => {
           {currentStep === "results" && formData && (
             <div className="space-y-8">
               <PricingResults
-                results={formData}
+                results={pricingResults}
                 onBackToForm={() => setCurrentStep("questionnaire")}
                 onStartApplication={handleStartApplication}
               />
