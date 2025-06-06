@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -6,6 +5,9 @@ import LoanPassView from "@/components/LoanPassView";
 import PricingResults from "@/components/PricingResults";
 import RiskTracker from "@/components/RiskTracker";
 import { Button } from "@/components/ui/button";
+import QuoteTracker from "@/components/QuoteTracker";
+import { saveQuote } from "@/services/quoteTracker";
+import { ArrowLeft } from "lucide-react";
 
 const Quote = () => {
   const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results">("upload");
@@ -53,6 +55,10 @@ const Quote = () => {
     setFormData(data);
     setIsProcessing(true);
     
+    // Save the quote with flagging
+    const savedQuote = saveQuote(data);
+    console.log("Quote saved:", savedQuote);
+    
     // Simulate API call for pricing
     setTimeout(() => {
       setCurrentStep("results");
@@ -96,6 +102,18 @@ const Quote = () => {
                 alt="Dominion Financial" 
                 className="h-8 mr-3"
               />
+              
+              {/* Back to Upload Button */}
+              {currentStep !== "upload" && (
+                <Button
+                  variant="ghost"
+                  onClick={handleBackToUpload}
+                  className="ml-4 text-dominion-blue hover:bg-blue-50"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Upload
+                </Button>
+              )}
             </div>
             
             {/* View Selection Buttons */}
@@ -124,11 +142,16 @@ const Quote = () => {
       <main className="py-12 px-4">
         <div className="max-w-4xl mx-auto">
           {currentStep === "upload" && (
-            <QuestionnaireUpload
-              onFileUpload={handleFileUpload}
-              onManualEntry={handleManualEntry}
-              isLoading={isProcessing}
-            />
+            <div className="space-y-8">
+              <QuestionnaireUpload
+                onFileUpload={handleFileUpload}
+                onManualEntry={handleManualEntry}
+                isLoading={isProcessing}
+              />
+              
+              {/* Quote Tracker on Upload Screen */}
+              <QuoteTracker />
+            </div>
           )}
 
           {currentStep === "questionnaire" && (
