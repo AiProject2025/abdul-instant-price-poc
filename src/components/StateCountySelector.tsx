@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { statesAndCounties } from '@/utils/locationData';
 
 interface StateCountySelectorProps {
@@ -32,15 +31,13 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <FormItem>
-        <FormLabel>Property State *</FormLabel>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Property State *</label>
         <Select value={selectedState} onValueChange={handleStateChange}>
-          <FormControl>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Select state" />
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent className="bg-white border shadow-lg max-h-60 overflow-y-auto">
+          <SelectTrigger className="bg-white">
+            <SelectValue placeholder="Select state" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg max-h-60 overflow-y-auto z-50">
             {states.map((state) => (
               <SelectItem key={state} value={state}>
                 {state}
@@ -48,22 +45,22 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
             ))}
           </SelectContent>
         </Select>
-        {stateError && <FormMessage>{stateError}</FormMessage>}
-      </FormItem>
+        {stateError && (
+          <p className="text-sm font-medium text-red-600">{stateError}</p>
+        )}
+      </div>
 
-      <FormItem>
-        <FormLabel>Property County *</FormLabel>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Property County *</label>
         <Select 
           value={selectedCounty} 
           onValueChange={onCountyChange}
           disabled={!selectedState}
         >
-          <FormControl>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder={selectedState ? "Select county" : "Select state first"} />
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent className="bg-white border shadow-lg max-h-60 overflow-y-auto">
+          <SelectTrigger className="bg-white">
+            <SelectValue placeholder={selectedState ? "Select county" : "Select state first"} />
+          </SelectTrigger>
+          <SelectContent className="bg-white border shadow-lg max-h-60 overflow-y-auto z-50">
             {counties.map((county) => (
               <SelectItem key={county} value={county}>
                 {county}
@@ -71,8 +68,10 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
             ))}
           </SelectContent>
         </Select>
-        {countyError && <FormMessage>{countyError}</FormMessage>}
-      </FormItem>
+        {countyError && (
+          <p className="text-sm font-medium text-red-600">{countyError}</p>
+        )}
+      </div>
     </div>
   );
 };
