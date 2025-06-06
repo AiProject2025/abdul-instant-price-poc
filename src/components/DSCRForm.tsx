@@ -73,7 +73,8 @@ type DSCRFormData = z.infer<typeof dscrFormSchema>;
 
 interface DSCRFormProps {
   initialData?: any;
-  onSubmit: (data: DSCRFormData) => void;
+  onSubmit: (data: any) => Promise<void>;
+  onBack: () => void;
   isLoading: boolean;
 }
 

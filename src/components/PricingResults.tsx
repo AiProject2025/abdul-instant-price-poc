@@ -12,6 +12,7 @@ interface PricingResultsProps {
     loanAmount: number;
   }[];
   onStartApplication: () => void;
+  onBackToForm: () => void;
 }
 
 const PricingResults = ({ results, onStartApplication }: PricingResultsProps) => {
