@@ -2,11 +2,13 @@
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
+import LoanPassView from "@/components/LoanPassView";
 import PricingResults from "@/components/PricingResults";
 import RiskTracker from "@/components/RiskTracker";
+import { Button } from "@/components/ui/button";
 
 const Quote = () => {
-  const [currentStep, setCurrentStep] = useState<"upload" | "form" | "results">("upload");
+  const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results">("upload");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [extractedData, setExtractedData] = useState<any>(null);
   const [formData, setFormData] = useState<any>(null);
@@ -36,18 +38,18 @@ const Quote = () => {
         // Add more comprehensive mock data to auto-populate as much as possible
       };
       setExtractedData(mockExtractedData);
-      setCurrentStep("form");
+      setCurrentStep("questionnaire");
       setIsProcessing(false);
     }, 3000);
   };
 
   const handleManualEntry = () => {
-    // Go directly to form with no extracted data - user enters everything manually
+    // Go directly to questionnaire with no extracted data - user enters everything manually
     setExtractedData(null);
-    setCurrentStep("form");
+    setCurrentStep("questionnaire");
   };
 
-  const handleFormSubmit = async (data: any) => {
+  const handleQuestionnaireSubmit = async (data: any) => {
     setFormData(data);
     setIsProcessing(true);
     
@@ -55,6 +57,18 @@ const Quote = () => {
     setTimeout(() => {
       setCurrentStep("results");
       setIsProcessing(false);
+    }, 2000);
+  };
+
+  const handleLoanPassSubmit = async (data: any) => {
+    setFormData(data);
+    setIsProcessing(true);
+    
+    // Simulate API call for loan pass processing
+    setTimeout(() => {
+      console.log("Loan Pass submitted:", data);
+      setIsProcessing(false);
+      // Could navigate to results or another appropriate step
     }, 2000);
   };
 
@@ -83,6 +97,26 @@ const Quote = () => {
                 className="h-8 mr-3"
               />
             </div>
+            
+            {/* View Selection Buttons */}
+            {currentStep !== "upload" && currentStep !== "results" && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={currentStep === "questionnaire" ? "default" : "outline"}
+                  onClick={() => setCurrentStep("questionnaire")}
+                  className="text-sm"
+                >
+                  DSCR Questionnaire
+                </Button>
+                <Button
+                  variant={currentStep === "loanpass" ? "default" : "outline"}
+                  onClick={() => setCurrentStep("loanpass")}
+                  className="text-sm"
+                >
+                  Loan Pass View
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -97,10 +131,18 @@ const Quote = () => {
             />
           )}
 
-          {currentStep === "form" && (
+          {currentStep === "questionnaire" && (
             <DSCRForm
               initialData={extractedData}
-              onSubmit={handleFormSubmit}
+              onSubmit={handleQuestionnaireSubmit}
+              onBack={handleBackToUpload}
+              isLoading={isProcessing}
+            />
+          )}
+
+          {currentStep === "loanpass" && (
+            <LoanPassView
+              onSubmit={handleLoanPassSubmit}
               onBack={handleBackToUpload}
               isLoading={isProcessing}
             />
@@ -110,7 +152,7 @@ const Quote = () => {
             <div className="space-y-8">
               <PricingResults
                 results={formData}
-                onBackToForm={() => setCurrentStep("form")}
+                onBackToForm={() => setCurrentStep("questionnaire")}
                 onStartApplication={handleStartApplication}
               />
               
