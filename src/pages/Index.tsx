@@ -171,14 +171,6 @@ const Index = () => {
                 </div>
               </div>
             </div>
-
-            <div className="bg-gray-50 rounded-lg p-8">
-              <img 
-                src="/lovable-uploads/86aed73b-6ca7-4a10-87e5-1da0e15eb49c.png" 
-                alt="Pricing Interface Preview" 
-                className="w-full rounded-lg shadow-lg"
-              />
-            </div>
           </div>
         </div>
       </section>
