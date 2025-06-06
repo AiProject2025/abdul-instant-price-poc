@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
 import PricingResults from "@/components/PricingResults";
+import RiskTracker from "@/components/RiskTracker";
 
 const Quote = () => {
   const [currentStep, setCurrentStep] = useState<"upload" | "form" | "results">("upload");
@@ -105,11 +107,15 @@ const Quote = () => {
           )}
 
           {currentStep === "results" && formData && (
-            <PricingResults
-              results={formData}
-              onBackToForm={() => setCurrentStep("form")}
-              onStartApplication={handleStartApplication}
-            />
+            <div className="space-y-8">
+              <PricingResults
+                results={formData}
+                onBackToForm={() => setCurrentStep("form")}
+                onStartApplication={handleStartApplication}
+              />
+              
+              <RiskTracker loanData={formData} />
+            </div>
           )}
         </div>
       </main>
