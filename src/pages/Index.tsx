@@ -1,8 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Calculator, TrendingUp, Shield, Clock, CheckCircle } from "lucide-react";
+import { Upload, TrendingUp, Shield, Clock, CheckCircle } from "lucide-react";
 
 const Index = () => {
   return (
@@ -45,12 +44,6 @@ const Index = () => {
               <Button size="lg" className="bg-white text-dominion-blue hover:bg-gray-100 px-8 py-3">
                 <Upload className="mr-2 h-5 w-5" />
                 Upload Questionnaire
-              </Button>
-            </Link>
-            <Link to="/quote">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-dominion-blue px-8 py-3">
-                <Calculator className="mr-2 h-5 w-5" />
-                Manual Entry
               </Button>
             </Link>
           </div>
