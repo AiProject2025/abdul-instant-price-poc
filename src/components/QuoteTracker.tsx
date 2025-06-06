@@ -45,6 +45,33 @@ const QuoteTracker = () => {
           </div>
         </div>
 
+        {/* Detailed Flag Counts */}
+        <div className="mb-6">
+          <h4 className="font-semibold text-dominion-blue mb-3">Flag Details</h4>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+              <div className="text-lg font-bold text-orange-600">{stats.flagDetails.creditUnder699}</div>
+              <div className="text-xs text-orange-700">Credit 680-699</div>
+            </div>
+            <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="text-lg font-bold text-purple-600">{stats.flagDetails.loanUnder120k}</div>
+              <div className="text-xs text-purple-700">Loan Under $120k</div>
+            </div>
+            <div className="text-center p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+              <div className="text-lg font-bold text-indigo-600">{stats.flagDetails.judicialForeclosureStates}</div>
+              <div className="text-xs text-indigo-700">Judicial States</div>
+            </div>
+            <div className="text-center p-3 bg-pink-50 rounded-lg border border-pink-200">
+              <div className="text-lg font-bold text-pink-600">{stats.flagDetails.dscrBelow11}</div>
+              <div className="text-xs text-pink-700">DSCR Below 1.1</div>
+            </div>
+            <div className="text-center p-3 bg-teal-50 rounded-lg border border-teal-200">
+              <div className="text-lg font-bold text-teal-600">{stats.flagDetails.onlyOneBuyer}</div>
+              <div className="text-xs text-teal-700">Only 1 Buyer</div>
+            </div>
+          </div>
+        </div>
+
         {/* Recent Quotes */}
         <div className="space-y-3">
           <h4 className="font-semibold text-dominion-blue mb-3">Recent Quotes</h4>

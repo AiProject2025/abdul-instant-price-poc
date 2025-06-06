@@ -1,4 +1,3 @@
-
 export interface Quote {
   id: string;
   timestamp: Date;
@@ -113,9 +112,37 @@ export const getQuoteStats = () => {
   const totalQuotes = quotes.length;
   const flaggedQuotes = quotes.filter(q => q.isFlagged).length;
   
+  // Count specific flag types
+  const creditUnder699 = quotes.filter(q => 
+    q.flagReasons.includes('Credit score in 680-699 range')
+  ).length;
+  
+  const loanUnder120k = quotes.filter(q => 
+    q.flagReasons.includes('Loan amount under $120k')
+  ).length;
+  
+  const judicialForeclosureStates = quotes.filter(q => 
+    q.flagReasons.includes('Property in judicial foreclosure state')
+  ).length;
+  
+  const dscrBelow11 = quotes.filter(q => 
+    q.flagReasons.includes('DSCR under 1.1')
+  ).length;
+  
+  const onlyOneBuyer = quotes.filter(q => 
+    q.flagReasons.includes('Only 1 buyer showing pricing')
+  ).length;
+  
   return {
     totalQuotes,
     flaggedQuotes,
-    flaggedPercentage: totalQuotes > 0 ? Math.round((flaggedQuotes / totalQuotes) * 100) : 0
+    flaggedPercentage: totalQuotes > 0 ? Math.round((flaggedQuotes / totalQuotes) * 100) : 0,
+    flagDetails: {
+      creditUnder699,
+      loanUnder120k,
+      judicialForeclosureStates,
+      dscrBelow11,
+      onlyOneBuyer
+    }
   };
 };
