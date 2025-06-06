@@ -29,10 +29,6 @@ const Quote = () => {
     }, 3000);
   };
 
-  const handleManualEntry = () => {
-    setCurrentStep("form");
-  };
-
   const handleFormSubmit = async (data: any) => {
     setFormData(data);
     setIsProcessing(true);
@@ -49,6 +45,11 @@ const Quote = () => {
     setUploadedFile(null);
     setExtractedData(null);
     setFormData(null);
+  };
+
+  const handleStartApplication = () => {
+    // Handle application start logic here
+    console.log("Starting application...");
   };
 
   return (
@@ -73,7 +74,6 @@ const Quote = () => {
           {currentStep === "upload" && (
             <QuestionnaireUpload
               onFileUpload={handleFileUpload}
-              onManualEntry={handleManualEntry}
               isLoading={isProcessing}
             />
           )}
@@ -91,6 +91,7 @@ const Quote = () => {
             <PricingResults
               results={formData}
               onBackToForm={() => setCurrentStep("form")}
+              onStartApplication={handleStartApplication}
             />
           )}
         </div>
