@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface BondData {
-  yield: number;
+  yieldValue: number;
   change: number;
   lastUpdate: string;
 }
@@ -33,12 +33,12 @@ const BondDisplay = () => {
       // Note: FastTrack API would need to be called from a backend due to CORS
       const mockData = {
         tenYear: {
-          yield: 4.25 + (Math.random() * 0.2 - 0.1), // Mock fluctuation
+          yieldValue: 4.25 + (Math.random() * 0.2 - 0.1), // Mock fluctuation
           change: Math.random() * 0.1 - 0.05,
           lastUpdate: new Date().toLocaleTimeString()
         },
         fiveYear: {
-          yield: 4.05 + (Math.random() * 0.2 - 0.1), // Mock fluctuation
+          yieldValue: 4.05 + (Math.random() * 0.2 - 0.1), // Mock fluctuation
           change: Math.random() * 0.1 - 0.05,
           lastUpdate: new Date().toLocaleTimeString()
         }
@@ -64,7 +64,7 @@ const BondDisplay = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const formatYield = (yield: number) => `${yield.toFixed(3)}%`;
+  const formatYield = (yieldValue: number) => `${yieldValue.toFixed(3)}%`;
   
   const formatChange = (change: number) => {
     const sign = change >= 0 ? '+' : '';
@@ -112,7 +112,7 @@ const BondDisplay = () => {
           <div className="flex items-center space-x-2">
             <span className="font-medium">10Y:</span>
             <span className="font-bold">
-              {bondData.tenYear ? formatYield(bondData.tenYear.yield) : '--'}
+              {bondData.tenYear ? formatYield(bondData.tenYear.yieldValue) : '--'}
             </span>
             {bondData.tenYear && (
               <div className={`flex items-center space-x-1 ${getChangeColor(bondData.tenYear.change)}`}>
@@ -127,7 +127,7 @@ const BondDisplay = () => {
           <div className="flex items-center space-x-2">
             <span className="font-medium">5Y:</span>
             <span className="font-bold">
-              {bondData.fiveYear ? formatYield(bondData.fiveYear.yield) : '--'}
+              {bondData.fiveYear ? formatYield(bondData.fiveYear.yieldValue) : '--'}
             </span>
             {bondData.fiveYear && (
               <div className={`flex items-center space-x-1 ${getChangeColor(bondData.fiveYear.change)}`}>
