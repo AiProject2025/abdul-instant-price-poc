@@ -1,28 +1,18 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, TrendingUp, Shield, Clock, CheckCircle } from "lucide-react";
-
+import { Upload, Calculator, TrendingUp, Shield, Clock, CheckCircle } from "lucide-react";
 const Index = () => {
-  return (
-    <div className="min-h-screen">
+  return <div className="min-h-screen">
       {/* Navigation */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" 
-                alt="Dominion Financial" 
-                className="h-8 mr-3"
-              />
+              <img src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" alt="Dominion Financial" className="h-8 mr-3" />
             </div>
             <div className="flex items-center space-x-4">
-              <Link to="/quote">
-                <Button className="bg-dominion-green hover:bg-dominion-green/90 text-white">
-                  Get Quote
-                </Button>
-              </Link>
+              
             </div>
           </div>
         </div>
@@ -44,6 +34,12 @@ const Index = () => {
               <Button size="lg" className="bg-white text-dominion-blue hover:bg-gray-100 px-8 py-3">
                 <Upload className="mr-2 h-5 w-5" />
                 Upload Questionnaire
+              </Button>
+            </Link>
+            <Link to="/quote">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-dominion-blue px-8 py-3">
+                <Calculator className="mr-2 h-5 w-5" />
+                Manual Entry
               </Button>
             </Link>
           </div>
@@ -185,17 +181,11 @@ const Index = () => {
       <footer className="bg-gray-900 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-4">
-            <img 
-              src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" 
-              alt="Dominion Financial" 
-              className="h-8 mx-auto mb-2 brightness-0 invert"
-            />
+            <img src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" alt="Dominion Financial" className="h-8 mx-auto mb-2 brightness-0 invert" />
           </div>
           <p className="text-gray-400">© 2025 Dominion Financial. All rights reserved.</p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
