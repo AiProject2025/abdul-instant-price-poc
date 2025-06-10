@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -106,9 +105,60 @@ const DSCRForm: React.FC<DSCRFormProps> = ({ initialData, onSubmit, onBack, isLo
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formState);
+    
+    // Map form fields to API payload format
+    const apiPayload = {
+      state: formState.propertyState,
+      county: parseInt(formState.propertyCounty) || 0,
+      zip_code: formState.zipCode,
+      property_type: formState.propertyType?.toLowerCase().replace(' ', '-') || '',
+      number_of_units: formState.numberOfUnits,
+      appraised_value: parseFloat(formState.appraisedValue) || 0,
+      purchase_price: parseFloat(formState.purchasePrice) || 0,
+      base_loan_amount: parseFloat(formState.baseLoanAmount) || 0,
+      loan_purpose: formState.loanPurpose?.toLowerCase() || '',
+      refinance_type: formState.loanPurpose?.toLowerCase().includes('cash') ? 'cash-out' : '',
+      monthly_market_rent: formState.marketRent,
+      property_rental_income: formState.currentRent,
+      monthly_taxes: formState.monthlyTaxes,
+      monthly_hoa: formState.monthlyHOA || '0.00',
+      monthly_insurance: formState.monthlyInsurance,
+      monthly_flood_insurance: formState.monthlyFloodInsurance || '0.00',
+      credit_score: formState.decisionCreditScore,
+      months_of_reserves: formState.monthsOfReserves
+    };
+
+    try {
+      console.log('Calling instant pricing API with payload:', apiPayload);
+      
+      const response = await fetch('https://instant-pricing-252613984003.us-east1.run.app', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const apiResponse = await response.json();
+      console.log('API Response:', apiResponse);
+      
+      // Pass both form data and API response to parent component
+      onSubmit({
+        formData: formState,
+        pricingResults: apiResponse
+      });
+      
+    } catch (error) {
+      console.error('Error calling instant pricing API:', error);
+      // Still call onSubmit with form data in case of API error
+      onSubmit(formState);
+    }
   };
 
   return (
