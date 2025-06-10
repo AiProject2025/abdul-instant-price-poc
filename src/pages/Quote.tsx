@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -19,51 +20,25 @@ const Quote = () => {
   const [pricingResults, setPricingResults] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const generatePricingResults = (data: any) => {
-    const loanAmount = parseFloat(data.baseLoanAmount) || parseFloat(data.loanAmount) || 400000;
-    const appraisedValue = parseFloat(data.appraisedValue) || parseFloat(data.propertyValue) || 500000;
-    const ltv = Math.round((loanAmount / appraisedValue) * 100);
-    
-    // Calculate DSCR
-    const monthlyRent = parseFloat(data.marketRent) || 0;
-    const monthlyExpenses = (parseFloat(data.monthlyTaxes) || 0) + 
-                           (parseFloat(data.monthlyInsurance) || 0) + 
-                           (parseFloat(data.monthlyHOA) || 0) + 
-                           (parseFloat(data.monthlyFloodInsurance) || 0);
-    const netIncome = monthlyRent - monthlyExpenses;
-    const estimatedPayment = (loanAmount * 0.006);
-    const dscr = estimatedPayment > 0 ? netIncome / estimatedPayment : 1.25;
+  const transformApiResponseToResults = (apiResponse: any) => {
+    const results = Object.entries(apiResponse).map(([noteBuyer, data]: [string, any]) => ({
+      lender: "Dominion Financial",
+      noteBuyer: noteBuyer,
+      product: noteBuyer, // Using note buyer name as product
+      rate: data.adjusted_interest_rate,
+      monthlyPayment: Math.round(data.final_est_payment),
+      totalInterest: Math.round(parseFloat(data.loan_amount) * 0.65), // Keep existing calculation
+      loanAmount: parseFloat(data.loan_amount),
+      dscr: data.final_dscr,
+      propertyType: data.property_type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+      loanType: data.loan_purpose === 'refinance' ? 'DSCR Refinance' : 'DSCR Purchase',
+      pppDuration: "5/4/3/2/1",
+      ltv: parseFloat(data.ltv),
+      isLocked: false
+    }));
 
-    const noteBuyers = [
-      { product: "Product A", noteBuyer: "Blackstone", baseRate: 7.125 },
-      { product: "Product B", noteBuyer: "Bayview", baseRate: 7.250 },
-      { product: "Product C", noteBuyer: "Corevest", baseRate: 7.375 },
-      { product: "Product D", noteBuyer: "Maxes", baseRate: 7.500 },
-      { product: "Product E", noteBuyer: "Onslow", baseRate: 7.625 }
-    ];
-
-    const mockResults = noteBuyers.map((buyer, index) => {
-      const rate = buyer.baseRate + (Math.random() * 0.5 - 0.25); // Add some variation
-      const monthlyPayment = Math.round((loanAmount * (rate / 100)) / 12);
-      
-      return {
-        lender: "Dominion Financial",
-        noteBuyer: buyer.noteBuyer,
-        product: buyer.product,
-        rate: rate,
-        monthlyPayment: monthlyPayment,
-        totalInterest: Math.round(loanAmount * 0.65),
-        loanAmount: loanAmount,
-        dscr: dscr,
-        propertyType: data.propertyType || "Single Family",
-        loanType: "DSCR Investment",
-        pppDuration: "2 Years",
-        ltv: ltv,
-        isLocked: false
-      };
-    });
-
-    return mockResults.slice(0, 3); // Return top 3 offers
+    // Sort by rate (best rate first)
+    return results.sort((a, b) => a.rate - b.rate);
   };
 
   const handleFileUpload = async (file: File) => {
@@ -102,18 +77,24 @@ const Quote = () => {
   };
 
   const handleQuestionnaireSubmit = async (data: any) => {
-    setFormData(data);
+    setFormData(data.formData || data);
     setIsProcessing(true);
     
     // Save the quote with flagging
-    const savedQuote = saveQuote(data);
+    const savedQuote = saveQuote(data.formData || data);
     console.log("Quote saved:", savedQuote);
     
-    // Generate pricing results with enhanced data
-    const results = generatePricingResults(data);
-    setPricingResults(results);
+    // Check if we have API response data
+    if (data.pricingResults) {
+      // Transform API response to results format
+      const results = transformApiResponseToResults(data.pricingResults);
+      setPricingResults(results);
+    } else {
+      // Fallback to empty results if no API data
+      setPricingResults([]);
+    }
     
-    // Simulate API call for pricing
+    // Simulate processing time
     setTimeout(() => {
       setCurrentStep("results");
       setIsProcessing(false);
