@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -48,21 +47,40 @@ const Quote = () => {
     // Simulate AI processing to extract comprehensive data
     setTimeout(() => {
       const mockExtractedData = {
-        borrowerName: "John Doe",
-        propertyAddress: "123 Main St",
-        propertyCity: "Los Angeles",
-        propertyState: "California",
-        propertyZip: "90210",
-        loanAmount: "400000",
-        appraisedValue: "500000",
-        marketRent: "3500",
-        monthlyTaxes: "500",
-        monthlyInsurance: "200",
-        creditScore: "740",
-        monthsOfReserves: "12",
+        // Borrower Information
+        firstName: "John",
+        lastName: "Doe", 
+        email: "john.doe@email.com",
+        phone: "(555) 123-4567",
+        
+        // Property Information
+        streetAddress: "123 Main Street",
+        city: "Los Angeles",
+        propertyState: "CA",
+        propertyCounty: "Los Angeles",
+        zipCode: "90210",
         propertyType: "Single Family",
         numberOfUnits: "1",
-        // Add more comprehensive mock data to auto-populate as much as possible
+        appraisedValue: "500000",
+        purchasePrice: "480000",
+        
+        // Loan Information
+        baseLoanAmount: "400000",
+        loanPurpose: "Purchase",
+        
+        // Income Information
+        marketRent: "3500",
+        currentRent: "3200",
+        
+        // Expense Information
+        monthlyTaxes: "500",
+        monthlyInsurance: "200",
+        monthlyHOA: "150",
+        monthlyFloodInsurance: "75",
+        
+        // Financial Information
+        decisionCreditScore: "740",
+        monthsOfReserves: "12"
       };
       setExtractedData(mockExtractedData);
       setCurrentStep("questionnaire");
