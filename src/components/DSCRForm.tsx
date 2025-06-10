@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Upload, FileText } from 'lucide-react';
-import StateCountySelector from './StateCountySelector';
 
 interface DSCRFormProps {
   initialData?: any;
@@ -48,12 +48,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({ initialData, onSubmit, onBack, isLo
     
     // Financial Information
     decisionCreditScore: '',
-    monthsOfReserves: '',
-    liquidAssets: '',
-    
-    // Experience
-    numberOfProperties: '',
-    yearsOfExperience: ''
+    monthsOfReserves: ''
   });
 
   // Auto-populate form with extracted data
@@ -90,36 +85,36 @@ const DSCRForm: React.FC<DSCRFormProps> = ({ initialData, onSubmit, onBack, isLo
     }));
   };
 
-  const handleStateChange = (state: string) => {
-    setFormState(prev => ({
-      ...prev,
-      propertyState: state,
-      propertyCounty: '' // Clear county when state changes
-    }));
-  };
-
-  const handleCountyChange = (county: string) => {
-    setFormState(prev => ({
-      ...prev,
-      propertyCounty: county
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Determine loan purpose and refinance type based on selection
+    let loanPurpose = '';
+    let refinanceType = '';
+    
+    if (formState.loanPurpose === 'Purchase') {
+      loanPurpose = 'purchase';
+      refinanceType = '';
+    } else if (formState.loanPurpose === 'Rate Term Refinance') {
+      loanPurpose = 'refinance';
+      refinanceType = 'rate-term';
+    } else if (formState.loanPurpose === 'Cash Out Refinance') {
+      loanPurpose = 'refinance';
+      refinanceType = 'cash-out';
+    }
     
     // Map form fields to API payload format
     const apiPayload = {
       state: formState.propertyState,
-      county: parseInt(formState.propertyCounty) || 0,
+      county: formState.propertyCounty,
       zip_code: formState.zipCode,
       property_type: formState.propertyType?.toLowerCase().replace(' ', '-') || '',
       number_of_units: formState.numberOfUnits,
       appraised_value: parseFloat(formState.appraisedValue) || 0,
       purchase_price: parseFloat(formState.purchasePrice) || 0,
       base_loan_amount: parseFloat(formState.baseLoanAmount) || 0,
-      loan_purpose: formState.loanPurpose?.toLowerCase() || '',
-      refinance_type: formState.loanPurpose?.toLowerCase().includes('cash') ? 'cash-out' : '',
+      loan_purpose: loanPurpose,
+      refinance_type: refinanceType,
       monthly_market_rent: formState.marketRent,
       property_rental_income: formState.currentRent,
       monthly_taxes: formState.monthlyTaxes,
@@ -262,13 +257,29 @@ const DSCRForm: React.FC<DSCRFormProps> = ({ initialData, onSubmit, onBack, isLo
               </div>
             </div>
             
-            {/* State and County Selector */}
-            <StateCountySelector
-              selectedState={formState.propertyState}
-              selectedCounty={formState.propertyCounty}
-              onStateChange={handleStateChange}
-              onCountyChange={handleCountyChange}
-            />
+            {/* State and County as text inputs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Property State *</label>
+                <Input
+                  type="text"
+                  value={formState.propertyState}
+                  onChange={(e) => handleInputChange('propertyState', e.target.value)}
+                  placeholder="e.g., CA"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Property County *</label>
+                <Input
+                  type="text"
+                  value={formState.propertyCounty}
+                  onChange={(e) => handleInputChange('propertyCounty', e.target.value)}
+                  placeholder="e.g., Los Angeles"
+                  required
+                />
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -351,7 +362,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({ initialData, onSubmit, onBack, isLo
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Purchase">Purchase</SelectItem>
-                    <SelectItem value="Refinance">Refinance</SelectItem>
+                    <SelectItem value="Rate Term Refinance">Rate Term Refinance</SelectItem>
                     <SelectItem value="Cash Out Refinance">Cash Out Refinance</SelectItem>
                   </SelectContent>
                 </Select>
@@ -447,7 +458,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({ initialData, onSubmit, onBack, isLo
             <CardTitle className="text-xl text-dominion-blue">Financial Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Decision Credit Score *</label>
                 <Input
@@ -466,44 +477,6 @@ const DSCRForm: React.FC<DSCRFormProps> = ({ initialData, onSubmit, onBack, isLo
                   onChange={(e) => handleInputChange('monthsOfReserves', e.target.value)}
                   placeholder="12"
                   required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Liquid Assets</label>
-                <Input
-                  type="number"
-                  value={formState.liquidAssets}
-                  onChange={(e) => handleInputChange('liquidAssets', e.target.value)}
-                  placeholder="$150,000"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Experience */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl text-dominion-blue">Real Estate Experience</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Investment Properties</label>
-                <Input
-                  type="number"
-                  value={formState.numberOfProperties}
-                  onChange={(e) => handleInputChange('numberOfProperties', e.target.value)}
-                  placeholder="5"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
-                <Input
-                  type="number"
-                  value={formState.yearsOfExperience}
-                  onChange={(e) => handleInputChange('yearsOfExperience', e.target.value)}
-                  placeholder="3"
                 />
               </div>
             </div>
