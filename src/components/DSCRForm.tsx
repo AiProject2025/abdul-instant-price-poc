@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,29 +52,36 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     monthsOfReserves: ''
   });
 
-  // Auto-populate form with extracted data
+  // Auto-populate form with extracted data using exact field names from API
   useEffect(() => {
     if (initialData) {
       setFormState(prev => ({
         ...prev,
-        firstName: initialData.firstName || prev.firstName,
-        lastName: initialData.lastName || prev.lastName,
+        // Map API response field names to form state
+        firstName: initialData.first_name || prev.firstName,
+        lastName: initialData.last_name || prev.lastName,
         email: initialData.email || prev.email,
         phone: initialData.phone || prev.phone,
-        streetAddress: initialData.propertyAddress || initialData.streetAddress || prev.streetAddress,
-        city: initialData.propertyCity || initialData.city || prev.city,
-        propertyState: initialData.propertyState || initialData.state || prev.propertyState,
-        propertyCounty: initialData.propertyCounty || initialData.county || prev.propertyCounty,
-        zipCode: initialData.propertyZip || initialData.zipCode || prev.zipCode,
-        propertyType: initialData.propertyType || prev.propertyType,
-        numberOfUnits: initialData.numberOfUnits || prev.numberOfUnits,
-        appraisedValue: initialData.appraisedValue || prev.appraisedValue,
-        baseLoanAmount: initialData.loanAmount || initialData.baseLoanAmount || prev.baseLoanAmount,
-        marketRent: initialData.marketRent || prev.marketRent,
-        monthlyTaxes: initialData.monthlyTaxes || prev.monthlyTaxes,
-        monthlyInsurance: initialData.monthlyInsurance || prev.monthlyInsurance,
-        decisionCreditScore: initialData.creditScore || initialData.decisionCreditScore || prev.decisionCreditScore,
-        monthsOfReserves: initialData.monthsOfReserves || prev.monthsOfReserves
+        streetAddress: initialData.street_address || prev.streetAddress,
+        city: initialData.city || prev.city,
+        propertyState: initialData.property_state || prev.propertyState,
+        propertyCounty: initialData.property_county || prev.propertyCounty,
+        zipCode: initialData.zip_code || prev.zipCode,
+        propertyType: initialData.property_type || prev.propertyType,
+        numberOfUnits: initialData.number_of_units || prev.numberOfUnits,
+        appraisedValue: initialData.appraised_value || prev.appraisedValue,
+        purchasePrice: initialData.purchase_price || prev.purchasePrice,
+        baseLoanAmount: initialData.base_loan_amount || prev.baseLoanAmount,
+        loanPurpose: initialData.loan_purpose || prev.loanPurpose,
+        refinanceType: initialData.refinance_type || prev.refinanceType,
+        marketRent: initialData.market_rent || prev.marketRent,
+        currentRent: initialData.current_rent || prev.currentRent,
+        monthlyTaxes: initialData.monthly_taxes || prev.monthlyTaxes,
+        monthlyInsurance: initialData.monthly_insurance || prev.monthlyInsurance,
+        monthlyHOA: initialData.monthly_hoa || prev.monthlyHOA,
+        monthlyFloodInsurance: initialData.monthly_flood_insurance || prev.monthlyFloodInsurance,
+        decisionCreditScore: initialData.decision_credit_score || prev.decisionCreditScore,
+        monthsOfReserves: initialData.months_of_reserves || prev.monthsOfReserves
       }));
     }
   }, [initialData]);

@@ -44,48 +44,36 @@ const Quote = () => {
     setUploadedFile(file);
     setIsProcessing(true);
     
-    // Simulate AI processing to extract comprehensive data
-    setTimeout(() => {
-      const mockExtractedData = {
-        // Borrower Information
-        firstName: "John",
-        lastName: "Doe", 
-        email: "john.doe@email.com",
-        phone: "(555) 123-4567",
-        
-        // Property Information
-        streetAddress: "123 Main Street",
-        city: "Los Angeles",
-        propertyState: "CA",
-        propertyCounty: "Los Angeles",
-        zipCode: "90210",
-        propertyType: "Single Family",
-        numberOfUnits: "1",
-        appraisedValue: "500000",
-        purchasePrice: "480000",
-        
-        // Loan Information
-        baseLoanAmount: "400000",
-        loanPurpose: "Purchase",
-        
-        // Income Information
-        marketRent: "3500",
-        currentRent: "3200",
-        
-        // Expense Information
-        monthlyTaxes: "500",
-        monthlyInsurance: "200",
-        monthlyHOA: "150",
-        monthlyFloodInsurance: "75",
-        
-        // Financial Information
-        decisionCreditScore: "740",
-        monthsOfReserves: "12"
-      };
-      setExtractedData(mockExtractedData);
+    try {
+      console.log('Uploading file for data extraction:', file.name);
+      
+      // Create FormData to send the file
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Call your document extraction API
+      const response = await fetch('YOUR_DOCUMENT_EXTRACTION_API_URL_HERE', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Document extraction failed with status: ${response.status}`);
+      }
+
+      const extractionResult = await response.json();
+      console.log('Document extraction result:', extractionResult);
+      
+      setExtractedData(extractionResult);
       setCurrentStep("questionnaire");
       setIsProcessing(false);
-    }, 3000);
+    } catch (error) {
+      console.error('Error extracting data from document:', error);
+      // Even if extraction fails, allow user to proceed with manual entry
+      setExtractedData(null);
+      setCurrentStep("questionnaire");
+      setIsProcessing(false);
+    }
   };
 
   const handleManualEntry = () => {
