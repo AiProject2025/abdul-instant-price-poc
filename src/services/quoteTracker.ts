@@ -1,3 +1,4 @@
+
 export interface Quote {
   id: string;
   timestamp: Date;
@@ -105,6 +106,10 @@ export const getQuotes = (): Quote[] => {
   } catch {
     return [];
   }
+};
+
+export const clearAllQuotes = (): void => {
+  localStorage.removeItem('dominion-quotes');
 };
 
 export const getQuoteStats = () => {

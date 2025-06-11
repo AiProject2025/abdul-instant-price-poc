@@ -1,12 +1,20 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getQuotes, getQuoteStats, Quote } from "@/services/quoteTracker";
-import { AlertTriangle, TrendingUp, FileText, Flag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getQuotes, getQuoteStats, Quote, clearAllQuotes } from "@/services/quoteTracker";
+import { AlertTriangle, TrendingUp, FileText, Flag, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 const QuoteTracker = () => {
-  const quotes = getQuotes();
-  const stats = getQuoteStats();
+  const [quotes, setQuotes] = useState(getQuotes());
+  const [stats, setStats] = useState(getQuoteStats());
+
+  const handleClearQuotes = () => {
+    clearAllQuotes();
+    setQuotes([]);
+    setStats(getQuoteStats());
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -24,7 +32,18 @@ const QuoteTracker = () => {
               Monitor all quotes and flagged items
             </CardDescription>
           </div>
-          <FileText className="h-8 w-8 text-white" />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearQuotes}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear All
+            </Button>
+            <FileText className="h-8 w-8 text-white" />
+          </div>
         </div>
       </CardHeader>
       
