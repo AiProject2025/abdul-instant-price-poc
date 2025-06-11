@@ -128,7 +128,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       // Loan Information
       base_loan_amount: parseFloat(formState.baseLoanAmount) || 0,
       loan_purpose: formState.loanPurpose?.toLowerCase() || '',
-      refinance_type: formState.refinanceType?.toLowerCase().replace(' ', '_') || '',
+      refinance_type: formState.refinanceType?.toLowerCase().replace(' ', '-') || '',
       
       // Income Information
       market_rent: parseFloat(formState.marketRent) || 0,
