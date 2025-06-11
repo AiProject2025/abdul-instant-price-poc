@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -96,7 +94,8 @@ const Quote = () => {
 
     const currentFormData = data.formData || data;
     setFormData(currentFormData);
-    setLastSubmittedFormData(currentFormData); // Store the last submitted form data
+    // Store the complete form data, not just email and phone
+    setLastSubmittedFormData(currentFormData);
     
     // Save the quote with flagging
     const savedQuote = saveQuote(currentFormData);
@@ -269,4 +268,3 @@ const Quote = () => {
 };
 
 export default Quote;
-
