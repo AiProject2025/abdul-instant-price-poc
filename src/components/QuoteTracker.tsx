@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,8 +24,12 @@ const QuoteTracker = ({ onQuoteSelect }: QuoteTrackerProps) => {
   };
 
   const handleQuoteClick = (quote: Quote) => {
+    console.log('Quote clicked:', quote);
+    console.log('Original form data:', quote.originalFormData);
     if (onQuoteSelect) {
       onQuoteSelect(quote);
+    } else {
+      console.log('No onQuoteSelect handler provided');
     }
   };
 
@@ -113,7 +116,7 @@ const QuoteTracker = ({ onQuoteSelect }: QuoteTrackerProps) => {
             quotes.slice(-10).reverse().map((quote: Quote) => (
               <div 
                 key={quote.id} 
-                className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors hover:border-dominion-blue/50"
+                className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors hover:border-dominion-blue/50 hover:shadow-md"
                 onClick={() => handleQuoteClick(quote)}
               >
                 <div className="mt-1">

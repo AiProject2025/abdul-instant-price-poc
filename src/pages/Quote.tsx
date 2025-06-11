@@ -163,12 +163,17 @@ const Quote = () => {
 
   // Handle quote selection from the tracker
   const handleQuoteSelect = (quote: any) => {
+    console.log('handleQuoteSelect called with:', quote);
     if (quote.originalFormData) {
+      console.log('Restoring form data:', quote.originalFormData);
       // Restore the form data and navigate to questionnaire
       setLastSubmittedFormData(quote.originalFormData);
       setFormData(quote.originalFormData);
       setExtractedData(null); // Clear extracted data since we're using saved data
       setCurrentStep("questionnaire");
+      console.log('Navigation to questionnaire completed');
+    } else {
+      console.log('No originalFormData found in quote');
     }
   };
 
