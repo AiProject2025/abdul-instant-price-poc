@@ -52,7 +52,7 @@ const Quote = () => {
       formData.append('file', file);
       
       // Call your document extraction API
-      const response = await fetch('YOUR_DOCUMENT_EXTRACTION_API_URL_HERE', {
+      const response = await fetch('https://n8n-prod.onrender.com/webhook-test/2165eeb2-1590-43d2-8383-efee85dd15d6/instant-pricing/data-extraction', {
         method: 'POST',
         body: formData
       });
