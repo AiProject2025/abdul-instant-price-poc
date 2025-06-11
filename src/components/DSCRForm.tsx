@@ -145,9 +145,15 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       months_of_reserves: parseInt(formState.monthsOfReserves) || 0
     };
 
+    // Trigger loading state immediately
+    onSubmit({
+      formData: formState,
+      isLoading: true
+    });
+
     try {
       console.log('Calling pricing API with payload:', apiPayload);
-      const response = await fetch('https://n8n-prod.onrender.com/webhook-test/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/loanpass', {
+      const response = await fetch('https://n8n-prod.onrender.com/webhook/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/loanpass', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -170,7 +176,10 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     } catch (error) {
       console.error('Error calling pricing API:', error);
       // Still call onSubmit with form data in case of API error
-      onSubmit(formState);
+      onSubmit({
+        formData: formState,
+        error: true
+      });
     }
   };
 

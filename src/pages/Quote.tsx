@@ -53,8 +53,8 @@ const Quote = () => {
       const formData = new FormData();
       formData.append('file', file);
       
-      // Call your document extraction API
-      const response = await fetch('https://n8n-prod.onrender.com/webhook-test/2165eeb2-1590-43d2-8383-efee85dd15d6/instant-pricing/data-extraction', {
+      // Call your document extraction API with production URL
+      const response = await fetch('https://n8n-prod.onrender.com/webhook/2165eeb2-1590-43d2-8383-efee85dd15d6/instant-pricing/data-extraction', {
         method: 'POST',
         body: formData
       });
@@ -85,8 +85,13 @@ const Quote = () => {
   };
 
   const handleQuestionnaireSubmit = async (data: any) => {
+    // If this is just a loading trigger, set loading state and return
+    if (data.isLoading) {
+      setIsProcessing(true);
+      return;
+    }
+
     setFormData(data.formData || data);
-    setIsProcessing(true);
     
     // Save the quote with flagging
     const savedQuote = saveQuote(data.formData || data);
@@ -108,11 +113,9 @@ const Quote = () => {
       setFlags([]);
     }
     
-    // Simulate processing time
-    setTimeout(() => {
-      setCurrentStep("results");
-      setIsProcessing(false);
-    }, 2000);
+    // Move to results and stop loading
+    setCurrentStep("results");
+    setIsProcessing(false);
   };
 
   const handleLoanPassSubmit = async (data: any) => {
@@ -140,6 +143,10 @@ const Quote = () => {
   };
 
   const [flags, setFlags] = useState<string[]>([]);
+
+  const handleBackToQuestionnaire = () => {
+    setCurrentStep("questionnaire");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -233,7 +240,7 @@ const Quote = () => {
             <PricingResults
               results={pricingResults}
               flags={flags}
-              onBackToForm={() => setCurrentStep("questionnaire")}
+              onBackToForm={handleBackToQuestionnaire}
               onStartApplication={handleStartApplication}
             />
           )}
