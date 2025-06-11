@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -119,7 +120,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       property_state: formState.propertyState,
       property_county: formState.propertyCounty,
       zip_code: formState.zipCode,
-      property_type: formState.propertyType?.toLowerCase().replace(' ', '_') || '',
+      property_type: formState.propertyType?.toLowerCase().replace(/\s+/g, '-') || '',
       number_of_units: formState.numberOfUnits,
       appraised_value: parseFloat(formState.appraisedValue) || 0,
       purchase_price: parseFloat(formState.purchasePrice) || 0,
@@ -127,7 +128,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       // Loan Information
       base_loan_amount: parseFloat(formState.baseLoanAmount) || 0,
       loan_purpose: formState.loanPurpose?.toLowerCase() || '',
-      refinance_type: formState.refinanceType?.toLowerCase().replace(' ', '-') || '',
+      refinance_type: formState.refinanceType?.toLowerCase().replace(/\s+/g, '-') || '',
       
       // Income Information
       market_rent: parseFloat(formState.marketRent) || 0,
