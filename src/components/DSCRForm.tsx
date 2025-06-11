@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,42 +99,43 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Determine loan purpose and refinance type based on selection
-    let loanPurpose = '';
-    let refinanceType = '';
-    
-    if (formState.loanPurpose === 'Purchase') {
-      loanPurpose = 'purchase';
-      refinanceType = '';
-    } else if (formState.loanPurpose === 'Refinance') {
-      loanPurpose = 'refinance';
-      if (formState.refinanceType === 'Cash Out') {
-        refinanceType = 'cash-out';
-      } else if (formState.refinanceType === 'Rate Term') {
-        refinanceType = 'rate-term';
-      }
-    }
-
-    // Map form fields to API payload format
+    // Map all form fields to API payload format with consistent naming
     const apiPayload = {
-      state: formState.propertyState,
-      county: formState.propertyCounty,
+      // Borrower Information
+      first_name: formState.firstName,
+      last_name: formState.lastName,
+      email: formState.email,
+      phone: formState.phone,
+      
+      // Property Information
+      street_address: formState.streetAddress,
+      city: formState.city,
+      property_state: formState.propertyState,
+      property_county: formState.propertyCounty,
       zip_code: formState.zipCode,
-      property_type: formState.propertyType?.toLowerCase().replace(' ', '-') || '',
+      property_type: formState.propertyType?.toLowerCase().replace(' ', '_') || '',
       number_of_units: formState.numberOfUnits,
       appraised_value: parseFloat(formState.appraisedValue) || 0,
       purchase_price: parseFloat(formState.purchasePrice) || 0,
+      
+      // Loan Information
       base_loan_amount: parseFloat(formState.baseLoanAmount) || 0,
-      loan_purpose: loanPurpose,
-      refinance_type: refinanceType,
-      monthly_market_rent: formState.marketRent,
-      property_rental_income: formState.currentRent,
-      monthly_taxes: formState.monthlyTaxes,
-      monthly_hoa: formState.monthlyHOA || '0.00',
-      monthly_insurance: formState.monthlyInsurance,
-      monthly_flood_insurance: formState.monthlyFloodInsurance || '0.00',
-      credit_score: formState.decisionCreditScore,
-      months_of_reserves: formState.monthsOfReserves
+      loan_purpose: formState.loanPurpose?.toLowerCase() || '',
+      refinance_type: formState.refinanceType?.toLowerCase().replace(' ', '_') || '',
+      
+      // Income Information
+      market_rent: parseFloat(formState.marketRent) || 0,
+      current_rent: parseFloat(formState.currentRent) || 0,
+      
+      // Expense Information
+      monthly_taxes: parseFloat(formState.monthlyTaxes) || 0,
+      monthly_insurance: parseFloat(formState.monthlyInsurance) || 0,
+      monthly_hoa: parseFloat(formState.monthlyHOA) || 0,
+      monthly_flood_insurance: parseFloat(formState.monthlyFloodInsurance) || 0,
+      
+      // Financial Information
+      decision_credit_score: parseInt(formState.decisionCreditScore) || 0,
+      months_of_reserves: parseInt(formState.monthsOfReserves) || 0
     };
 
     try {
