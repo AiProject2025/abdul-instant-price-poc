@@ -3,7 +3,6 @@ import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
 import LoanPassView from "@/components/LoanPassView";
 import PricingResults from "@/components/PricingResults";
-import RiskTracker from "@/components/RiskTracker";
 import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
 import { Button } from "@/components/ui/button";
@@ -231,16 +230,12 @@ const Quote = () => {
           )}
 
           {currentStep === "results" && formData && (
-            <div className="space-y-8">
-              <PricingResults
-                results={pricingResults}
-                flags={flags}
-                onBackToForm={() => setCurrentStep("questionnaire")}
-                onStartApplication={handleStartApplication}
-              />
-              
-              <RiskTracker loanData={formData} />
-            </div>
+            <PricingResults
+              results={pricingResults}
+              flags={flags}
+              onBackToForm={() => setCurrentStep("questionnaire")}
+              onStartApplication={handleStartApplication}
+            />
           )}
         </div>
       </main>
