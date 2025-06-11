@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -148,6 +149,15 @@ const Quote = () => {
     setCurrentStep("questionnaire");
   };
 
+  // Updated navigation handler that goes to questionnaire from results, upload from other pages
+  const handleNavigationBack = () => {
+    if (currentStep === "results") {
+      setCurrentStep("questionnaire");
+    } else {
+      handleBackToUpload();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -161,15 +171,15 @@ const Quote = () => {
                 className="h-8 mr-3"
               />
               
-              {/* Back to Upload Button */}
+              {/* Back Button */}
               {currentStep !== "upload" && (
                 <Button
                   variant="ghost"
-                  onClick={handleBackToUpload}
+                  onClick={handleNavigationBack}
                   className="ml-4 text-dominion-blue hover:bg-blue-50"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Upload
+                  {currentStep === "results" ? "Back to Form" : "Back to Upload"}
                 </Button>
               )}
             </div>
