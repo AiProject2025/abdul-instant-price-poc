@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -16,6 +17,7 @@ const Quote = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [extractedData, setExtractedData] = useState<any>(null);
   const [formData, setFormData] = useState<any>(null);
+  const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
   const [pricingResults, setPricingResults] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -92,10 +94,12 @@ const Quote = () => {
       return;
     }
 
-    setFormData(data.formData || data);
+    const currentFormData = data.formData || data;
+    setFormData(currentFormData);
+    setLastSubmittedFormData(currentFormData); // Store the last submitted form data
     
     // Save the quote with flagging
-    const savedQuote = saveQuote(data.formData || data);
+    const savedQuote = saveQuote(currentFormData);
     console.log("Quote saved:", savedQuote);
     
     // Check if we have API response data
@@ -136,6 +140,7 @@ const Quote = () => {
     setUploadedFile(null);
     setExtractedData(null);
     setFormData(null);
+    setLastSubmittedFormData(null);
   };
 
   const handleStartApplication = () => {
@@ -231,7 +236,7 @@ const Quote = () => {
 
           {currentStep === "questionnaire" && (
             <DSCRForm
-              initialData={extractedData}
+              initialData={lastSubmittedFormData || extractedData}
               onSubmit={handleQuestionnaireSubmit}
               onBack={handleBackToUpload}
               isLoading={isProcessing}
@@ -264,3 +269,4 @@ const Quote = () => {
 };
 
 export default Quote;
+
