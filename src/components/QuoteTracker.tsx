@@ -3,10 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getQuotes, getQuoteStats, Quote, clearAllQuotes } from "@/services/quoteTracker";
-import { AlertTriangle, TrendingUp, FileText, Flag, Trash2 } from "lucide-react";
+import { AlertTriangle, TrendingUp, FileText, Flag, Trash2, MousePointer } from "lucide-react";
 import { useState } from "react";
 
-const QuoteTracker = () => {
+interface QuoteTrackerProps {
+  onQuoteSelect?: (quote: Quote) => void;
+}
+
+const QuoteTracker = ({ onQuoteSelect }: QuoteTrackerProps) => {
   const [quotes, setQuotes] = useState(getQuotes());
   const [stats, setStats] = useState(getQuoteStats());
 
@@ -20,6 +24,12 @@ const QuoteTracker = () => {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const handleQuoteClick = (quote: Quote) => {
+    if (onQuoteSelect) {
+      onQuoteSelect(quote);
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="bg-gradient-to-r from-dominion-blue to-dominion-green text-white">
@@ -29,7 +39,7 @@ const QuoteTracker = () => {
               Quote Tracking Dashboard
             </CardTitle>
             <CardDescription className="text-gray-100">
-              Monitor all quotes and flagged items
+              Monitor all quotes and flagged items. Click on any quote to restore it.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -101,7 +111,11 @@ const QuoteTracker = () => {
             </div>
           ) : (
             quotes.slice(-10).reverse().map((quote: Quote) => (
-              <div key={quote.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+              <div 
+                key={quote.id} 
+                className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors hover:border-dominion-blue/50"
+                onClick={() => handleQuoteClick(quote)}
+              >
                 <div className="mt-1">
                   {quote.isFlagged ? (
                     <Flag className="h-4 w-4 text-red-500" />
@@ -118,6 +132,7 @@ const QuoteTracker = () => {
                           Flagged
                         </Badge>
                       )}
+                      <MousePointer className="h-3 w-3 text-dominion-gray opacity-60" />
                       <span className="text-xs text-dominion-gray">
                         {formatDate(quote.timestamp)}
                       </span>

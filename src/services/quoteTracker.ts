@@ -10,6 +10,8 @@ export interface Quote {
   propertyState: string;
   isFlagged: boolean;
   flagReasons: string[];
+  // Store the original form data for restoration
+  originalFormData?: any;
 }
 
 // Judicial foreclosure states
@@ -85,7 +87,8 @@ export const saveQuote = (quoteData: any): Quote => {
     timestamp: new Date(),
     ...quoteToCheck,
     isFlagged: isFlagged || buyerCount === 1,
-    flagReasons
+    flagReasons,
+    originalFormData: quoteData // Store the complete form data for restoration
   };
 
   quotes.push(newQuote);

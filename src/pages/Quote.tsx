@@ -18,6 +18,7 @@ const Quote = () => {
   const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
   const [pricingResults, setPricingResults] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [flags, setFlags] = useState<string[]>([]);
 
   const transformApiResponseToResults = (apiResponse: any) => {
     // Handle the new response structure where quotes are under the 'quotes' key
@@ -147,8 +148,6 @@ const Quote = () => {
     console.log("Starting application...");
   };
 
-  const [flags, setFlags] = useState<string[]>([]);
-
   const handleBackToQuestionnaire = () => {
     setCurrentStep("questionnaire");
   };
@@ -159,6 +158,17 @@ const Quote = () => {
       setCurrentStep("questionnaire");
     } else {
       handleBackToUpload();
+    }
+  };
+
+  // Handle quote selection from the tracker
+  const handleQuoteSelect = (quote: any) => {
+    if (quote.originalFormData) {
+      // Restore the form data and navigate to questionnaire
+      setLastSubmittedFormData(quote.originalFormData);
+      setFormData(quote.originalFormData);
+      setExtractedData(null); // Clear extracted data since we're using saved data
+      setCurrentStep("questionnaire");
     }
   };
 
@@ -229,7 +239,7 @@ const Quote = () => {
               />
               
               {/* Quote Tracker on Upload Screen */}
-              <QuoteTracker />
+              <QuoteTracker onQuoteSelect={handleQuoteSelect} />
             </div>
           )}
 
