@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -145,8 +146,8 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     };
 
     try {
-      console.log('Calling instant pricing API with payload:', apiPayload);
-      const response = await fetch('https://instant-pricing-252613984003.us-east1.run.app', {
+      console.log('Calling pricing API with payload:', apiPayload);
+      const response = await fetch('https://n8n-prod.onrender.com/webhook-test/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/loanpass', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -167,7 +168,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
         pricingResults: apiResponse
       });
     } catch (error) {
-      console.error('Error calling instant pricing API:', error);
+      console.error('Error calling pricing API:', error);
       // Still call onSubmit with form data in case of API error
       onSubmit(formState);
     }
