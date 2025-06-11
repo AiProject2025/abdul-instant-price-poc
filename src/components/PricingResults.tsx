@@ -1,8 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, DollarSign, Calculator, FileText, Home, Clock, Percent, Lock, Unlock } from "lucide-react";
+import FlagsDisplay from "@/components/FlagsDisplay";
 
 interface PricingResultsProps {
   results: {
@@ -20,11 +20,12 @@ interface PricingResultsProps {
     ltv: number;
     isLocked?: boolean;
   }[];
+  flags?: string[];
   onStartApplication: () => void;
   onBackToForm: () => void;
 }
 
-const PricingResults = ({ results, onStartApplication }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, onStartApplication }: PricingResultsProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -45,6 +46,11 @@ const PricingResults = ({ results, onStartApplication }: PricingResultsProps) =>
 
   return (
     <div className="space-y-6">
+      {/* Show flags first if they exist */}
+      {flags && flags.length > 0 && (
+        <FlagsDisplay flags={flags} />
+      )}
+
       <div className="text-center">
         <h2 className="text-2xl font-bold text-dominion-blue mb-2">Your DSCR Loan Pricing Results</h2>
         <p className="text-dominion-gray">

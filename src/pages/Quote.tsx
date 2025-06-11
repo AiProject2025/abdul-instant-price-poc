@@ -20,7 +20,10 @@ const Quote = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const transformApiResponseToResults = (apiResponse: any) => {
-    const results = Object.entries(apiResponse).map(([noteBuyer, data]: [string, any]) => ({
+    // Handle the new response structure where quotes are under the 'quotes' key
+    const quotesData = apiResponse.quotes || apiResponse;
+    
+    const results = Object.entries(quotesData).map(([noteBuyer, data]: [string, any]) => ({
       lender: "Dominion Financial",
       noteBuyer: noteBuyer,
       product: noteBuyer, // Using note buyer name as product
@@ -95,9 +98,15 @@ const Quote = () => {
       // Transform API response to results format
       const results = transformApiResponseToResults(data.pricingResults);
       setPricingResults(results);
+      
+      // Store the flags from the API response
+      if (data.pricingResults.flags) {
+        setFlags(data.pricingResults.flags);
+      }
     } else {
       // Fallback to empty results if no API data
       setPricingResults([]);
+      setFlags([]);
     }
     
     // Simulate processing time
@@ -130,6 +139,8 @@ const Quote = () => {
     // Handle application start logic here
     console.log("Starting application...");
   };
+
+  const [flags, setFlags] = useState<string[]>([]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -223,6 +234,7 @@ const Quote = () => {
             <div className="space-y-8">
               <PricingResults
                 results={pricingResults}
+                flags={flags}
                 onBackToForm={() => setCurrentStep("questionnaire")}
                 onStartApplication={handleStartApplication}
               />
