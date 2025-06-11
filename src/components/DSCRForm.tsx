@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Loader2, Upload, FileText } from 'lucide-react';
 
 interface DSCRFormProps {
@@ -377,21 +377,39 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               </div>
             </div>
             
-            {/* Conditional Refinance Type field */}
-            {formState.loanPurpose === 'Refinance' && (
+            {/* Always visible Refinance Type field */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div></div> {/* Empty div for spacing */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Refinance Type *</label>
-                <Select value={formState.refinanceType} onValueChange={value => handleInputChange('refinanceType', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select refinance type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Cash Out">Cash Out</SelectItem>
-                    <SelectItem value="Rate Term">Rate Term</SelectItem>
-                  </SelectContent>
-                </Select>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <Select 
+                          value={formState.refinanceType} 
+                          onValueChange={value => handleInputChange('refinanceType', value)}
+                          disabled={formState.loanPurpose !== 'Refinance'}
+                        >
+                          <SelectTrigger className={formState.loanPurpose !== 'Refinance' ? 'opacity-50 cursor-not-allowed' : ''}>
+                            <SelectValue placeholder="Select refinance type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Cash Out">Cash Out</SelectItem>
+                            <SelectItem value="Rate Term">Rate Term</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </TooltipTrigger>
+                    {formState.loanPurpose !== 'Refinance' && (
+                      <TooltipContent>
+                        <p>Only available for Refinance loan purpose</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
