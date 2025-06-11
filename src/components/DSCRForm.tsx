@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -308,11 +307,17 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Single Family">Single Family</SelectItem>
-                    <SelectItem value="Duplex">Duplex</SelectItem>
-                    <SelectItem value="Triplex">Triplex</SelectItem>
-                    <SelectItem value="Fourplex">Fourplex</SelectItem>
+                    <SelectItem value="Condominium">Condominium</SelectItem>
+                    <SelectItem value="Condotel">Condotel</SelectItem>
+                    <SelectItem value="Two to Four Family">Two to Four Family</SelectItem>
+                    <SelectItem value="Multi-Family">Multi-Family</SelectItem>
                     <SelectItem value="Condo">Condo</SelectItem>
-                    <SelectItem value="Townhome">Townhome</SelectItem>
+                    <SelectItem value="Mixed-Use">Mixed-Use</SelectItem>
+                    <SelectItem value="PUD">PUD</SelectItem>
+                    <SelectItem value="Townhouse">Townhouse</SelectItem>
+                    <SelectItem value="Cooperative">Cooperative</SelectItem>
+                    <SelectItem value="Modular Home">Modular Home</SelectItem>
+                    <SelectItem value="Manufactured Home">Manufactured Home</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
