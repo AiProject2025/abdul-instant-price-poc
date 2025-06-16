@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,8 +48,8 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     monthlyHOA: '',
     monthlyFloodInsurance: '',
     // Financial Information
-    decisionCreditScore: '',
-    monthsOfReserves: ''
+    decisionCreditScore: ''
+    // Removed monthsOfReserves field
   });
 
   // Auto-populate form with extracted data using exact field names from API
@@ -81,8 +80,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
         monthlyInsurance: initialData.monthly_insurance || prev.monthlyInsurance,
         monthlyHOA: initialData.monthly_hoa || prev.monthlyHOA,
         monthlyFloodInsurance: initialData.monthly_flood_insurance || prev.monthlyFloodInsurance,
-        decisionCreditScore: initialData.decision_credit_score || prev.decisionCreditScore,
-        monthsOfReserves: initialData.months_of_reserves || prev.monthsOfReserves
+        decisionCreditScore: initialData.decision_credit_score || prev.decisionCreditScore
       }));
     }
   }, [initialData]);
@@ -141,11 +139,11 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       monthly_flood_insurance: parseFloat(formState.monthlyFloodInsurance) || 0,
       
       // Financial Information
-      decision_credit_score: parseInt(formState.decisionCreditScore) || 0,
-      months_of_reserves: parseInt(formState.monthsOfReserves) || 0
+      decision_credit_score: parseInt(formState.decisionCreditScore) || 0
+      // Removed months_of_reserves field
     };
 
-    // Trigger loading state immediately
+    // Trigger loading state immediately and always pass form data
     onSubmit({
       formData: formState,
       isLoading: true
@@ -175,7 +173,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       });
     } catch (error) {
       console.error('Error calling pricing API:', error);
-      // Still call onSubmit with form data in case of API error
+      // Always pass form data even in case of API error so it's preserved
       onSubmit({
         formData: formState,
         error: true
@@ -342,6 +340,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     <SelectItem value="2">2</SelectItem>
                     <SelectItem value="3">3</SelectItem>
                     <SelectItem value="4">4</SelectItem>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="6">6</SelectItem>
+                    <SelectItem value="7">7</SelectItem>
+                    <SelectItem value="8">8</SelectItem>
+                    <SelectItem value="9">9</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -535,16 +539,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   required 
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Months of Reserves *</label>
-                <Input 
-                  type="number" 
-                  value={formState.monthsOfReserves} 
-                  onChange={e => handleInputChange('monthsOfReserves', e.target.value)} 
-                  placeholder="12" 
-                  required 
-                />
-              </div>
+              {/* Removed Months of Reserves field */}
             </div>
           </CardContent>
         </Card>
