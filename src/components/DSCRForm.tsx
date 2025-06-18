@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -269,26 +268,6 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
           </CardContent>
         </Card>
 
-        {/* Purchase or Refinance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl text-dominion-blue">
-              Are you Purchasing or Refinancing a Rental Property?
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select value={formState.loanPurpose} onValueChange={value => handleInputChange('loanPurpose', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Purchase">Purchase</SelectItem>
-                <SelectItem value="Refinance">Refinance</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
         {/* Subject Property Address */}
         <Card>
           <CardHeader>
@@ -344,6 +323,26 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Purchase or Refinance */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">
+              Are you Purchasing or Refinancing a Rental Property?
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select value={formState.loanPurpose} onValueChange={value => handleInputChange('loanPurpose', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Purchase">Purchase</SelectItem>
+                <SelectItem value="Refinance">Refinance</SelectItem>
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
 
