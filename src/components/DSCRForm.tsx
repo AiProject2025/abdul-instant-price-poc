@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,8 +55,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     estimatedRehabCost: '',
     
     // Property Details - Refinance
-    currentPropertyValue: '',
-    currentLoanBalance: '',
+    datePurchased: '',
+    marketValue: '',
+    hasMortgage: '',
+    mortgagePayoff: '',
+    rehabCostSpent: '',
+    rehabCostNeeded: '',
     
     // Loan Details
     desiredLTV: '',
@@ -104,6 +109,13 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     }
     
     return total;
+  };
+
+  // Calculate total rehab cost for refinance
+  const calculateTotalRehabCost = () => {
+    const spent = parseFloat(formState.rehabCostSpent) || 0;
+    const needed = parseFloat(formState.rehabCostNeeded) || 0;
+    return spent + needed;
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -277,65 +289,63 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
           </CardContent>
         </Card>
 
-        {/* Subject Property Address - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Subject Property Address</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Subject Property Address */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">Subject Property Address</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Street *</label>
+              <Input 
+                type="text" 
+                value={formState.streetAddress} 
+                onChange={e => handleInputChange('streetAddress', e.target.value)} 
+                required 
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Street *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
                 <Input 
                   type="text" 
-                  value={formState.streetAddress} 
-                  onChange={e => handleInputChange('streetAddress', e.target.value)} 
+                  value={formState.city} 
+                  onChange={e => handleInputChange('city', e.target.value)} 
                   required 
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.city} 
-                    onChange={e => handleInputChange('city', e.target.value)} 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.propertyState} 
-                    onChange={e => handleInputChange('propertyState', e.target.value)} 
-                    required 
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                <Input 
+                  type="text" 
+                  value={formState.propertyState} 
+                  onChange={e => handleInputChange('propertyState', e.target.value)} 
+                  required 
+                />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.zipCode} 
-                    onChange={e => handleInputChange('zipCode', e.target.value)} 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Property County *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.propertyCounty} 
-                    onChange={e => handleInputChange('propertyCounty', e.target.value)} 
-                    required 
-                  />
-                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+                <Input 
+                  type="text" 
+                  value={formState.zipCode} 
+                  onChange={e => handleInputChange('zipCode', e.target.value)} 
+                  required 
+                />
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Property County *</label>
+                <Input 
+                  type="text" 
+                  value={formState.propertyCounty} 
+                  onChange={e => handleInputChange('propertyCounty', e.target.value)} 
+                  required 
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Property Details - Conditional based on Purchase vs Refinance */}
         {formState.loanPurpose === 'Purchase' && (
@@ -663,76 +673,142 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Property Value *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date Purchased</label>
+                  <Input 
+                    type="date" 
+                    value={formState.datePurchased} 
+                    onChange={e => handleInputChange('datePurchased', e.target.value)} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Market Value (Estimated) *</label>
                   <Input 
                     type="number" 
-                    value={formState.currentPropertyValue} 
-                    onChange={e => handleInputChange('currentPropertyValue', e.target.value)} 
+                    value={formState.marketValue} 
+                    onChange={e => handleInputChange('marketValue', e.target.value)} 
                     placeholder="$500,000" 
                     required 
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Loan Balance</label>
-                  <Input 
-                    type="number" 
-                    value={formState.currentLoanBalance} 
-                    onChange={e => handleInputChange('currentLoanBalance', e.target.value)} 
-                    placeholder="$0" 
-                  />
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Loan Details - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Loan Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Desired LTV? *</label>
-                  <Select value={formState.desiredLTV} onValueChange={value => handleInputChange('desiredLTV', value)}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Is there a mortgage on the property?</label>
+                  <Select value={formState.hasMortgage} onValueChange={value => handleInputChange('hasMortgage', value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select LTV" />
+                      <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="75%">75%</SelectItem>
-                      <SelectItem value="80%">80%</SelectItem>
-                      <SelectItem value="85%">85%</SelectItem>
-                      <SelectItem value="90%">90%</SelectItem>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
                     </SelectContent>
                   </Select>
+                  
+                  {/* Conditional Mortgage Payoff - appears as sub-field */}
+                  {formState.hasMortgage === 'Yes' && (
+                    <div className="mt-4 ml-6 pl-4 border-l-2 border-orange-200 bg-orange-50/30 rounded-r-lg p-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <span className="text-orange-700">↳</span> What is the estimated Mortgage Payoff?
+                      </label>
+                      <Input 
+                        type="number" 
+                        value={formState.mortgagePayoff} 
+                        onChange={e => handleInputChange('mortgagePayoff', e.target.value)} 
+                        className="bg-white"
+                        placeholder="$0"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Desired Closing Date</label>
-                  <Input 
-                    type="date" 
-                    value={formState.desiredClosingDate} 
-                    onChange={e => handleInputChange('desiredClosingDate', e.target.value)} 
-                  />
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      What is your estimated rehab cost already spent on the property (If Applicable)?
+                    </label>
+                    <Input 
+                      type="number" 
+                      value={formState.rehabCostSpent} 
+                      onChange={e => handleInputChange('rehabCostSpent', e.target.value)} 
+                      placeholder="$0" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      What is your estimated rehab cost needed (If Applicable)?
+                    </label>
+                    <Input 
+                      type="number" 
+                      value={formState.rehabCostNeeded} 
+                      onChange={e => handleInputChange('rehabCostNeeded', e.target.value)} 
+                      placeholder="$0" 
+                    />
+                  </div>
                 </div>
+                
+                {(formState.rehabCostSpent || formState.rehabCostNeeded) && (
+                  <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-700">Total Estimated Rehab Cost:</span>
+                      <span className="text-xl font-bold text-dominion-blue">
+                        ${calculateTotalRehabCost().toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Property Rents (Monthly) - Always show if loan purpose is selected and units are specified */}
-        {formState.loanPurpose && formState.numberOfUnits && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">
-                Property Rents (Monthly) - {formState.loanPurpose === 'Purchase' ? 'New Purchase' : 'Current Rents'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {renderRentalIncomeFields()}
+        {/* Loan Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">Loan Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Desired LTV? *</label>
+                <Select value={formState.desiredLTV} onValueChange={value => handleInputChange('desiredLTV', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select LTV" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="75%">75%</SelectItem>
+                    <SelectItem value="80%">80%</SelectItem>
+                    <SelectItem value="85%">85%</SelectItem>
+                    <SelectItem value="90%">90%</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Desired Closing Date</label>
+                <Input 
+                  type="date" 
+                  value={formState.desiredClosingDate} 
+                  onChange={e => handleInputChange('desiredClosingDate', e.target.value)} 
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Property Rents (Monthly) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">
+              Property Rents (Monthly) - {formState.loanPurpose === 'Purchase' ? 'New Purchase' : formState.loanPurpose === 'Refinance' ? 'Current Rents' : 'Estimated Rents'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {renderRentalIncomeFields()}
+            </div>
+            {formState.numberOfUnits && (
               <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-700">Total Rental Income:</span>
@@ -741,104 +817,98 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   </span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Annual Property Expenses - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Annual Property Expenses</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Taxes *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualTaxes} 
-                    onChange={e => handleInputChange('annualTaxes', e.target.value)} 
-                    placeholder="$6,000" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Insurance Costs *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualInsurance} 
-                    onChange={e => handleInputChange('annualInsurance', e.target.value)} 
-                    placeholder="$2,400" 
-                    required 
-                  />
-                </div>
+        {/* Annual Property Expenses */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">Annual Property Expenses</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Annual Taxes *</label>
+                <Input 
+                  type="number" 
+                  value={formState.annualTaxes} 
+                  onChange={e => handleInputChange('annualTaxes', e.target.value)} 
+                  placeholder="$6,000" 
+                  required 
+                />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Association Fees</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualAssociationFees} 
-                    onChange={e => handleInputChange('annualAssociationFees', e.target.value)} 
-                    placeholder="$1,800" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Flood Insurance Premiums</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualFloodInsurance} 
-                    onChange={e => handleInputChange('annualFloodInsurance', e.target.value)} 
-                    placeholder="$900" 
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Annual Insurance Costs *</label>
+                <Input 
+                  type="number" 
+                  value={formState.annualInsurance} 
+                  onChange={e => handleInputChange('annualInsurance', e.target.value)} 
+                  placeholder="$2,400" 
+                  required 
+                />
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Annual Association Fees</label>
+                <Input 
+                  type="number" 
+                  value={formState.annualAssociationFees} 
+                  onChange={e => handleInputChange('annualAssociationFees', e.target.value)} 
+                  placeholder="$1,800" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Annual Flood Insurance Premiums</label>
+                <Input 
+                  type="number" 
+                  value={formState.annualFloodInsurance} 
+                  onChange={e => handleInputChange('annualFloodInsurance', e.target.value)} 
+                  placeholder="$900" 
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Final Details - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Final Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Credit Score *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.creditScore} 
-                    onChange={e => handleInputChange('creditScore', e.target.value)} 
-                    placeholder="740" 
-                    required 
-                  />
-                </div>
+        {/* Final Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">Final Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Your Credit Score *</label>
+                <Input 
+                  type="number" 
+                  value={formState.creditScore} 
+                  onChange={e => handleInputChange('creditScore', e.target.value)} 
+                  placeholder="740" 
+                  required 
+                />
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Submit Button */}
-        {formState.loanPurpose && (
-          <div className="flex justify-between items-center pt-6">
-            <Button type="button" variant="outline" onClick={onBack}>
-              Back to Upload
-            </Button>
-            <Button type="submit" disabled={isLoading} className="bg-dominion-blue hover:bg-blue-700">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Get Pricing'
-              )}
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-between items-center pt-6">
+          <Button type="button" variant="outline" onClick={onBack}>
+            Back to Upload
+          </Button>
+          <Button type="submit" disabled={isLoading} className="bg-dominion-blue hover:bg-blue-700">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Get Pricing'
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );
