@@ -80,6 +80,16 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     creditScore: ''
   });
 
+  // Initialize form with data if available
+  useEffect(() => {
+    if (initialData) {
+      setFormState(prev => ({
+        ...prev,
+        ...initialData
+      }));
+    }
+  }, [initialData]);
+
   // Calculate total rental income
   const calculateTotalRental = () => {
     const units = parseInt(formState.numberOfUnits) || 0;
@@ -330,7 +340,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               <CardHeader>
                 <CardTitle className="text-xl text-dominion-blue">Property Details - New Purchase</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Property Type *</label>
@@ -341,28 +351,34 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                       <SelectContent>
                         <SelectItem value="Single Family">Single Family</SelectItem>
                         <SelectItem value="Multi-Family">Multi-Family</SelectItem>
-                        <SelectItem value="Condo">Condo</SelectItem>
+                        <SelectItem value="Condominium">Condominium</SelectItem>
                         <SelectItem value="Townhome">Townhome</SelectItem>
                         <SelectItem value="Commercial">Commercial</SelectItem>
                         <SelectItem value="Land">Land</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Condo Approval Type</label>
-                    <Select value={formState.condoApprovalType} onValueChange={value => handleInputChange('condoApprovalType', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select approval type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Warrantable">Warrantable</SelectItem>
-                        <SelectItem value="Non-Warrantable">Non-Warrantable</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    
+                    {/* Conditional Condo Approval Type - appears as sub-field */}
+                    {formState.propertyType === 'Condominium' && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <span className="text-blue-700">↳</span> Condominium Approval Type
+                        </label>
+                        <Select value={formState.condoApprovalType} onValueChange={value => handleInputChange('condoApprovalType', value)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select approval type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Warrantable">Warrantable</SelectItem>
+                            <SelectItem value="Non-Warrantable">Non-Warrantable</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Is there a Purchase Contract in place? *</label>
                     <Select value={formState.hasPurchaseContract} onValueChange={value => handleInputChange('hasPurchaseContract', value)}>
@@ -374,20 +390,26 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                         <SelectItem value="No">No</SelectItem>
                       </SelectContent>
                     </Select>
+                    
+                    {/* Conditional Purchase Contract Close Date - appears as sub-field */}
+                    {formState.hasPurchaseContract === 'Yes' && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-green-200 bg-green-50/30 rounded-r-lg p-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <span className="text-green-700">↳</span> Purchase Contract close date?
+                        </label>
+                        <Input 
+                          type="text" 
+                          value={formState.purchaseContractCloseDate} 
+                          onChange={e => handleInputChange('purchaseContractCloseDate', e.target.value)} 
+                          className="bg-white"
+                          placeholder="Enter close date"
+                        />
+                      </div>
+                    )}
                   </div>
-                  {formState.hasPurchaseContract === 'Yes' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Contract close date?</label>
-                      <Input 
-                        type="text" 
-                        value={formState.purchaseContractCloseDate} 
-                        onChange={e => handleInputChange('purchaseContractCloseDate', e.target.value)} 
-                      />
-                    </div>
-                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
                     <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
@@ -407,40 +429,44 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                         <SelectItem value="10">10</SelectItem>
                       </SelectContent>
                     </Select>
+                    
+                    {/* Conditional Nonconforming Units - appears as sub-field */}
+                    {parseInt(formState.numberOfUnits) >= 2 && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <span className="text-yellow-700">↳</span> Are these units Nonconforming/Grandfathered use?
+                        </label>
+                        <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    
+                    {/* Conditional Net Operation Income - appears as sub-field */}
+                    {parseInt(formState.numberOfUnits) >= 5 && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <span className="text-purple-700">↳</span> What is the total Net Operation Income?
+                        </label>
+                        <Input 
+                          type="number" 
+                          value={formState.totalNetOperationIncome} 
+                          onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
+                          placeholder="$0" 
+                          className="bg-white"
+                        />
+                      </div>
+                    )}
                   </div>
-                  {parseInt(formState.numberOfUnits) >= 2 && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Are these units Nonconforming/Grandfathered use?
-                      </label>
-                      <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
                 </div>
 
-                {parseInt(formState.numberOfUnits) >= 5 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      What is the total Net Operation Income?
-                    </label>
-                    <Input 
-                      type="number" 
-                      value={formState.totalNetOperationIncome} 
-                      onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
-                      placeholder="$0" 
-                    />
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Will there be a lease in place before closing?
@@ -454,51 +480,56 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                         <SelectItem value="No">No</SelectItem>
                       </SelectContent>
                     </Select>
+                    
+                    {/* Conditional Lease Details - appears as sub-fields */}
+                    {formState.leaseInPlace === 'Yes' && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-indigo-200 bg-indigo-50/30 rounded-r-lg p-4 space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <span className="text-indigo-700">↳</span> What is the lease structure?
+                          </label>
+                          <Input 
+                            type="text" 
+                            value={formState.leaseStructure} 
+                            onChange={e => handleInputChange('leaseStructure', e.target.value)} 
+                            className="bg-white"
+                            placeholder="Enter lease structure"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <span className="text-indigo-700">↳</span> Is the property under a section 8 lease?
+                          </label>
+                          <Select value={formState.section8Lease} onValueChange={value => handleInputChange('section8Lease', value)}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <span className="text-indigo-700">↳</span> Is there 12 months of STR Rental History?
+                          </label>
+                          <Select value={formState.strRentalHistory} onValueChange={value => handleInputChange('strRentalHistory', value)}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {formState.leaseInPlace === 'Yes' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">What is the lease structure?</label>
-                      <Input 
-                        type="text" 
-                        value={formState.leaseStructure} 
-                        onChange={e => handleInputChange('leaseStructure', e.target.value)} 
-                      />
-                    </div>
-                  )}
                 </div>
-
-                {formState.leaseInPlace === 'Yes' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Is the property under a section 8 lease?
-                      </label>
-                      <Select value={formState.section8Lease} onValueChange={value => handleInputChange('section8Lease', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Is there 12 months of STR Rental History?
-                      </label>
-                      <Select value={formState.strRentalHistory} onValueChange={value => handleInputChange('strRentalHistory', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -569,7 +600,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {renderRentalIncomeFields()}
                   </div>
-                  <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <div className="flex justify-between items-center">
                       <span className="font-medium text-gray-700">Total Rental Income:</span>
                       <span className="text-xl font-bold text-dominion-blue">
