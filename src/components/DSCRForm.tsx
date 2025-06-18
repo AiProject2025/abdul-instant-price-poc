@@ -54,6 +54,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     estimatedRehabCost: '',
     
     // Property Details - Refinance
+    refinanceType: '',
     currentPropertyValue: '',
     currentLoanBalance: '',
     datePurchased: '',
@@ -578,6 +579,18 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Refinance Type *</label>
+                  <Select value={formState.refinanceType} onValueChange={value => handleInputChange('refinanceType', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select refinance type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Cash-Out">Cash-Out</SelectItem>
+                      <SelectItem value="Rate-Term">Rate-Term</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Property Type *</label>
                   <Select value={formState.propertyType} onValueChange={value => handleInputChange('propertyType', value)}>
                     <SelectTrigger>
@@ -737,6 +750,16 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Price *</label>
+                  <Input 
+                    type="number" 
+                    value={formState.purchasePrice} 
+                    onChange={e => handleInputChange('purchasePrice', e.target.value)} 
+                    placeholder="$500,000" 
+                    required 
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Date Purchased *</label>
                   <Input 
                     type="date" 
@@ -745,6 +768,9 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     required 
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Market Value (Estimated) *</label>
                   <Input 
