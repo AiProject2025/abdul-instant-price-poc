@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,10 +53,6 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     strRentalHistory: '',
     purchasePrice: '',
     estimatedRehabCost: '',
-    
-    // Property Details - Refinance
-    currentPropertyValue: '',
-    currentLoanBalance: '',
     
     // Loan Details
     desiredLTV: '',
@@ -277,234 +274,169 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
           </CardContent>
         </Card>
 
-        {/* Subject Property Address - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Subject Property Address</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Street *</label>
-                <Input 
-                  type="text" 
-                  value={formState.streetAddress} 
-                  onChange={e => handleInputChange('streetAddress', e.target.value)} 
-                  required 
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.city} 
-                    onChange={e => handleInputChange('city', e.target.value)} 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.propertyState} 
-                    onChange={e => handleInputChange('propertyState', e.target.value)} 
-                    required 
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.zipCode} 
-                    onChange={e => handleInputChange('zipCode', e.target.value)} 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Property County *</label>
-                  <Input 
-                    type="text" 
-                    value={formState.propertyCounty} 
-                    onChange={e => handleInputChange('propertyCounty', e.target.value)} 
-                    required 
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Property Details - Conditional based on Purchase vs Refinance */}
+        {/* Show remaining sections only if Purchase is selected */}
         {formState.loanPurpose === 'Purchase' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Property Details - New Purchase</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <>
+            {/* Subject Property Address */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-dominion-blue">Subject Property Address</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Property Type *</label>
-                  <Select value={formState.propertyType} onValueChange={value => handleInputChange('propertyType', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select property type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Single Family">Single Family</SelectItem>
-                      <SelectItem value="Multi-Family">Multi-Family</SelectItem>
-                      <SelectItem value="Condominium">Condominium</SelectItem>
-                      <SelectItem value="Townhome">Townhome</SelectItem>
-                      <SelectItem value="Commercial">Commercial</SelectItem>
-                      <SelectItem value="Land">Land</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Condo Approval Type - appears as sub-field */}
-                  {formState.propertyType === 'Condominium' && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-blue-700">↳</span> Condominium Approval Type
-                      </label>
-                      <Select value={formState.condoApprovalType} onValueChange={value => handleInputChange('condoApprovalType', value)}>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select approval type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Warrantable">Warrantable</SelectItem>
-                          <SelectItem value="Non-Warrantable">Non-Warrantable</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Street *</label>
+                  <Input 
+                    type="text" 
+                    value={formState.streetAddress} 
+                    onChange={e => handleInputChange('streetAddress', e.target.value)} 
+                    required 
+                  />
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Is there a Purchase Contract in place? *</label>
-                  <Select value={formState.hasPurchaseContract} onValueChange={value => handleInputChange('hasPurchaseContract', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Yes">Yes</SelectItem>
-                      <SelectItem value="No">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Purchase Contract Close Date - appears as sub-field */}
-                  {formState.hasPurchaseContract === 'Yes' && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-green-200 bg-green-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-green-700">↳</span> Purchase Contract close date?
-                      </label>
-                      <Input 
-                        type="text" 
-                        value={formState.purchaseContractCloseDate} 
-                        onChange={e => handleInputChange('purchaseContractCloseDate', e.target.value)} 
-                        className="bg-white"
-                        placeholder="Enter close date"
-                      />
-                    </div>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                    <Input 
+                      type="text" 
+                      value={formState.city} 
+                      onChange={e => handleInputChange('city', e.target.value)} 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                    <Input 
+                      type="text" 
+                      value={formState.propertyState} 
+                      onChange={e => handleInputChange('propertyState', e.target.value)} 
+                      required 
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
-                  <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select units" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="6">6</SelectItem>
-                      <SelectItem value="7">7</SelectItem>
-                      <SelectItem value="8">8</SelectItem>
-                      <SelectItem value="9">9</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Nonconforming Units - appears as sub-field */}
-                  {parseInt(formState.numberOfUnits) >= 2 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-yellow-700">↳</span> Are these units Nonconforming/Grandfathered use?
-                      </label>
-                      <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  
-                  {/* Conditional Net Operation Income - appears as sub-field */}
-                  {parseInt(formState.numberOfUnits) >= 5 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-purple-700">↳</span> What is the total Net Operation Income?
-                      </label>
-                      <Input 
-                        type="number" 
-                        value={formState.totalNetOperationIncome} 
-                        onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
-                        placeholder="$0" 
-                        className="bg-white"
-                      />
-                    </div>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+                    <Input 
+                      type="text" 
+                      value={formState.zipCode} 
+                      onChange={e => handleInputChange('zipCode', e.target.value)} 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Property County *</label>
+                    <Input 
+                      type="text" 
+                      value={formState.propertyCounty} 
+                      onChange={e => handleInputChange('propertyCounty', e.target.value)} 
+                      required 
+                    />
+                  </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Will there be a lease in place before closing?
-                  </label>
-                  <Select value={formState.leaseInPlace} onValueChange={value => handleInputChange('leaseInPlace', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Yes">Yes</SelectItem>
-                      <SelectItem value="No">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Lease Details - appears as sub-fields */}
-                  {formState.leaseInPlace === 'Yes' && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-indigo-200 bg-indigo-50/30 rounded-r-lg p-4 space-y-4">
-                      <div>
+            {/* Property Details - New Purchase */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-dominion-blue">Property Details - New Purchase</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Property Type *</label>
+                    <Select value={formState.propertyType} onValueChange={value => handleInputChange('propertyType', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select property type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Single Family">Single Family</SelectItem>
+                        <SelectItem value="Multi-Family">Multi-Family</SelectItem>
+                        <SelectItem value="Condominium">Condominium</SelectItem>
+                        <SelectItem value="Townhome">Townhome</SelectItem>
+                        <SelectItem value="Commercial">Commercial</SelectItem>
+                        <SelectItem value="Land">Land</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Conditional Condo Approval Type - appears as sub-field */}
+                    {formState.propertyType === 'Condominium' && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <span className="text-indigo-700">↳</span> What is the lease structure?
+                          <span className="text-blue-700">↳</span> Condominium Approval Type
+                        </label>
+                        <Select value={formState.condoApprovalType} onValueChange={value => handleInputChange('condoApprovalType', value)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select approval type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Warrantable">Warrantable</SelectItem>
+                            <SelectItem value="Non-Warrantable">Non-Warrantable</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Is there a Purchase Contract in place? *</label>
+                    <Select value={formState.hasPurchaseContract} onValueChange={value => handleInputChange('hasPurchaseContract', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Conditional Purchase Contract Close Date - appears as sub-field */}
+                    {formState.hasPurchaseContract === 'Yes' && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-green-200 bg-green-50/30 rounded-r-lg p-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <span className="text-green-700">↳</span> Purchase Contract close date?
                         </label>
                         <Input 
                           type="text" 
-                          value={formState.leaseStructure} 
-                          onChange={e => handleInputChange('leaseStructure', e.target.value)} 
+                          value={formState.purchaseContractCloseDate} 
+                          onChange={e => handleInputChange('purchaseContractCloseDate', e.target.value)} 
                           className="bg-white"
-                          placeholder="Enter lease structure"
+                          placeholder="Enter close date"
                         />
                       </div>
-                      
-                      <div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
+                    <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select units" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="6">6</SelectItem>
+                        <SelectItem value="7">7</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="9">9</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Conditional Nonconforming Units - appears as sub-field */}
+                    {parseInt(formState.numberOfUnits) >= 2 && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <span className="text-indigo-700">↳</span> Is the property under a section 8 lease?
+                          <span className="text-yellow-700">↳</span> Are these units Nonconforming/Grandfathered use?
                         </label>
-                        <Select value={formState.section8Lease} onValueChange={value => handleInputChange('section8Lease', value)}>
+                        <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
                           <SelectTrigger className="bg-white">
                             <SelectValue placeholder="Select" />
                           </SelectTrigger>
@@ -514,331 +446,262 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      <div>
+                    )}
+                    
+                    {/* Conditional Net Operation Income - appears as sub-field */}
+                    {parseInt(formState.numberOfUnits) >= 5 && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <span className="text-indigo-700">↳</span> Is there 12 months of STR Rental History?
+                          <span className="text-purple-700">↳</span> What is the total Net Operation Income?
                         </label>
-                        <Select value={formState.strRentalHistory} onValueChange={value => handleInputChange('strRentalHistory', value)}>
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Input 
+                          type="number" 
+                          value={formState.totalNetOperationIncome} 
+                          onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
+                          placeholder="$0" 
+                          className="bg-white"
+                        />
                       </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Will there be a lease in place before closing?
+                    </label>
+                    <Select value={formState.leaseInPlace} onValueChange={value => handleInputChange('leaseInPlace', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Conditional Lease Details - appears as sub-fields */}
+                    {formState.leaseInPlace === 'Yes' && (
+                      <div className="mt-4 ml-6 pl-4 border-l-2 border-indigo-200 bg-indigo-50/30 rounded-r-lg p-4 space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <span className="text-indigo-700">↳</span> What is the lease structure?
+                          </label>
+                          <Input 
+                            type="text" 
+                            value={formState.leaseStructure} 
+                            onChange={e => handleInputChange('leaseStructure', e.target.value)} 
+                            className="bg-white"
+                            placeholder="Enter lease structure"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <span className="text-indigo-700">↳</span> Is the property under a section 8 lease?
+                          </label>
+                          <Select value={formState.section8Lease} onValueChange={value => handleInputChange('section8Lease', value)}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <span className="text-indigo-700">↳</span> Is there 12 months of STR Rental History?
+                          </label>
+                          <Select value={formState.strRentalHistory} onValueChange={value => handleInputChange('strRentalHistory', value)}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Price *</label>
+                    <Input 
+                      type="number" 
+                      value={formState.purchasePrice} 
+                      onChange={e => handleInputChange('purchasePrice', e.target.value)} 
+                      placeholder="$500,000" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Estimated rehab cost (If Applicable)?
+                    </label>
+                    <Input 
+                      type="number" 
+                      value={formState.estimatedRehabCost} 
+                      onChange={e => handleInputChange('estimatedRehabCost', e.target.value)} 
+                      placeholder="$0" 
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Loan Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-dominion-blue">Loan Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Desired LTV? *</label>
+                    <Select value={formState.desiredLTV} onValueChange={value => handleInputChange('desiredLTV', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select LTV" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="75%">75%</SelectItem>
+                        <SelectItem value="80%">80%</SelectItem>
+                        <SelectItem value="85%">85%</SelectItem>
+                        <SelectItem value="90%">90%</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Desired Closing Date</label>
+                    <Input 
+                      type="date" 
+                      value={formState.desiredClosingDate} 
+                      onChange={e => handleInputChange('desiredClosingDate', e.target.value)} 
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Property Rents (Monthly) - New Purchase */}
+            {formState.numberOfUnits && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl text-dominion-blue">Property Rents (Monthly) - New Purchase</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {renderRentalIncomeFields()}
+                  </div>
+                  <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-700">Total Rental Income:</span>
+                      <span className="text-xl font-bold text-dominion-blue">
+                        ${calculateTotalRental().toLocaleString()}
+                      </span>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Price *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.purchasePrice} 
-                    onChange={e => handleInputChange('purchasePrice', e.target.value)} 
-                    placeholder="$500,000" 
-                    required 
-                  />
+            {/* Annual Property Expenses */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-dominion-blue">Annual Property Expenses</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Annual Taxes *</label>
+                    <Input 
+                      type="number" 
+                      value={formState.annualTaxes} 
+                      onChange={e => handleInputChange('annualTaxes', e.target.value)} 
+                      placeholder="$6,000" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Annual Insurance Costs *</label>
+                    <Input 
+                      type="number" 
+                      value={formState.annualInsurance} 
+                      onChange={e => handleInputChange('annualInsurance', e.target.value)} 
+                      placeholder="$2,400" 
+                      required 
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Estimated rehab cost (If Applicable)?
-                  </label>
-                  <Input 
-                    type="number" 
-                    value={formState.estimatedRehabCost} 
-                    onChange={e => handleInputChange('estimatedRehabCost', e.target.value)} 
-                    placeholder="$0" 
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Annual Association Fees</label>
+                    <Input 
+                      type="number" 
+                      value={formState.annualAssociationFees} 
+                      onChange={e => handleInputChange('annualAssociationFees', e.target.value)} 
+                      placeholder="$1,800" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Annual Flood Insurance Premiums</label>
+                    <Input 
+                      type="number" 
+                      value={formState.annualFloodInsurance} 
+                      onChange={e => handleInputChange('annualFloodInsurance', e.target.value)} 
+                      placeholder="$900" 
+                    />
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
 
-        {formState.loanPurpose === 'Refinance' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Property Details - Refinance</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Property Type *</label>
-                  <Select value={formState.propertyType} onValueChange={value => handleInputChange('propertyType', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select property type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Single Family">Single Family</SelectItem>
-                      <SelectItem value="Multi-Family">Multi-Family</SelectItem>
-                      <SelectItem value="Condominium">Condominium</SelectItem>
-                      <SelectItem value="Townhome">Townhome</SelectItem>
-                      <SelectItem value="Commercial">Commercial</SelectItem>
-                      <SelectItem value="Land">Land</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Condo Approval Type */}
-                  {formState.propertyType === 'Condominium' && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-blue-700">↳</span> Condominium Approval Type
-                      </label>
-                      <Select value={formState.condoApprovalType} onValueChange={value => handleInputChange('condoApprovalType', value)}>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select approval type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Warrantable">Warrantable</SelectItem>
-                          <SelectItem value="Non-Warrantable">Non-Warrantable</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+            {/* Final Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-dominion-blue">Final Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Credit Score *</label>
+                    <Input 
+                      type="number" 
+                      value={formState.creditScore} 
+                      onChange={e => handleInputChange('creditScore', e.target.value)} 
+                      placeholder="740" 
+                      required 
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
-                  <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select units" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="6">6</SelectItem>
-                      <SelectItem value="7">7</SelectItem>
-                      <SelectItem value="8">8</SelectItem>
-                      <SelectItem value="9">9</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Nonconforming Units */}
-                  {parseInt(formState.numberOfUnits) >= 2 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-yellow-700">↳</span> Are these units Nonconforming/Grandfathered use?
-                      </label>
-                      <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  
-                  {/* Conditional Net Operation Income */}
-                  {parseInt(formState.numberOfUnits) >= 5 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-purple-700">↳</span> What is the total Net Operation Income?
-                      </label>
-                      <Input 
-                        type="number" 
-                        value={formState.totalNetOperationIncome} 
-                        onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
-                        placeholder="$0" 
-                        className="bg-white"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Property Value *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.currentPropertyValue} 
-                    onChange={e => handleInputChange('currentPropertyValue', e.target.value)} 
-                    placeholder="$500,000" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Loan Balance</label>
-                  <Input 
-                    type="number" 
-                    value={formState.currentLoanBalance} 
-                    onChange={e => handleInputChange('currentLoanBalance', e.target.value)} 
-                    placeholder="$0" 
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Loan Details - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Loan Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Desired LTV? *</label>
-                  <Select value={formState.desiredLTV} onValueChange={value => handleInputChange('desiredLTV', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select LTV" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="75%">75%</SelectItem>
-                      <SelectItem value="80%">80%</SelectItem>
-                      <SelectItem value="85%">85%</SelectItem>
-                      <SelectItem value="90%">90%</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Desired Closing Date</label>
-                  <Input 
-                    type="date" 
-                    value={formState.desiredClosingDate} 
-                    onChange={e => handleInputChange('desiredClosingDate', e.target.value)} 
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Property Rents (Monthly) - Always show if loan purpose is selected and units are specified */}
-        {formState.loanPurpose && formState.numberOfUnits && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">
-                Property Rents (Monthly) - {formState.loanPurpose === 'Purchase' ? 'New Purchase' : 'Current Rents'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {renderRentalIncomeFields()}
-              </div>
-              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-700">Total Rental Income:</span>
-                  <span className="text-xl font-bold text-dominion-blue">
-                    ${calculateTotalRental().toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Annual Property Expenses - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Annual Property Expenses</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Taxes *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualTaxes} 
-                    onChange={e => handleInputChange('annualTaxes', e.target.value)} 
-                    placeholder="$6,000" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Insurance Costs *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualInsurance} 
-                    onChange={e => handleInputChange('annualInsurance', e.target.value)} 
-                    placeholder="$2,400" 
-                    required 
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Association Fees</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualAssociationFees} 
-                    onChange={e => handleInputChange('annualAssociationFees', e.target.value)} 
-                    placeholder="$1,800" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Flood Insurance Premiums</label>
-                  <Input 
-                    type="number" 
-                    value={formState.annualFloodInsurance} 
-                    onChange={e => handleInputChange('annualFloodInsurance', e.target.value)} 
-                    placeholder="$900" 
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Final Details - Always show if loan purpose is selected */}
-        {formState.loanPurpose && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-dominion-blue">Final Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Credit Score *</label>
-                  <Input 
-                    type="number" 
-                    value={formState.creditScore} 
-                    onChange={e => handleInputChange('creditScore', e.target.value)} 
-                    placeholder="740" 
-                    required 
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </>
         )}
 
         {/* Submit Button */}
-        {formState.loanPurpose && (
-          <div className="flex justify-between items-center pt-6">
-            <Button type="button" variant="outline" onClick={onBack}>
-              Back to Upload
-            </Button>
-            <Button type="submit" disabled={isLoading} className="bg-dominion-blue hover:bg-blue-700">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Get Pricing'
-              )}
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-between items-center pt-6">
+          <Button type="button" variant="outline" onClick={onBack}>
+            Back to Upload
+          </Button>
+          <Button type="submit" disabled={isLoading} className="bg-dominion-blue hover:bg-blue-700">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Get Pricing'
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );
