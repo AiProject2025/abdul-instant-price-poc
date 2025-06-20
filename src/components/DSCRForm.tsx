@@ -411,11 +411,10 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                         <span className="text-green-700">↳</span> Purchase Contract close date?
                       </label>
                       <Input 
-                        type="text" 
+                        type="date" 
                         value={formState.purchaseContractCloseDate} 
                         onChange={e => handleInputChange('purchaseContractCloseDate', e.target.value)} 
                         className="bg-white"
-                        placeholder="Enter close date"
                       />
                     </div>
                   )}
@@ -501,13 +500,17 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           <span className="text-indigo-700">↳</span> What is the lease structure?
                         </label>
-                        <Input 
-                          type="text" 
-                          value={formState.leaseStructure} 
-                          onChange={e => handleInputChange('leaseStructure', e.target.value)} 
-                          className="bg-white"
-                          placeholder="Enter lease structure"
-                        />
+                        <Select value={formState.leaseStructure} onValueChange={value => handleInputChange('leaseStructure', value)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select lease structure" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Long-Term Lease">Long-Term Lease</SelectItem>
+                            <SelectItem value="Short-Term Rental">Short-Term Rental</SelectItem>
+                            <SelectItem value="Single-Room Occupancy">Single-Room Occupancy</SelectItem>
+                            <SelectItem value="Month-to-Month Lease">Month-to-Month Lease</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       
                       <div>
@@ -705,13 +708,17 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           <span className="text-indigo-700">↳</span> What is the lease structure?
                         </label>
-                        <Input 
-                          type="text" 
-                          value={formState.leaseStructure} 
-                          onChange={e => handleInputChange('leaseStructure', e.target.value)} 
-                          className="bg-white"
-                          placeholder="Enter lease structure"
-                        />
+                        <Select value={formState.leaseStructure} onValueChange={value => handleInputChange('leaseStructure', value)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select lease structure" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Long-Term Lease">Long-Term Lease</SelectItem>
+                            <SelectItem value="Short-Term Rental">Short-Term Rental</SelectItem>
+                            <SelectItem value="Single-Room Occupancy">Single-Room Occupancy</SelectItem>
+                            <SelectItem value="Month-to-Month Lease">Month-to-Month Lease</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       
                       <div>
@@ -860,17 +867,13 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Desired LTV? *</label>
-                <Select value={formState.desiredLTV} onValueChange={value => handleInputChange('desiredLTV', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select LTV" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="75%">75%</SelectItem>
-                    <SelectItem value="80%">80%</SelectItem>
-                    <SelectItem value="85%">85%</SelectItem>
-                    <SelectItem value="90%">90%</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input 
+                  type="text" 
+                  value={formState.desiredLTV} 
+                  onChange={e => handleInputChange('desiredLTV', e.target.value)} 
+                  placeholder="e.g., 75%" 
+                  required 
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Desired Closing Date</label>
