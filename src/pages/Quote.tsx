@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -69,7 +70,7 @@ const Quote = () => {
       }
     };
 
-    // Transform to API format
+    // Transform to API format with new key mappings
     const apiData = {
       // Personal Info
       firstName: formData.firstName,
@@ -78,28 +79,28 @@ const Quote = () => {
       email: formData.email,
       yourCompany: formData.yourCompany,
       usCitizen: formData.usCitizen,
-      borrower_type: formData.closingType,
+      borrower_type: formData.closingType, // mapped from closingType
       
       // Subject Property Address
-      address: formData.streetAddress,
+      address: formData.streetAddress, // mapped from streetAddress
       city: formData.city,
-      state: formData.propertyState,
-      zip_code: formData.zipCode,
-      county: formData.propertyCounty,
+      state: formData.propertyState, // mapped from propertyState
+      zip_code: formData.zipCode, // mapped from zipCode
+      county: formData.propertyCounty, // mapped from propertyCounty
       
       // Loan Purpose
-      loan_purpose: formData.loanPurpose,
+      loan_purpose: formData.loanPurpose, // mapped from loanPurpose
       
       // Property Details
-      property_type: formData.propertyType,
-      number_of_units: formData.numberOfUnits,
+      property_type: formData.propertyType, // mapped from propertyType
+      number_of_units: formData.numberOfUnits, // mapped from numberOfUnits
       
       // Loan Details
       desired_ltv: formData.desiredLTV,
       desired_closing_date: formData.desiredClosingDate,
       
       // Calculated Rental Income
-      market_rent: calculateTotalRental(),
+      market_rent: calculateTotalRental(), // mapped from totalRentalIncome
       
       // Annual Property Expenses
       annual_taxes: formData.annualTaxes,
@@ -108,20 +109,20 @@ const Quote = () => {
       annual_flood_insurance: formData.annualFloodInsurance || "0",
       
       // Final Details
-      decision_credit_score: formData.creditScore,
+      decision_credit_score: formData.creditScore, // mapped from creditScore
       
       // Rehab Cost
-      rehab_cost: calculateRehabCost()
+      rehab_cost: calculateRehabCost() // unified field for both estimated and total rehab cost
     };
 
     // Add conditional fields based on property type
     if (formData.propertyType === 'Condominium') {
-      apiData.condo_approval_type = formData.condoApprovalType;
+      apiData.condo_approval_type = formData.condoApprovalType; // mapped from condoApprovalType
     }
 
     // Add conditional fields based on number of units
     if (parseInt(formData.numberOfUnits) >= 2) {
-      apiData.isNonconfirming = formData.nonconformingUnits;
+      apiData.isNonconfirming = formData.nonconformingUnits; // mapped from nonconformingUnits
     }
 
     if (parseInt(formData.numberOfUnits) >= 5) {
@@ -133,14 +134,14 @@ const Quote = () => {
       apiData.lease_in_place = formData.leaseInPlace;
       if (formData.leaseInPlace === 'Yes') {
         apiData.lease_structure = formData.leaseStructure;
-        apiData.section_8 = formData.section8Lease;
+        apiData.section_8 = formData.section8Lease; // mapped from section8Lease  
         apiData.str_rental_history = formData.strRentalHistory;
       }
     }
 
     // Add loan purpose specific fields
     if (formData.loanPurpose === 'Purchase') {
-      apiData.purchase_price = formData.purchasePrice;
+      apiData.purchase_price = formData.purchasePrice; // mapped from purchasePrice
       if (formData.hasPurchaseContract) {
         apiData.has_purchase_contract = formData.hasPurchaseContract;
         if (formData.hasPurchaseContract === 'Yes') {
@@ -148,8 +149,8 @@ const Quote = () => {
         }
       }
     } else if (formData.loanPurpose === 'Refinance') {
-      apiData.refinance_type = formData.refinanceType;
-      apiData.purchase_price = formData.purchasePrice;
+      apiData.refinance_type = formData.refinanceType; // mapped from refinanceType
+      apiData.purchase_price = formData.purchasePrice; // mapped from purchasePrice
       apiData.date_purchased = formData.datePurchased;
       apiData.market_value = formData.marketValue;
       if (formData.hasMortgage) {
