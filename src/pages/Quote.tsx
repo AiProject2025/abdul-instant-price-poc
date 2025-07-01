@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
@@ -71,7 +70,7 @@ const Quote = () => {
     };
 
     // Transform to API format with new key mappings
-    const apiData = {
+    const apiData: any = {
       // Personal Info
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -117,46 +116,46 @@ const Quote = () => {
 
     // Add conditional fields based on property type
     if (formData.propertyType === 'Condominium') {
-      apiData.condo_approval_type = formData.condoApprovalType; // mapped from condoApprovalType
+      apiData['condo_approval_type'] = formData.condoApprovalType; // mapped from condoApprovalType
     }
 
     // Add conditional fields based on number of units
     if (parseInt(formData.numberOfUnits) >= 2) {
-      apiData.isNonconfirming = formData.nonconformingUnits; // mapped from nonconformingUnits
+      apiData['isNonconfirming'] = formData.nonconformingUnits; // mapped from nonconformingUnits
     }
 
     if (parseInt(formData.numberOfUnits) >= 5) {
-      apiData.total_net_operation_income = formData.totalNetOperationIncome;
+      apiData['total_net_operation_income'] = formData.totalNetOperationIncome;
     }
 
     // Add lease information
     if (formData.leaseInPlace) {
-      apiData.lease_in_place = formData.leaseInPlace;
+      apiData['lease_in_place'] = formData.leaseInPlace;
       if (formData.leaseInPlace === 'Yes') {
-        apiData.lease_structure = formData.leaseStructure;
-        apiData.section_8 = formData.section8Lease; // mapped from section8Lease  
-        apiData.str_rental_history = formData.strRentalHistory;
+        apiData['lease_structure'] = formData.leaseStructure;
+        apiData['section_8'] = formData.section8Lease; // mapped from section8Lease  
+        apiData['str_rental_history'] = formData.strRentalHistory;
       }
     }
 
     // Add loan purpose specific fields
     if (formData.loanPurpose === 'Purchase') {
-      apiData.purchase_price = formData.purchasePrice; // mapped from purchasePrice
+      apiData['purchase_price'] = formData.purchasePrice; // mapped from purchasePrice
       if (formData.hasPurchaseContract) {
-        apiData.has_purchase_contract = formData.hasPurchaseContract;
+        apiData['has_purchase_contract'] = formData.hasPurchaseContract;
         if (formData.hasPurchaseContract === 'Yes') {
-          apiData.purchase_contract_close_date = formData.purchaseContractCloseDate;
+          apiData['purchase_contract_close_date'] = formData.purchaseContractCloseDate;
         }
       }
     } else if (formData.loanPurpose === 'Refinance') {
-      apiData.refinance_type = formData.refinanceType; // mapped from refinanceType
-      apiData.purchase_price = formData.purchasePrice; // mapped from purchasePrice
-      apiData.date_purchased = formData.datePurchased;
-      apiData.market_value = formData.marketValue;
+      apiData['refinance_type'] = formData.refinanceType; // mapped from refinanceType
+      apiData['purchase_price'] = formData.purchasePrice; // mapped from purchasePrice
+      apiData['date_purchased'] = formData.datePurchased;
+      apiData['market_value'] = formData.marketValue;
       if (formData.hasMortgage) {
-        apiData.has_mortgage = formData.hasMortgage;
+        apiData['has_mortgage'] = formData.hasMortgage;
         if (formData.hasMortgage === 'Yes') {
-          apiData.mortgage_payoff = formData.mortgagePayoff;
+          apiData['mortgage_payoff'] = formData.mortgagePayoff;
         }
       }
     }
