@@ -44,6 +44,125 @@ const Quote = () => {
     return results.sort((a, b) => a.rate - b.rate);
   };
 
+  const transformFormDataForAPI = (formData: any) => {
+    // Calculate total rental income
+    const calculateTotalRental = () => {
+      const units = parseInt(formData.numberOfUnits) || 0;
+      let total = 0;
+      
+      for (let i = 1; i <= units; i++) {
+        const rent = parseFloat(formData[`unit${i}Rent`]) || 0;
+        total += rent;
+      }
+      
+      return total.toString();
+    };
+
+    // Calculate total rehab cost
+    const calculateRehabCost = () => {
+      if (formData.loanPurpose === 'Purchase') {
+        return formData.estimatedRehabCost || "0";
+      } else {
+        const spent = parseFloat(formData.rehabCostSpent) || 0;
+        const needed = parseFloat(formData.rehabCostNeeded) || 0;
+        return (spent + needed).toString();
+      }
+    };
+
+    // Transform to API format
+    const apiData = {
+      // Personal Info
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      email: formData.email,
+      yourCompany: formData.yourCompany,
+      usCitizen: formData.usCitizen,
+      borrower_type: formData.closingType,
+      
+      // Subject Property Address
+      address: formData.streetAddress,
+      city: formData.city,
+      state: formData.propertyState,
+      zip_code: formData.zipCode,
+      county: formData.propertyCounty,
+      
+      // Loan Purpose
+      loan_purpose: formData.loanPurpose,
+      
+      // Property Details
+      property_type: formData.propertyType,
+      number_of_units: formData.numberOfUnits,
+      
+      // Loan Details
+      desired_ltv: formData.desiredLTV,
+      desired_closing_date: formData.desiredClosingDate,
+      
+      // Calculated Rental Income
+      market_rent: calculateTotalRental(),
+      
+      // Annual Property Expenses
+      annual_taxes: formData.annualTaxes,
+      annual_insurance: formData.annualInsurance,
+      annual_association_fees: formData.annualAssociationFees || "0",
+      annual_flood_insurance: formData.annualFloodInsurance || "0",
+      
+      // Final Details
+      decision_credit_score: formData.creditScore,
+      
+      // Rehab Cost
+      rehab_cost: calculateRehabCost()
+    };
+
+    // Add conditional fields based on property type
+    if (formData.propertyType === 'Condominium') {
+      apiData.condo_approval_type = formData.condoApprovalType;
+    }
+
+    // Add conditional fields based on number of units
+    if (parseInt(formData.numberOfUnits) >= 2) {
+      apiData.isNonconfirming = formData.nonconformingUnits;
+    }
+
+    if (parseInt(formData.numberOfUnits) >= 5) {
+      apiData.total_net_operation_income = formData.totalNetOperationIncome;
+    }
+
+    // Add lease information
+    if (formData.leaseInPlace) {
+      apiData.lease_in_place = formData.leaseInPlace;
+      if (formData.leaseInPlace === 'Yes') {
+        apiData.lease_structure = formData.leaseStructure;
+        apiData.section_8 = formData.section8Lease;
+        apiData.str_rental_history = formData.strRentalHistory;
+      }
+    }
+
+    // Add loan purpose specific fields
+    if (formData.loanPurpose === 'Purchase') {
+      apiData.purchase_price = formData.purchasePrice;
+      if (formData.hasPurchaseContract) {
+        apiData.has_purchase_contract = formData.hasPurchaseContract;
+        if (formData.hasPurchaseContract === 'Yes') {
+          apiData.purchase_contract_close_date = formData.purchaseContractCloseDate;
+        }
+      }
+    } else if (formData.loanPurpose === 'Refinance') {
+      apiData.refinance_type = formData.refinanceType;
+      apiData.purchase_price = formData.purchasePrice;
+      apiData.date_purchased = formData.datePurchased;
+      apiData.market_value = formData.marketValue;
+      if (formData.hasMortgage) {
+        apiData.has_mortgage = formData.hasMortgage;
+        if (formData.hasMortgage === 'Yes') {
+          apiData.mortgage_payoff = formData.mortgagePayoff;
+        }
+      }
+    }
+
+    return apiData;
+  };
+
   const handleFileUpload = async (file: File) => {
     setUploadedFile(file);
     setIsProcessing(true);
@@ -95,25 +214,49 @@ const Quote = () => {
 
     const currentFormData = data.formData || data;
     setFormData(currentFormData);
-    // Store the complete form data, not just email and phone
     setLastSubmittedFormData(currentFormData);
     
     // Save the quote with flagging
     const savedQuote = saveQuote(currentFormData);
     console.log("Quote saved:", savedQuote);
-    
-    // Check if we have API response data
-    if (data.pricingResults) {
+
+    try {
+      setIsProcessing(true);
+      
+      // Transform form data to API format
+      const apiPayload = transformFormDataForAPI(currentFormData);
+      console.log('API Payload:', apiPayload);
+
+      // Make API call to pricing endpoint
+      const response = await fetch('https://n8n-prod.onrender.com/webhook-test/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/pricing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Pricing API failed with status: ${response.status}`);
+      }
+
+      const pricingResponse = await response.json();
+      console.log('Pricing API Response:', pricingResponse);
+
       // Transform API response to results format
-      const results = transformApiResponseToResults(data.pricingResults);
+      const results = transformApiResponseToResults(pricingResponse);
       setPricingResults(results);
       
       // Store the flags from the API response
-      if (data.pricingResults.flags) {
-        setFlags(data.pricingResults.flags);
+      if (pricingResponse.flags) {
+        setFlags(pricingResponse.flags);
+      } else {
+        setFlags([]);
       }
-    } else {
-      // Fallback to empty results if no API data
+      
+    } catch (error) {
+      console.error('Error calling pricing API:', error);
+      // Fallback to empty results if API fails
       setPricingResults([]);
       setFlags([]);
     }
@@ -152,7 +295,6 @@ const Quote = () => {
     setCurrentStep("questionnaire");
   };
 
-  // Updated navigation handler that goes to questionnaire from results, upload from other pages
   const handleNavigationBack = () => {
     if (currentStep === "results") {
       setCurrentStep("questionnaire");
@@ -161,7 +303,6 @@ const Quote = () => {
     }
   };
 
-  // Handle quote selection from the tracker
   const handleQuoteSelect = (quote: any) => {
     console.log('handleQuoteSelect called with:', quote);
     if (quote.originalFormData) {
