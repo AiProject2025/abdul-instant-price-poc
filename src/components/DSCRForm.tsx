@@ -120,11 +120,36 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     return spent + needed;
   };
 
+  // List of numeric fields that should only accept numbers
+  const numericFields = [
+    'purchasePrice', 'estimatedRehabCost', 'marketValue', 'mortgagePayoff',
+    'rehabCostSpent', 'rehabCostNeeded', 'totalNetOperationIncome',
+    'unit1Rent', 'unit2Rent', 'unit3Rent', 'unit4Rent', 'unit5Rent',
+    'unit6Rent', 'unit7Rent', 'unit8Rent', 'unit9Rent', 'unit10Rent',
+    'annualTaxes', 'annualInsurance', 'annualAssociationFees', 'annualFloodInsurance',
+    'creditScore', 'desiredLTV'
+  ];
+
   const handleInputChange = (field: string, value: string) => {
-    setFormState(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // For numeric fields, validate and clean the input
+    if (numericFields.includes(field)) {
+      // Remove any non-numeric characters except decimal point
+      const cleanValue = value.replace(/[^0-9.]/g, '');
+      
+      // Ensure only one decimal point
+      const parts = cleanValue.split('.');
+      const validValue = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : cleanValue;
+      
+      setFormState(prev => ({
+        ...prev,
+        [field]: validValue
+      }));
+    } else {
+      setFormState(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

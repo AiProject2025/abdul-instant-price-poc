@@ -45,6 +45,19 @@ const Quote = () => {
   };
 
   const transformFormDataForAPI = (formData: any) => {
+    // Helper function to normalize text values to lowercase with hyphens
+    const normalizeTextValue = (value: string) => {
+      if (!value) return '';
+      return value.toString().toLowerCase().replace(/\s+/g, '-');
+    };
+
+    // Helper function to ensure numeric value is converted to string
+    const normalizeNumericValue = (value: any) => {
+      if (!value) return '0';
+      const numValue = parseFloat(value.toString().replace(/[^0-9.-]/g, ''));
+      return isNaN(numValue) ? '0' : numValue.toString();
+    };
+
     // Calculate total rental income
     const calculateTotalRental = () => {
       const units = parseInt(formData.numberOfUnits) || 0;
@@ -61,7 +74,7 @@ const Quote = () => {
     // Calculate total rehab cost
     const calculateRehabCost = () => {
       if (formData.loanPurpose === 'Purchase') {
-        return formData.estimatedRehabCost || "0";
+        return normalizeNumericValue(formData.estimatedRehabCost);
       } else {
         const spent = parseFloat(formData.rehabCostSpent) || 0;
         const needed = parseFloat(formData.rehabCostNeeded) || 0;
@@ -69,93 +82,93 @@ const Quote = () => {
       }
     };
 
-    // Transform to API format with new key mappings
+    // Transform to API format with normalization
     const apiData: any = {
-      // Personal Info
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      phone: formData.phone,
-      email: formData.email,
-      yourCompany: formData.yourCompany,
-      usCitizen: formData.usCitizen,
-      borrower_type: formData.closingType, // mapped from closingType
+      // Personal Info (text fields to lowercase)
+      firstName: formData.firstName?.toLowerCase() || '',
+      lastName: formData.lastName?.toLowerCase() || '',
+      phone: formData.phone || '',
+      email: formData.email?.toLowerCase() || '',
+      yourCompany: formData.yourCompany?.toLowerCase() || '',
+      usCitizen: normalizeTextValue(formData.usCitizen),
+      borrower_type: normalizeTextValue(formData.closingType),
       
-      // Subject Property Address
-      address: formData.streetAddress, // mapped from streetAddress
-      city: formData.city,
-      state: formData.propertyState, // mapped from propertyState
-      zip_code: formData.zipCode, // mapped from zipCode
-      county: formData.propertyCounty, // mapped from propertyCounty
+      // Subject Property Address (text fields to lowercase)
+      address: formData.streetAddress?.toLowerCase() || '',
+      city: formData.city?.toLowerCase() || '',
+      state: formData.propertyState?.toLowerCase() || '',
+      zip_code: formData.zipCode || '',
+      county: formData.propertyCounty?.toLowerCase() || '',
       
-      // Loan Purpose
-      loan_purpose: formData.loanPurpose, // mapped from loanPurpose
+      // Loan Purpose (normalize dropdown values)
+      loan_purpose: normalizeTextValue(formData.loanPurpose),
       
-      // Property Details
-      property_type: formData.propertyType, // mapped from propertyType
-      number_of_units: formData.numberOfUnits, // mapped from numberOfUnits
+      // Property Details (normalize dropdown values)
+      property_type: normalizeTextValue(formData.propertyType),
+      number_of_units: formData.numberOfUnits || '1',
       
       // Loan Details
-      desired_ltv: formData.desiredLTV,
-      desired_closing_date: formData.desiredClosingDate,
+      desired_ltv: normalizeNumericValue(formData.desiredLTV),
+      desired_closing_date: formData.desiredClosingDate || '',
       
       // Calculated Rental Income
-      market_rent: calculateTotalRental(), // mapped from totalRentalIncome
+      market_rent: calculateTotalRental(),
       
-      // Annual Property Expenses
-      annual_taxes: formData.annualTaxes,
-      annual_insurance: formData.annualInsurance,
-      annual_association_fees: formData.annualAssociationFees || "0",
-      annual_flood_insurance: formData.annualFloodInsurance || "0",
+      // Annual Property Expenses (numeric values)
+      annual_taxes: normalizeNumericValue(formData.annualTaxes),
+      annual_insurance: normalizeNumericValue(formData.annualInsurance),
+      annual_association_fees: normalizeNumericValue(formData.annualAssociationFees),
+      annual_flood_insurance: normalizeNumericValue(formData.annualFloodInsurance),
       
       // Final Details
-      decision_credit_score: formData.creditScore, // mapped from creditScore
+      decision_credit_score: normalizeNumericValue(formData.creditScore),
       
       // Rehab Cost
-      rehab_cost: calculateRehabCost() // unified field for both estimated and total rehab cost
+      rehab_cost: calculateRehabCost()
     };
 
     // Add conditional fields based on property type
     if (formData.propertyType === 'Condominium') {
-      apiData['condo_approval_type'] = formData.condoApprovalType; // mapped from condoApprovalType
+      apiData['condo_approval_type'] = normalizeTextValue(formData.condoApprovalType);
     }
 
     // Add conditional fields based on number of units
     if (parseInt(formData.numberOfUnits) >= 2) {
-      apiData['isNonconfirming'] = formData.nonconformingUnits; // mapped from nonconformingUnits
+      apiData['isNonconfirming'] = normalizeTextValue(formData.nonconformingUnits);
     }
 
     if (parseInt(formData.numberOfUnits) >= 5) {
-      apiData['total_net_operation_income'] = formData.totalNetOperationIncome;
+      apiData['total_net_operation_income'] = normalizeNumericValue(formData.totalNetOperationIncome);
     }
 
     // Add lease information
     if (formData.leaseInPlace) {
-      apiData['lease_in_place'] = formData.leaseInPlace;
+      apiData['lease_in_place'] = normalizeTextValue(formData.leaseInPlace);
       if (formData.leaseInPlace === 'Yes') {
-        apiData['lease_structure'] = formData.leaseStructure;
-        apiData['section_8'] = formData.section8Lease; // mapped from section8Lease  
-        apiData['str_rental_history'] = formData.strRentalHistory;
+        apiData['lease_structure'] = normalizeTextValue(formData.leaseStructure);
+        apiData['section_8'] = normalizeTextValue(formData.section8Lease);
+        apiData['str_rental_history'] = normalizeTextValue(formData.strRentalHistory);
       }
     }
 
     // Add loan purpose specific fields
     if (formData.loanPurpose === 'Purchase') {
-      apiData['purchase_price'] = formData.purchasePrice; // mapped from purchasePrice
+      apiData['purchase_price'] = normalizeNumericValue(formData.purchasePrice);
       if (formData.hasPurchaseContract) {
-        apiData['has_purchase_contract'] = formData.hasPurchaseContract;
+        apiData['has_purchase_contract'] = normalizeTextValue(formData.hasPurchaseContract);
         if (formData.hasPurchaseContract === 'Yes') {
-          apiData['purchase_contract_close_date'] = formData.purchaseContractCloseDate;
+          apiData['purchase_contract_close_date'] = formData.purchaseContractCloseDate || '';
         }
       }
     } else if (formData.loanPurpose === 'Refinance') {
-      apiData['refinance_type'] = formData.refinanceType; // mapped from refinanceType
-      apiData['purchase_price'] = formData.purchasePrice; // mapped from purchasePrice
-      apiData['date_purchased'] = formData.datePurchased;
-      apiData['market_value'] = formData.marketValue;
+      apiData['refinance_type'] = normalizeTextValue(formData.refinanceType);
+      apiData['purchase_price'] = normalizeNumericValue(formData.purchasePrice);
+      apiData['date_purchased'] = formData.datePurchased || '';
+      apiData['market_value'] = normalizeNumericValue(formData.marketValue);
       if (formData.hasMortgage) {
-        apiData['has_mortgage'] = formData.hasMortgage;
+        apiData['has_mortgage'] = normalizeTextValue(formData.hasMortgage);
         if (formData.hasMortgage === 'Yes') {
-          apiData['mortgage_payoff'] = formData.mortgagePayoff;
+          apiData['mortgage_payoff'] = normalizeNumericValue(formData.mortgagePayoff);
         }
       }
     }
