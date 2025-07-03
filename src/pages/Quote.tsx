@@ -96,7 +96,7 @@ const Quote = () => {
       // Subject Property Address (text fields to lowercase)
       address: formData.streetAddress?.toLowerCase() || '',
       city: formData.city?.toLowerCase() || '',
-      state: formData.propertyState?.toLowerCase() || '',
+      state: formData.propertyState?.toLowerCase() || '', // This will already be the abbreviation
       zip_code: formData.zipCode || '',
       county: formData.propertyCounty?.toLowerCase() || '',
       

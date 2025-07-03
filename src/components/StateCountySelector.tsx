@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { statesAndCounties } from '@/utils/locationData';
+import { statesAndCounties, statesWithAbbreviations, stateAbbreviations } from '@/utils/locationData';
 
 interface StateCountySelectorProps {
   selectedState?: string;
@@ -20,11 +20,16 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
   stateError,
   countyError
 }) => {
-  const states = Object.keys(statesAndCounties).sort();
-  const counties = selectedState ? statesAndCounties[selectedState] || [] : [];
+  // Find the full state name from abbreviation for counties lookup
+  const getStateNameFromAbbreviation = (abbreviation: string) => {
+    return Object.keys(stateAbbreviations).find(name => stateAbbreviations[name] === abbreviation) || '';
+  };
+
+  const fullStateName = selectedState ? getStateNameFromAbbreviation(selectedState) : '';
+  const counties = fullStateName ? statesAndCounties[fullStateName] || [] : [];
 
   const handleStateChange = (value: string) => {
-    onStateChange(value);
+    onStateChange(value); // This will be the abbreviation (e.g., "TX")
     // Clear county when state changes
     onCountyChange('');
   };
@@ -38,9 +43,9 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
             <SelectValue placeholder="Select state" />
           </SelectTrigger>
           <SelectContent className="bg-white border shadow-lg max-h-60 overflow-y-auto z-50">
-            {states.map((state) => (
-              <SelectItem key={state} value={state}>
-                {state}
+            {statesWithAbbreviations.map((state) => (
+              <SelectItem key={state.abbreviation} value={state.abbreviation}>
+                {state.displayName}
               </SelectItem>
             ))}
           </SelectContent>
@@ -58,7 +63,7 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
           disabled={!selectedState}
         >
           <SelectTrigger className="bg-white">
-            <SelectValue placeholder={selectedState ? "Select county" : "Select state first"} />
+            <SelectValue placeholder={fullStateName ? "Select county" : "Select state first"} />
           </SelectTrigger>
           <SelectContent className="bg-white border shadow-lg max-h-60 overflow-y-auto z-50">
             {counties.map((county) => (
