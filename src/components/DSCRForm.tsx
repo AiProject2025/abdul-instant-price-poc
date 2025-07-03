@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import StateCountySelector from '@/components/StateCountySelector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, FileText } from 'lucide-react';
 
@@ -321,16 +322,16 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   required 
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                <Input 
-                  type="text" 
-                  value={formState.propertyState} 
-                  onChange={e => handleInputChange('propertyState', e.target.value)} 
-                  required 
-                />
-              </div>
             </div>
+            
+            {/* State and County Selector */}
+            <StateCountySelector
+              selectedState={formState.propertyState}
+              selectedCounty={formState.propertyCounty}
+              onStateChange={(state) => handleInputChange('propertyState', state)}
+              onCountyChange={(county) => handleInputChange('propertyCounty', county)}
+            />
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
@@ -338,15 +339,6 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   type="text" 
                   value={formState.zipCode} 
                   onChange={e => handleInputChange('zipCode', e.target.value)} 
-                  required 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Property County *</label>
-                <Input 
-                  type="text" 
-                  value={formState.propertyCounty} 
-                  onChange={e => handleInputChange('propertyCounty', e.target.value)} 
                   required 
                 />
               </div>
