@@ -91,12 +91,79 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     creditScore: ''
   });
 
+  // Transform extracted data to match form field names
+  const mapExtractedDataToFormFields = (data: any) => {
+    if (!data) return {};
+    
+    return {
+      // Personal Info
+      firstName: data.first_name || data.firstName || '',
+      lastName: data.last_name || data.lastName || '',
+      phone: data.phone || '',
+      email: data.email || '',
+      yourCompany: data.your_company || data.yourCompany || '',
+      usCitizen: data.us_citizen || data.usCitizen || '',
+      closingType: data.borrower_type || data.closingType || '',
+      
+      // Loan Purpose
+      loanPurpose: data.loan_purpose === 'refinance' ? 'Refinance' : 
+                   data.loan_purpose === 'purchase' ? 'Purchase' : 
+                   data.loanPurpose || '',
+      
+      // Property Address
+      streetAddress: data.street_address || data.address || data.streetAddress || '',
+      city: data.city || '',
+      propertyState: data.state || data.propertyState || '',
+      zipCode: data.zip_code || data.zipCode || '',
+      propertyCounty: data.county || data.property_county || data.propertyCounty || '',
+      
+      // Property Details
+      propertyType: data.property_type === 'two-to-four-family' ? 'Multi Family' :
+                    data.property_type === 'single-family' ? 'Single Family' :
+                    data.property_type || data.propertyType || '',
+      numberOfUnits: data.number_of_units || data.numberOfUnits || '',
+      
+      // Purchase Details
+      purchasePrice: data.purchase_price || data.purchasePrice || '',
+      
+      // Refinance Details
+      refinanceType: data.refinance_type === 'cash-out' ? 'Cash Out' :
+                     data.refinance_type || data.refinanceType || '',
+      marketValue: data.appraised_value || data.market_value || data.marketValue || '',
+      mortgagePayoff: data.mortgage_payoff || data.mortgagePayoff || '',
+      
+      // Rental Income (convert monthly to match form expectations)
+      unit1Rent: data.current_rent || data.market_rent ? 
+                 (parseFloat(data.current_rent || data.market_rent) / (parseInt(data.number_of_units) || 1)).toString() : 
+                 data.unit1Rent || '',
+      
+      // Expenses (convert monthly to annual)
+      annualTaxes: data.monthly_taxes ? (parseFloat(data.monthly_taxes) * 12).toString() : 
+                   data.annual_taxes || data.annualTaxes || '',
+      annualInsurance: data.monthly_insurance ? (parseFloat(data.monthly_insurance) * 12).toString() : 
+                       data.annual_insurance || data.annualInsurance || '',
+      annualAssociationFees: data.monthly_hoa ? (parseFloat(data.monthly_hoa) * 12).toString() : 
+                            data.annual_association_fees || data.annualAssociationFees || '',
+      annualFloodInsurance: data.monthly_flood_insurance ? (parseFloat(data.monthly_flood_insurance) * 12).toString() : 
+                           data.annual_flood_insurance || data.annualFloodInsurance || '',
+      
+      // Credit Score
+      creditScore: data.decision_credit_score || data.creditScore || '',
+      
+      // Desired LTV (calculate from base_loan_amount and appraised_value)
+      desiredLTV: data.base_loan_amount && data.appraised_value ? 
+                  Math.round((parseFloat(data.base_loan_amount) / parseFloat(data.appraised_value)) * 100).toString() :
+                  data.desired_ltv || data.desiredLTV || ''
+    };
+  };
+
   // Initialize form with data if available
   useEffect(() => {
     if (initialData) {
+      const mappedData = mapExtractedDataToFormFields(initialData);
       setFormState(prev => ({
         ...prev,
-        ...initialData
+        ...mappedData
       }));
     }
   }, [initialData]);
