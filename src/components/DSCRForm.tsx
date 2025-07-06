@@ -95,6 +95,14 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
   const mapExtractedDataToFormFields = (data: any) => {
     if (!data) return {};
     
+    // Helper to determine property type from number of units
+    const getPropertyType = () => {
+      const units = parseInt(data.number_of_units || '1');
+      if (units === 1) return 'Single Family';
+      if (units >= 2 && units <= 4) return 'Multi Family';
+      return data.property_type || data.propertyType || '';
+    };
+    
     return {
       // Personal Info
       firstName: data.first_name || data.firstName || '',
@@ -118,9 +126,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       propertyCounty: data.county || data.property_county || data.propertyCounty || '',
       
       // Property Details
-      propertyType: data.property_type === 'two-to-four-family' ? 'Multi Family' :
-                    data.property_type === 'single-family' ? 'Single Family' :
-                    data.property_type || data.propertyType || '',
+      propertyType: getPropertyType(),
       numberOfUnits: data.number_of_units || data.numberOfUnits || '',
       
       // Purchase Details
@@ -128,32 +134,59 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       
       // Refinance Details
       refinanceType: data.refinance_type === 'cash-out' ? 'Cash Out' :
+                     data.refinance_type === 'rate-and-term' ? 'Rate and Term' :
                      data.refinance_type || data.refinanceType || '',
+      datePurchased: data.date_purchased || data.datePurchased || '',
       marketValue: data.appraised_value || data.market_value || data.marketValue || '',
+      hasMortgage: data.has_mortgage || data.hasMortgage || '',
       mortgagePayoff: data.mortgage_payoff || data.mortgagePayoff || '',
+      rehabCostSpent: data.rehab_cost_spent || data.rehabCostSpent || '',
+      rehabCostNeeded: data.rehab_cost_needed || data.rehabCostNeeded || '',
       
-      // Rental Income (convert monthly to match form expectations)
-      unit1Rent: data.current_rent || data.market_rent ? 
-                 (parseFloat(data.current_rent || data.market_rent) / (parseInt(data.number_of_units) || 1)).toString() : 
-                 data.unit1Rent || '',
+      // Rental Income - handle both single unit and multi-unit scenarios
+      unit1Rent: (() => {
+        if (data.unit_1_actual_rent) return data.unit_1_actual_rent;
+        if (data.current_rent) return data.current_rent;
+        if (data.market_rent && data.number_of_units) {
+          return (parseFloat(data.market_rent) / parseInt(data.number_of_units)).toString();
+        }
+        return data.unit1Rent || '';
+      })(),
+      unit2Rent: data.unit_2_actual_rent || data.unit2Rent || '',
       
-      // Expenses (convert monthly to annual)
-      annualTaxes: data.monthly_taxes ? (parseFloat(data.monthly_taxes) * 12).toString() : 
-                   data.annual_taxes || data.annualTaxes || '',
-      annualInsurance: data.monthly_insurance ? (parseFloat(data.monthly_insurance) * 12).toString() : 
-                       data.annual_insurance || data.annualInsurance || '',
-      annualAssociationFees: data.monthly_hoa ? (parseFloat(data.monthly_hoa) * 12).toString() : 
-                            data.annual_association_fees || data.annualAssociationFees || '',
-      annualFloodInsurance: data.monthly_flood_insurance ? (parseFloat(data.monthly_flood_insurance) * 12).toString() : 
-                           data.annual_flood_insurance || data.annualFloodInsurance || '',
+      // Expenses (convert monthly to annual where needed)
+      annualTaxes: data.annual_taxes || 
+                   (data.monthly_taxes ? (parseFloat(data.monthly_taxes) * 12).toString() : '') ||
+                   data.annualTaxes || '',
+      annualInsurance: data.annual_insurance || 
+                       (data.monthly_insurance ? (parseFloat(data.monthly_insurance) * 12).toString() : '') ||
+                       data.annualInsurance || '',
+      annualAssociationFees: data.annual_association_fees || 
+                            (data.monthly_hoa ? (parseFloat(data.monthly_hoa) * 12).toString() : '') ||
+                            data.annualAssociationFees || '',
+      annualFloodInsurance: data.annual_flood_insurance || 
+                           (data.monthly_flood_insurance ? (parseFloat(data.monthly_flood_insurance) * 12).toString() : '') ||
+                           data.annualFloodInsurance || '',
       
       // Credit Score
       creditScore: data.decision_credit_score || data.creditScore || '',
       
-      // Desired LTV (calculate from base_loan_amount and appraised_value)
-      desiredLTV: data.base_loan_amount && data.appraised_value ? 
-                  Math.round((parseFloat(data.base_loan_amount) / parseFloat(data.appraised_value)) * 100).toString() :
-                  data.desired_ltv || data.desiredLTV || ''
+      // Desired LTV (calculate from base_loan_amount and appraised_value or use direct value)
+      desiredLTV: data.desired_ltv || 
+                  (data.base_loan_amount && data.appraised_value ? 
+                   Math.round((parseFloat(data.base_loan_amount) / parseFloat(data.appraised_value)) * 100).toString() : '') ||
+                  data.desiredLTV || '',
+      
+      // Lease Information
+      leaseInPlace: data.lease_in_place || data.leaseInPlace || '',
+      leaseStructure: data.lease_structure || data.leaseStructure || '',
+      section8Lease: data.section_8 || data.section8Lease || '',
+      
+      // Additional Property Details
+      nonconformingUnits: data.isNonconforming || data.nonconformingUnits || '',
+      
+      // Estimated Rehab for Purchase
+      estimatedRehabCost: data.rehab_cost || data.estimatedRehabCost || ''
     };
   };
 
