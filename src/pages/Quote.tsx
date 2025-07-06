@@ -199,6 +199,8 @@ const Quote = () => {
 
       const extractionResult = await response.json();
       console.log('Document extraction result:', extractionResult);
+      console.log('Fields with data:', Object.entries(extractionResult).filter(([key, value]) => value && value !== "").map(([key, value]) => `${key}: ${value}`));
+      console.log('Empty fields:', Object.entries(extractionResult).filter(([key, value]) => !value || value === "").map(([key]) => key));
       
       setExtractedData(extractionResult);
       setCurrentStep("questionnaire");
