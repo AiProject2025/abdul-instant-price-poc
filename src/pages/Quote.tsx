@@ -199,8 +199,10 @@ const Quote = () => {
 
       const extractionResult = await response.json();
       console.log('Document extraction result:', extractionResult);
-      console.log('Fields with data:', Object.entries(extractionResult).filter(([key, value]) => value && value !== "").map(([key, value]) => `${key}: ${value}`));
-      console.log('Empty fields:', Object.entries(extractionResult).filter(([key, value]) => !value || value === "").map(([key]) => key));
+      console.log('Missing dropdown fields needed by form:');
+      console.log('- us_citizen:', extractionResult.us_citizen || 'MISSING');
+      console.log('- borrower_type:', extractionResult.borrower_type || 'MISSING');
+      console.log('- closing_type:', extractionResult.closing_type || 'MISSING');
       
       setExtractedData(extractionResult);
       setCurrentStep("questionnaire");
