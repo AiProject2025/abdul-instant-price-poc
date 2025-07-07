@@ -593,17 +593,6 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     required 
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Estimated rehab cost (If Applicable)?
-                  </label>
-                  <Input 
-                    type="number" 
-                    value={formState.estimatedRehabCost} 
-                    onChange={e => handleInputChange('estimatedRehabCost', e.target.value)} 
-                    placeholder="$0" 
-                  />
-                </div>
               </div>
             </CardContent>
           </Card>
