@@ -194,6 +194,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
   useEffect(() => {
     if (initialData) {
       const mappedData = mapExtractedDataToFormFields(initialData);
+      console.log('Form initialization - extracted data:', initialData);
+      console.log('Form initialization - mapped data:', mappedData);
+      console.log('Specific field mapping:');
+      console.log('- propertyState:', mappedData.propertyState);
+      console.log('- usCitizen:', mappedData.usCitizen);
+      console.log('- closingType:', mappedData.closingType);
       setFormState(prev => ({
         ...prev,
         ...mappedData
