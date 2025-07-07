@@ -399,6 +399,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Single Family">Single Family</SelectItem>
+                      <SelectItem value="Two to Four Family">Two to Four Family</SelectItem>
                       <SelectItem value="Multi Family">Multi Family</SelectItem>
                       <SelectItem value="Mixed Use">Mixed Use</SelectItem>
                       <SelectItem value="Condominium">Condominium</SelectItem>
@@ -635,6 +636,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Single Family">Single Family</SelectItem>
+                      <SelectItem value="Two to Four Family">Two to Four Family</SelectItem>
                       <SelectItem value="Multi Family">Multi Family</SelectItem>
                       <SelectItem value="Mixed Use">Mixed Use</SelectItem>
                       <SelectItem value="Condominium">Condominium</SelectItem>
