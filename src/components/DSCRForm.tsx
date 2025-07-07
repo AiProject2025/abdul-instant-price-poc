@@ -1409,6 +1409,52 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
           </CardContent>
         </Card>
 
+        {/* Pre-Payment Penalty */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">Pre-Payment Penalty</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Prepayment Penalty Term *</label>
+                <Select value={formState.prepaymentPenaltyTerm} onValueChange={value => handleInputChange('prepaymentPenaltyTerm', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select term" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="No Prepay">No Prepay</SelectItem>
+                    <SelectItem value="1 Year">1 Year</SelectItem>
+                    <SelectItem value="2 Year">2 Year</SelectItem>
+                    <SelectItem value="3 Year">3 Year</SelectItem>
+                    <SelectItem value="4 Year">4 Year</SelectItem>
+                    <SelectItem value="5 Year">5 Year</SelectItem>
+                    <SelectItem value="7 Year">7 Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Prepayment Penalty Structure *</label>
+                <Select value={formState.prepaymentPenaltyStructure} onValueChange={value => handleInputChange('prepaymentPenaltyStructure', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select structure" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Step-Down">Step-Down</SelectItem>
+                    <SelectItem value="Fixed 5%">Fixed 5%</SelectItem>
+                    <SelectItem value="Fixed 4%">Fixed 4%</SelectItem>
+                    <SelectItem value="Fixed 3%">Fixed 3%</SelectItem>
+                    <SelectItem value="Fixed 2%">Fixed 2%</SelectItem>
+                    <SelectItem value="Fixed 1%">Fixed 1%</SelectItem>
+                    <SelectItem value="6 Months Interest">6 Months Interest</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Loan Officer Information */}
         <Card>
           <CardHeader>
