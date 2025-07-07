@@ -121,9 +121,9 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       // Property Address
       streetAddress: data.street_address || data.address || data.streetAddress || '',
       city: data.city || '',
-      propertyState: data.state || data.propertyState || '',
+      propertyState: data.property_state || data.state || data.propertyState || '',
       zipCode: data.zip_code || data.zipCode || '',
-      propertyCounty: data.county || data.property_county || data.propertyCounty || '',
+      propertyCounty: data.property_county || data.county || data.propertyCounty || '',
       
       // Property Details
       propertyType: getPropertyType(),
