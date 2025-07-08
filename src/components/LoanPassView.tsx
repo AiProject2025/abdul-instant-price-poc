@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft } from "lucide-react";
+import { statesWithAbbreviations } from "@/utils/locationData";
 
 interface LoanPassViewProps {
   onBack: () => void;
@@ -271,11 +272,11 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Maryland (MD)">Maryland (MD)</SelectItem>
-                  <SelectItem value="California (CA)">California (CA)</SelectItem>
-                  <SelectItem value="New York (NY)">New York (NY)</SelectItem>
-                  <SelectItem value="Texas (TX)">Texas (TX)</SelectItem>
-                  <SelectItem value="Florida (FL)">Florida (FL)</SelectItem>
+                  {statesWithAbbreviations.map((state) => (
+                    <SelectItem key={state.abbreviation} value={state.displayName}>
+                      {state.displayName}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
