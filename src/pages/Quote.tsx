@@ -124,6 +124,9 @@ const Quote = () => {
       // Property Details (normalize dropdown values)
       property_type: normalizeTextValue(formData.propertyType),
       property_condition: normalizeTextValue(formData.propertyCondition),
+      rural: normalizeTextValue(formData.rural),
+      declining_market: normalizeTextValue(formData.decliningMarket),
+      interest_only: normalizeTextValue(formData.interestOnly),
       number_of_units: formData.numberOfUnits || '1',
       number_of_leased_units: normalizeNumericValue(formData.numberOfLeasedUnits),
       has_vacant_units: normalizeTextValue(formData.hasVacantUnits),

@@ -47,6 +47,9 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     // Property Details - New Purchase
     propertyType: '',
     propertyCondition: '',
+    rural: '',
+    decliningMarket: '',
+    interestOnly: '',
     condoApprovalType: '',
     hasPurchaseContract: '',
     purchaseContractCloseDate: '',
@@ -467,6 +470,45 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Rural? *</label>
+                  <Select value={formState.rural} onValueChange={value => handleInputChange('rural', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Declining market? *</label>
+                  <Select value={formState.decliningMarket} onValueChange={value => handleInputChange('decliningMarket', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Interest only? *</label>
+                  <Select value={formState.interestOnly} onValueChange={value => handleInputChange('interestOnly', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Is there a Purchase Contract in place? *</label>
@@ -781,6 +823,45 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                       <SelectItem value="C4">C4</SelectItem>
                       <SelectItem value="C5">C5</SelectItem>
                       <SelectItem value="C6">C6</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Rural? *</label>
+                  <Select value={formState.rural} onValueChange={value => handleInputChange('rural', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Declining market? *</label>
+                  <Select value={formState.decliningMarket} onValueChange={value => handleInputChange('decliningMarket', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Interest only? *</label>
+                  <Select value={formState.interestOnly} onValueChange={value => handleInputChange('interestOnly', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
