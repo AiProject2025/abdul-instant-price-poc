@@ -1636,7 +1636,17 @@ export const lookupCountyByZipCode = (zipCode: string): { state: string; county:
   // For 5-digit zip codes, pad with leading zeros if needed
   const paddedZipCode = cleanZipCode.padStart(5, '0');
   
-  return zipCodeToCountyMap[paddedZipCode] || null;
+  const result = zipCodeToCountyMap[paddedZipCode];
+  if (result) {
+    // Remove " County" suffix to match the format expected by locationData.ts
+    const countyName = result.county.replace(/\s+County$/, '');
+    return {
+      state: result.state,
+      county: countyName
+    };
+  }
+  
+  return null;
 };
 
 /**
