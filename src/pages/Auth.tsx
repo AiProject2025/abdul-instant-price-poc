@@ -78,8 +78,8 @@ const Auth = () => {
     }
 
     try {
-      // First try to sign up the user (this will fail if they already exist)
-      const { error: signUpError } = await supabase.auth.signUp({
+      // For local development, create user directly without email confirmation
+      const { data: userData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -90,46 +90,27 @@ const Auth = () => {
         },
       });
 
-      // If signup fails because user exists, try to sign in
-      if (signUpError && signUpError.message.includes('already registered')) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        });
-
-        if (signInError) {
-          setError('Login failed. Please try again.');
-        } else {
-          navigate('/');
-        }
-      } else if (signUpError) {
-        // If other signup error, try to sign in anyway
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        });
-
-        if (signInError) {
-          setError('Account created successfully! Please wait a moment and try logging in again.');
-        } else {
-          navigate('/');
-        }
-      } else {
-        // Signup successful, now sign in
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        });
-
-        if (signInError) {
-          setMessage('Account created! Please try logging in again.');
-        } else {
-          navigate('/');
-        }
+      if (signUpError && !signUpError.message.includes('already registered')) {
+        setError(`Signup failed: ${signUpError.message}`);
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
+
+      // Now sign in directly
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (signInError) {
+        setError(`Login failed: ${signInError.message}`);
+      } else {
+        // Success - navigate to main page
+        navigate('/');
+      }
+    } catch (error: any) {
       console.error('Auth error:', error);
-      setError('Authentication failed. Please try again.');
+      setError(`Authentication failed: ${error.message}`);
     }
 
     setIsLoading(false);
