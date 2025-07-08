@@ -76,6 +76,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-dominion-blue mb-4">
+              <span className="text-sm text-gray-500 font-medium mr-2">(Coming Soon!)</span>
               Next-Generation Lending Platform
             </h2>
             <p className="text-xl text-slate-600">Powered by docIQ 1.0 Beta and advanced analytics</p>
