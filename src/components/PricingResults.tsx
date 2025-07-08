@@ -337,7 +337,7 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote, lastSubmittedForm
               variant="outline" 
               className="bg-white text-dominion-blue hover:bg-gray-100"
             >
-              Speak with a Loan Expert
+              Email Josh
             </Button>
           </div>
         </CardContent>
