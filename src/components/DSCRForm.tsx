@@ -47,6 +47,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     hasPurchaseContract: '',
     purchaseContractCloseDate: '',
     numberOfUnits: '',
+    numberOfLeasedUnits: '',
     nonconformingUnits: '',
     totalNetOperationIncome: '',
     leaseInPlace: '',
@@ -447,60 +448,83 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
-                  <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select units" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="6">6</SelectItem>
-                      <SelectItem value="7">7</SelectItem>
-                      <SelectItem value="8">8</SelectItem>
-                      <SelectItem value="9">9</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Nonconforming Units - appears as sub-field */}
-                  {parseInt(formState.numberOfUnits) >= 2 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-yellow-700">↳</span> Are these units Nonconforming/Grandfathered use?
-                      </label>
-                      <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  
-                  {/* Conditional Net Operation Income - appears as sub-field */}
-                  {parseInt(formState.numberOfUnits) >= 5 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-purple-700">↳</span> What is the total Net Operation Income?
-                      </label>
-                      <Input 
-                        type="number" 
-                        value={formState.totalNetOperationIncome} 
-                        onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
-                        placeholder="$0" 
-                        className="bg-white"
-                      />
-                    </div>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
+                    <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select units" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="6">6</SelectItem>
+                        <SelectItem value="7">7</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="9">9</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Leased Units *</label>
+                    <Select value={formState.numberOfLeasedUnits} onValueChange={value => handleInputChange('numberOfLeasedUnits', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select leased units" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">0</SelectItem>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="6">6</SelectItem>
+                        <SelectItem value="7">7</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="9">9</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+                  
+                {/* Conditional Nonconforming Units - appears as sub-field */}
+                {parseInt(formState.numberOfUnits) >= 2 && (
+                  <div className="ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <span className="text-yellow-700">↳</span> Any nonconforming units?
+                    </label>
+                    <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                  
+                {/* Conditional Net Operation Income - appears as sub-field */}
+                {parseInt(formState.numberOfUnits) >= 5 && (
+                  <div className="ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <span className="text-purple-700">↳</span> What is the total Net Operation Income?
+                    </label>
+                    <Input 
+                      type="number" 
+                      value={formState.totalNetOperationIncome} 
+                      onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
+                      placeholder="$0" 
+                      className="bg-white"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -673,60 +697,83 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
-                  <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select units" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="6">6</SelectItem>
-                      <SelectItem value="7">7</SelectItem>
-                      <SelectItem value="8">8</SelectItem>
-                      <SelectItem value="9">9</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Conditional Nonconforming Units */}
-                  {parseInt(formState.numberOfUnits) >= 2 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-yellow-700">↳</span> Are these units Nonconforming/Grandfathered use?
-                      </label>
-                      <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  
-                  {/* Conditional Net Operation Income */}
-                  {parseInt(formState.numberOfUnits) >= 5 && (
-                    <div className="mt-4 ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <span className="text-purple-700">↳</span> What is the total Net Operation Income?
-                      </label>
-                      <Input 
-                        type="number" 
-                        value={formState.totalNetOperationIncome} 
-                        onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
-                        placeholder="$0" 
-                        className="bg-white"
-                      />
-                    </div>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units *</label>
+                    <Select value={formState.numberOfUnits} onValueChange={value => handleInputChange('numberOfUnits', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select units" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="6">6</SelectItem>
+                        <SelectItem value="7">7</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="9">9</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Leased Units *</label>
+                    <Select value={formState.numberOfLeasedUnits} onValueChange={value => handleInputChange('numberOfLeasedUnits', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select leased units" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">0</SelectItem>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="6">6</SelectItem>
+                        <SelectItem value="7">7</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="9">9</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+                  
+                {/* Conditional Nonconforming Units */}
+                {parseInt(formState.numberOfUnits) >= 2 && (
+                  <div className="ml-6 pl-4 border-l-2 border-yellow-200 bg-yellow-50/30 rounded-r-lg p-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <span className="text-yellow-700">↳</span> Are these units Nonconforming/Grandfathered use?
+                    </label>
+                    <Select value={formState.nonconformingUnits} onValueChange={value => handleInputChange('nonconformingUnits', value)}>
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Yes">Yes</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                  
+                {/* Conditional Net Operation Income */}
+                {parseInt(formState.numberOfUnits) >= 5 && (
+                  <div className="ml-6 pl-4 border-l-2 border-purple-200 bg-purple-50/30 rounded-r-lg p-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <span className="text-purple-700">↳</span> What is the total Net Operation Income?
+                    </label>
+                    <Input 
+                      type="number" 
+                      value={formState.totalNetOperationIncome} 
+                      onChange={e => handleInputChange('totalNetOperationIncome', e.target.value)} 
+                      placeholder="$0" 
+                      className="bg-white"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
