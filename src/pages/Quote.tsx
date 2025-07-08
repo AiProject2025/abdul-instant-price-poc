@@ -24,22 +24,36 @@ const Quote = () => {
     // Handle the new response structure where quotes are under the 'quotes' key
     const quotesData = apiResponse.quotes || apiResponse;
     
-    const results = Object.entries(quotesData).map(([noteBuyer, data]: [string, any]) => ({
-      lender: "Dominion Financial",
-      noteBuyer: noteBuyer,
-      product: noteBuyer, // Using note buyer name as product
-      rate: data.adjusted_interest_rate,
-      monthlyPayment: Math.round(data.final_est_payment),
-      totalInterest: Math.round(parseFloat(data.loan_amount) * 0.65), // Keep existing calculation
-      loanAmount: parseFloat(data.loan_amount),
-      dscr: data.final_dscr,
-      propertyType: data.property_type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-      loanType: data.loan_purpose === 'refinance' ? 'DSCR Refinance' : 'DSCR Purchase',
-      pppDuration: "5/4/3/2/1",
-      ltv: parseFloat(data.ltv),
-      points: data.points || 2.0, // Default to 2.0 if not provided by API
-      isLocked: false
-    }));
+    const results = Object.entries(quotesData).map(([noteBuyer, data]: [string, any]) => {
+      // Determine loan type based on loan purpose and refinance type
+      let loanType = "Purchase";
+      if (data.loan_purpose === 'refinance') {
+        if (data.refinance_type === 'cash-out') {
+          loanType = "Cash Out";
+        } else if (data.refinance_type === 'rate-term' || data.refinance_type === 'rate/term') {
+          loanType = "Rate/Term";
+        } else {
+          loanType = "Refinance";
+        }
+      }
+
+      return {
+        lender: "Dominion Financial",
+        noteBuyer: noteBuyer,
+        product: noteBuyer, // Using note buyer name as product
+        rate: data.adjusted_interest_rate,
+        monthlyPayment: Math.round(data.final_est_payment),
+        totalInterest: Math.round(parseFloat(data.loan_amount) * 0.65), // Keep existing calculation
+        loanAmount: parseFloat(data.loan_amount),
+        dscr: data.final_dscr,
+        propertyType: data.property_type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+        loanType: loanType,
+        pppDuration: "5/4/3/2/1",
+        ltv: parseFloat(data.ltv),
+        points: data.points || 2.0, // Default to 2.0 if not provided by API
+        isLocked: false
+      };
+    });
 
     // Sort by rate (best rate first)
     return results.sort((a, b) => a.rate - b.rate);
