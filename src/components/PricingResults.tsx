@@ -169,7 +169,6 @@ DSCR Loan System`;
   // Generate all possible buyers for the ineligible reasons grid
   const allBuyers = [
     'Blackstone',
-    'Blackstone Express', 
     'Bayview',
     'Maxex',
     'Onslow Bay',
