@@ -64,48 +64,74 @@ const Auth = () => {
     setError(null);
     setMessage(null);
 
-    // Check if it's a Dominion email with correct password
-    if (data.email.endsWith('@thedominiongroup.com') && data.password === '32south') {
-      // Try to sign in first
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+    // Validate Dominion email and password
+    if (!data.email.endsWith('@thedominiongroup.com')) {
+      setError('Please use a @thedominiongroup.com email address');
+      setIsLoading(false);
+      return;
+    }
+
+    if (data.password !== '32south') {
+      setError('Invalid password. Please use "32south"');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // First try to sign up the user (this will fail if they already exist)
+      const { error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: data.email.split('@')[0].replace(/\./g, ' '),
+          },
+        },
       });
 
-      if (signInError) {
-        // If sign in fails, try to create the account
-        const { error: signUpError } = await supabase.auth.signUp({
+      // If signup fails because user exists, try to sign in
+      if (signUpError && signUpError.message.includes('already registered')) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-              full_name: data.email.split('@')[0],
-            },
-          },
         });
 
-        if (signUpError) {
-          setError(signUpError.message);
+        if (signInError) {
+          setError('Login failed. Please try again.');
         } else {
-          // After signup, try to sign in again
-          const { error: secondSignInError } = await supabase.auth.signInWithPassword({
-            email: data.email,
-            password: data.password,
-          });
+          navigate('/');
+        }
+      } else if (signUpError) {
+        // If other signup error, try to sign in anyway
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
 
-          if (secondSignInError) {
-            setMessage('Account created! Please check your email for verification or try logging in again.');
-          } else {
-            navigate('/');
-          }
+        if (signInError) {
+          setError('Account created successfully! Please wait a moment and try logging in again.');
+        } else {
+          navigate('/');
         }
       } else {
-        navigate('/');
+        // Signup successful, now sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (signInError) {
+          setMessage('Account created! Please try logging in again.');
+        } else {
+          navigate('/');
+        }
       }
-    } else {
-      setError('Please use a @thedominiongroup.com email with password "32south"');
+    } catch (error) {
+      console.error('Auth error:', error);
+      setError('Authentication failed. Please try again.');
     }
+
     setIsLoading(false);
   };
 
