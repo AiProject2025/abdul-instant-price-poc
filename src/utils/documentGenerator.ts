@@ -440,7 +440,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                 new TableCell({ 
                   children: [new Paragraph({ 
                     children: [new TextRun({ 
-                      text: data.refinanceType ? `${data.loanPurpose} - ${data.refinanceType}` : data.loanPurpose,
+                      text: data.loanPurpose,
                       size: 22
                     })] 
                   })],
@@ -456,7 +456,36 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 })
               ]
-            })
+            }),
+            // Add Refinance Type row only if it's a refinance loan
+            ...(data.refinanceType ? [
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Refinance Type:", bold: true, size: 22, color: "1E40AF" })] })],
+                    shading: { fill: "F1F5F9" },
+                    margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                  }),
+                  new TableCell({ 
+                    children: [new Paragraph({ 
+                      children: [new TextRun({ 
+                        text: data.refinanceType,
+                        size: 22
+                      })] 
+                    })],
+                    margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                  }),
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "", size: 22 })] })],
+                    margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                  }),
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "", size: 22 })] })],
+                    margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                  })
+                ]
+              })
+            ] : [])
           ],
           borders: {
             top: { style: "single", size: 1, color: "E2E8F0" },
