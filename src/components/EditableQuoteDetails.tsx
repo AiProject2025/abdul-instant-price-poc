@@ -25,12 +25,58 @@ interface EditableQuoteDetailsProps {
     loanOfficer: string;
     phoneNumber: string;
     date: string;
+    // Additional fields for comprehensive quote
+    propertiesQuoted?: number;
+    appraised_value?: number;
+    interestOnly?: string;
+    interestReserve?: number;
+    escrowForTaxes?: string;
+    floodCertification?: string;
+    processingFee?: string;
+    rateLockFee?: string;
+    legalFees?: string;
+    payoffAmount?: number;
+    datePurchased?: string;
+    purchasePrice?: number;
+    rentalStatus?: string;
+    rehabCosts?: number;
+    totalMonthlyRent?: number;
+    annualTaxAmount?: number;
+    totalMarketRent?: number;
+    annualInsuranceCost?: number;
+    creditScore?: number;
+    annualAssociationFees?: number;
+    propertyCondition?: string;
   };
   onSave: (data: any) => void;
 }
 
 const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave }: EditableQuoteDetailsProps) => {
-  const [editData, setEditData] = useState(initialData);
+  const [editData, setEditData] = useState({
+    ...initialData,
+    // Set defaults for new fields
+    propertiesQuoted: initialData.propertiesQuoted || 1,
+    appraised_value: initialData.appraised_value || Math.round(initialData.loanAmount / (initialData.ltv / 100)),
+    interestOnly: initialData.interestOnly || "No",
+    interestReserve: initialData.interestReserve || 0,
+    escrowForTaxes: initialData.escrowForTaxes || "Required",
+    floodCertification: initialData.floodCertification || "$120 reimbursement",
+    processingFee: initialData.processingFee || "$350 loan processing fee for title company coordination",
+    rateLockFee: initialData.rateLockFee || "Upfront Cost of 0.35% of Proposed Loan Amount",
+    legalFees: initialData.legalFees || "$500 loan doc prep to Dominion Financial Services LLC",
+    payoffAmount: initialData.payoffAmount || 0,
+    datePurchased: initialData.datePurchased || "",
+    purchasePrice: initialData.purchasePrice || 0,
+    rentalStatus: initialData.rentalStatus || "Leased",
+    rehabCosts: initialData.rehabCosts || 0,
+    totalMonthlyRent: initialData.totalMonthlyRent || 0,
+    annualTaxAmount: initialData.annualTaxAmount || 0,
+    totalMarketRent: initialData.totalMarketRent || 0,
+    annualInsuranceCost: initialData.annualInsuranceCost || 0,
+    creditScore: initialData.creditScore || 750,
+    annualAssociationFees: initialData.annualAssociationFees || 0,
+    propertyCondition: initialData.propertyCondition || "C4 or better"
+  });
 
   const handleInputChange = (field: string, value: any) => {
     setEditData(prev => ({
@@ -239,6 +285,243 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave }: Editable
               value={editData.date}
               onChange={(e) => handleInputChange('date', e.target.value)}
             />
+          </div>
+
+          {/* Additional Quote Details */}
+          <div className="col-span-full">
+            <h3 className="text-lg font-semibold mb-4 text-dominion-blue">Additional Quote Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div className="space-y-2">
+                <Label htmlFor="propertiesQuoted"># of Properties Quoted</Label>
+                <Input
+                  id="propertiesQuoted"
+                  type="number"
+                  value={editData.propertiesQuoted}
+                  onChange={(e) => handleInputChange('propertiesQuoted', parseInt(e.target.value) || 1)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="appraised_value">Appraised Value</Label>
+                <Input
+                  id="appraised_value"
+                  type="number"
+                  value={editData.appraised_value}
+                  onChange={(e) => handleInputChange('appraised_value', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="interestOnly">Interest Only</Label>
+                <Select
+                  value={editData.interestOnly}
+                  onValueChange={(value) => handleInputChange('interestOnly', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="interestReserve">Interest Reserve</Label>
+                <Input
+                  id="interestReserve"
+                  type="number"
+                  value={editData.interestReserve}
+                  onChange={(e) => handleInputChange('interestReserve', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="escrowForTaxes">Escrow For Taxes & Insurance</Label>
+                <Select
+                  value={editData.escrowForTaxes}
+                  onValueChange={(value) => handleInputChange('escrowForTaxes', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Required">Required</SelectItem>
+                    <SelectItem value="Not Required">Not Required</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="floodCertification">Flood Certification</Label>
+                <Input
+                  id="floodCertification"
+                  value={editData.floodCertification}
+                  onChange={(e) => handleInputChange('floodCertification', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="processingFee">Processing Fee</Label>
+                <Input
+                  id="processingFee"
+                  value={editData.processingFee}
+                  onChange={(e) => handleInputChange('processingFee', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rateLockFee">Optional Rate Lock Fee</Label>
+                <Input
+                  id="rateLockFee"
+                  value={editData.rateLockFee}
+                  onChange={(e) => handleInputChange('rateLockFee', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="legalFees">Legal</Label>
+                <Input
+                  id="legalFees"
+                  value={editData.legalFees}
+                  onChange={(e) => handleInputChange('legalFees', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Property Details Section */}
+          <div className="col-span-full">
+            <h3 className="text-lg font-semibold mb-4 text-dominion-blue">Property Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div className="space-y-2">
+                <Label htmlFor="payoffAmount">Payoff to Current Lender</Label>
+                <Input
+                  id="payoffAmount"
+                  type="number"
+                  value={editData.payoffAmount}
+                  onChange={(e) => handleInputChange('payoffAmount', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="purchasePrice">Purchase Price</Label>
+                <Input
+                  id="purchasePrice"
+                  type="number"
+                  value={editData.purchasePrice}
+                  onChange={(e) => handleInputChange('purchasePrice', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="datePurchased">Date Purchased</Label>
+                <Input
+                  id="datePurchased"
+                  value={editData.datePurchased}
+                  onChange={(e) => handleInputChange('datePurchased', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rehabCosts">Rehab Costs Already Spent</Label>
+                <Input
+                  id="rehabCosts"
+                  type="number"
+                  value={editData.rehabCosts}
+                  onChange={(e) => handleInputChange('rehabCosts', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rentalStatus">Rental Status</Label>
+                <Select
+                  value={editData.rentalStatus}
+                  onValueChange={(value) => handleInputChange('rentalStatus', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Leased">Leased</SelectItem>
+                    <SelectItem value="Vacant">Vacant</SelectItem>
+                    <SelectItem value="Owner Occupied">Owner Occupied</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="annualTaxAmount">Annual Tax Amount</Label>
+                <Input
+                  id="annualTaxAmount"
+                  type="number"
+                  value={editData.annualTaxAmount}
+                  onChange={(e) => handleInputChange('annualTaxAmount', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="totalMonthlyRent">Total Monthly Rent</Label>
+                <Input
+                  id="totalMonthlyRent"
+                  type="number"
+                  value={editData.totalMonthlyRent}
+                  onChange={(e) => handleInputChange('totalMonthlyRent', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="annualInsuranceCost">Annual Insurance Cost</Label>
+                <Input
+                  id="annualInsuranceCost"
+                  type="number"
+                  value={editData.annualInsuranceCost}
+                  onChange={(e) => handleInputChange('annualInsuranceCost', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="totalMarketRent">Total Market Rent</Label>
+                <Input
+                  id="totalMarketRent"
+                  type="number"
+                  value={editData.totalMarketRent}
+                  onChange={(e) => handleInputChange('totalMarketRent', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="annualAssociationFees">Annual Association Fees</Label>
+                <Input
+                  id="annualAssociationFees"
+                  type="number"
+                  value={editData.annualAssociationFees}
+                  onChange={(e) => handleInputChange('annualAssociationFees', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="creditScore">Credit Score</Label>
+                <Input
+                  id="creditScore"
+                  type="number"
+                  value={editData.creditScore}
+                  onChange={(e) => handleInputChange('creditScore', parseInt(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="propertyCondition">Property Condition</Label>
+                <Input
+                  id="propertyCondition"
+                  value={editData.propertyCondition}
+                  onChange={(e) => handleInputChange('propertyCondition', e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

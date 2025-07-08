@@ -18,6 +18,28 @@ interface LoanQuoteData {
   loanOfficer: string;
   phoneNumber: string;
   date: string;
+  // Additional comprehensive fields
+  propertiesQuoted?: number;
+  appraised_value?: number;
+  interestOnly?: string;
+  interestReserve?: number;
+  escrowForTaxes?: string;
+  floodCertification?: string;
+  processingFee?: string;
+  rateLockFee?: string;
+  legalFees?: string;
+  payoffAmount?: number;
+  datePurchased?: string;
+  purchasePrice?: number;
+  rentalStatus?: string;
+  rehabCosts?: number;
+  totalMonthlyRent?: number;
+  annualTaxAmount?: number;
+  totalMarketRent?: number;
+  annualInsuranceCost?: number;
+  creditScore?: number;
+  annualAssociationFees?: number;
+  propertyCondition?: string;
 }
 
 export const generateLoanQuote = async (data: LoanQuoteData) => {
@@ -172,7 +194,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
           spacing: { before: 200, after: 50 }
         }),
 
-        // Compact Quote Details Table
+        // Comprehensive Quote Details Table
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
@@ -184,7 +206,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: "1", size: 16 })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: (data.propertiesQuoted || 1).toString(), size: 16 })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
@@ -234,7 +256,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: `$${Math.round(data.loanAmount / (data.ltv / 100)).toLocaleString()}`, size: 16, bold: true })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.appraised_value || Math.round(data.loanAmount / (data.ltv / 100))).toLocaleString()}`, size: 16, bold: true })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 })
               ]
@@ -268,7 +290,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: "No", size: 16 })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: data.interestOnly || "No", size: 16 })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
@@ -297,12 +319,75 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: "$0", size: 16 })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.interestReserve || 0).toLocaleString()}`, size: 16 })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 })
               ]
             }),
             // Row 7
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Appraisal:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Paid directly by borrower to AMC", size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Escrow For Taxes & Insurance:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.escrowForTaxes || "Required", size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            }),
+            // Row 8
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Flood Certification:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.floodCertification || "$120 reimbursement", size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Processing Fee:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.processingFee || "$350 loan processing fee for title company coordination", size: 14 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            }),
+            // Row 9
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Optional Rate Lock Fee:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.rateLockFee || "Upfront Cost of 0.35% of Proposed Loan Amount", size: 14 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Legal:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.legalFees || "$500 loan doc prep to Dominion Financial Services LLC", size: 14 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            }),
+            // Row 10
             new TableRow({
               children: [
                 new TableCell({ 
@@ -342,7 +427,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
           spacing: { before: 150, after: 50 }
         }),
 
-        // Compact Property Details Table
+        // Comprehensive Property Details Table
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
@@ -362,11 +447,11 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: "DSCR Ratio:", bold: true, size: 16 })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: "Payoff to Current Lender:", bold: true, size: 16 })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: data.dscr.toFixed(3), size: 16, bold: true })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.payoffAmount || 0).toLocaleString()}`, size: 16 })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 })
               ]
@@ -389,16 +474,137 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                     margins: { top: 50, bottom: 50, left: 100, right: 100 }
                   }),
                   new TableCell({ 
-                    children: [new Paragraph({ children: [new TextRun({ text: "", size: 16 })] })],
+                    children: [new Paragraph({ children: [new TextRun({ text: "Purchase Price:", bold: true, size: 16 })] })],
                     margins: { top: 50, bottom: 50, left: 100, right: 100 }
                   }),
                   new TableCell({ 
-                    children: [new Paragraph({ children: [new TextRun({ text: "", size: 16 })] })],
+                    children: [new Paragraph({ children: [new TextRun({ text: `$${(data.purchasePrice || 0).toLocaleString()}`, size: 16 })] })],
                     margins: { top: 50, bottom: 50, left: 100, right: 100 }
                   })
                 ]
               })
-            ] : [])
+            ] : [
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Date Purchased:", bold: true, size: 16 })] })],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                  }),
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: data.datePurchased || "", size: 16 })] })],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                  }),
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Purchase Price:", bold: true, size: 16 })] })],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                  }),
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: `$${(data.purchasePrice || 0).toLocaleString()}`, size: 16 })] })],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                  })
+                ]
+              })
+            ]),
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Rental Status:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.rentalStatus || "Leased", size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Rehab Costs Already Spent:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.rehabCosts || 0).toLocaleString()}`, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Total Monthly Rent:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.totalMonthlyRent || 0).toLocaleString()}`, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Annual Tax Amount:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.annualTaxAmount || 0).toLocaleString()}`, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Total Market Rent:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.totalMarketRent || 0).toLocaleString()}`, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Annual Insurance Cost:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.annualInsuranceCost || 0).toLocaleString()}`, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Credit Score:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: (data.creditScore || 750).toString(), size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Annual Association Fees:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.annualAssociationFees || 0).toLocaleString()}`, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Property Condition:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.propertyCondition || "C4 or better", size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "DSCR Ratio:", bold: true, size: 16 })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.dscr.toFixed(3), size: 16, bold: true })] })],
+                  margins: { top: 50, bottom: 50, left: 100, right: 100 }
+                })
+              ]
+            })
           ]
         }),
 
