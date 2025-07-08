@@ -35,16 +35,12 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
     setZipCodeInput(value);
     onZipCodeChange(value);
     
-    // Try to auto-populate state and county if zip code is valid
-    if (value.length >= 5) {
+    // Auto-populate state and county for valid zip codes
+    if (value.length === 5) {
       const locationData = lookupCountyByZipCode(value);
       if (locationData) {
-        // Force immediate state update
         onStateChange(locationData.state);
-        // Small delay to let state dropdown update before setting county
-        setTimeout(() => {
-          onCountyChange(locationData.county);
-        }, 100);
+        onCountyChange(locationData.county);
       }
     }
   };
