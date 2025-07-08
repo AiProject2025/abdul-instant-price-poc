@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, DollarSign, Calculator, FileText, Home, Clock, Percent, Lock, Unlock, Grid, List } from "lucide-react";
+import { TrendingUp, DollarSign, Calculator, FileText, Home, Clock, Percent, Lock, Unlock, Grid, List, Edit } from "lucide-react";
 import FlagsDisplay from "@/components/FlagsDisplay";
+import EditableQuoteDetails from "@/components/EditableQuoteDetails";
 import { useState } from "react";
 
 interface PricingResultsProps {
@@ -24,12 +25,15 @@ interface PricingResultsProps {
     isLocked?: boolean;
   }[];
   flags?: string[];
-  onGenerateLoanQuote: () => void;
+  onGenerateLoanQuote: (selectedResult?: any, editedData?: any) => void;
   onBackToForm: () => void;
+  lastSubmittedFormData?: any;
 }
 
-const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, onGenerateLoanQuote, lastSubmittedFormData }: PricingResultsProps) => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<any>(null);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -47,6 +51,36 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsP
   const handleLockRate = (index: number) => {
     console.log(`Locking rate for ${results[index].noteBuyer} - ${results[index].product}`);
     // Add lock rate logic here
+  };
+
+  const handleEditQuote = (result: any) => {
+    if (!lastSubmittedFormData) return;
+
+    const quoteData = {
+      borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
+      propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
+      loanAmount: result.loanAmount,
+      interestRate: result.rate,
+      monthlyPayment: result.monthlyPayment,
+      loanTerm: 360, // 30 years
+      ltv: result.ltv,
+      dscr: result.dscr,
+      propertyType: result.propertyType,
+      loanPurpose: result.loanPurpose,
+      refinanceType: result.refinanceType,
+      points: result.points,
+      noteBuyer: result.noteBuyer,
+      loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
+      phoneNumber: '410-705-2277',
+      date: new Date().toLocaleDateString()
+    };
+
+    setSelectedResult(result);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEditedQuote = (editedData: any) => {
+    onGenerateLoanQuote(selectedResult, editedData);
   };
 
   return (
@@ -127,14 +161,24 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsP
                     <span className="font-semibold">{result.points}%</span>
                   </div>
                 </div>
-                <Button 
-                  onClick={onGenerateLoanQuote}
-                  className="w-full bg-dominion-blue hover:bg-dominion-blue/90 text-white text-sm"
-                  size="sm"
-                >
-                  <FileText className="mr-2 h-3 w-3" />
-                  Generate Quote
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => onGenerateLoanQuote(result)}
+                    className="flex-1 bg-dominion-blue hover:bg-dominion-blue/90 text-white text-sm"
+                    size="sm"
+                  >
+                    <FileText className="mr-2 h-3 w-3" />
+                    Quick Quote
+                  </Button>
+                  <Button 
+                    onClick={() => handleEditQuote(result)}
+                    variant="outline"
+                    size="sm"
+                    className="px-3"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : (
@@ -238,11 +282,20 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsP
                 {/* Action Buttons */}
                 <div className="flex gap-3">
                   <Button 
-                    onClick={onGenerateLoanQuote}
+                    onClick={() => onGenerateLoanQuote(result)}
                     className="flex-1 bg-dominion-blue hover:bg-dominion-blue/90 text-white"
                   >
                     <FileText className="mr-2 h-4 w-4" />
-                    Generate Loan Quote
+                    Quick Quote
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleEditQuote(result)}
+                    variant="outline"
+                    className="px-4"
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Quote
                   </Button>
                   
                   {/* Lock Rate Button - only for non-Blackstone products */}
@@ -289,6 +342,33 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsP
           </div>
         </CardContent>
       </Card>
+
+      {/* Editable Quote Details Dialog */}
+      {selectedResult && lastSubmittedFormData && (
+        <EditableQuoteDetails
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          initialData={{
+            borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
+            propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
+            loanAmount: selectedResult.loanAmount,
+            interestRate: selectedResult.rate,
+            monthlyPayment: selectedResult.monthlyPayment,
+            loanTerm: 360,
+            ltv: selectedResult.ltv,
+            dscr: selectedResult.dscr,
+            propertyType: selectedResult.propertyType,
+            loanPurpose: selectedResult.loanPurpose,
+            refinanceType: selectedResult.refinanceType,
+            points: selectedResult.points,
+            noteBuyer: selectedResult.noteBuyer,
+            loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
+            phoneNumber: '410-705-2277',
+            date: new Date().toLocaleDateString()
+          }}
+          onSave={handleSaveEditedQuote}
+        />
+      )}
     </div>
   );
 };

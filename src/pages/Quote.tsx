@@ -313,36 +313,68 @@ const Quote = () => {
     setLastSubmittedFormData(null);
   };
 
-  const handleGenerateLoanQuote = async () => {
+  const handleGenerateLoanQuote = async (selectedResult?: any, editedData?: any) => {
     console.log("Generating loan quote...");
     
-    if (!lastSubmittedFormData || !pricingResults.length) {
-      console.error("Missing form data or pricing results");
+    if (!lastSubmittedFormData) {
+      console.error("Missing form data");
       return;
     }
 
     try {
-      // Use the first (best) pricing result
-      const bestResult = pricingResults[0];
+      let quoteData;
       
-      const quoteData = {
-        borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
-        propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
-        loanAmount: bestResult.loanAmount,
-        interestRate: bestResult.rate,
-        monthlyPayment: bestResult.monthlyPayment,
-        loanTerm: 360, // 30 years
-        ltv: bestResult.ltv,
-        dscr: bestResult.dscr,
-        propertyType: bestResult.propertyType,
-        loanPurpose: bestResult.loanPurpose,
-        refinanceType: bestResult.refinanceType,
-        points: bestResult.points,
-        noteBuyer: bestResult.noteBuyer,
-        loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
-        phoneNumber: '410-705-2277',
-        date: new Date().toLocaleDateString()
-      };
+      if (editedData) {
+        // Use edited data if provided
+        quoteData = editedData;
+      } else if (selectedResult) {
+        // Use selected result if provided
+        quoteData = {
+          borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
+          propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
+          loanAmount: selectedResult.loanAmount,
+          interestRate: selectedResult.rate,
+          monthlyPayment: selectedResult.monthlyPayment,
+          loanTerm: 360, // 30 years
+          ltv: selectedResult.ltv,
+          dscr: selectedResult.dscr,
+          propertyType: selectedResult.propertyType,
+          loanPurpose: selectedResult.loanPurpose,
+          refinanceType: selectedResult.refinanceType,
+          points: selectedResult.points,
+          noteBuyer: selectedResult.noteBuyer,
+          loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
+          phoneNumber: '410-705-2277',
+          date: new Date().toLocaleDateString()
+        };
+      } else {
+        // Use the first (best) pricing result as fallback
+        if (!pricingResults.length) {
+          console.error("Missing pricing results");
+          return;
+        }
+        
+        const bestResult = pricingResults[0];
+        
+        quoteData = {
+          borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
+          propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
+          loanAmount: bestResult.loanAmount,
+          interestRate: bestResult.rate,
+          monthlyPayment: bestResult.monthlyPayment,
+          loanTerm: 360, // 30 years
+          ltv: bestResult.ltv,
+          dscr: bestResult.dscr,
+          propertyType: bestResult.propertyType,
+          loanPurpose: bestResult.loanPurpose,
+          refinanceType: bestResult.refinanceType,
+          points: bestResult.points,
+          noteBuyer: bestResult.noteBuyer,
+          loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
+          phoneNumber: '410-705-2277',
+          date: new Date().toLocaleDateString()
+        };
+      }
 
       await generateLoanQuote(quoteData);
     } catch (error) {
@@ -471,6 +503,7 @@ const Quote = () => {
               flags={flags}
               onBackToForm={handleBackToQuestionnaire}
               onGenerateLoanQuote={handleGenerateLoanQuote}
+              lastSubmittedFormData={lastSubmittedFormData}
             />
           )}
         </div>
