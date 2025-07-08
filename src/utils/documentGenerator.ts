@@ -25,18 +25,43 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
     sections: [{
       properties: {},
       children: [
-        // Header
+        // Modern Header with Gradient Effect
         new Paragraph({
           children: [
             new TextRun({
               text: "DOMINION FINANCIAL SERVICES",
               bold: true,
-              size: 32,
-              color: "1E40AF"
+              size: 40,
+              color: "1E40AF",
+              font: "Segoe UI"
             })
           ],
           alignment: AlignmentType.CENTER,
-          spacing: { after: 400 }
+          spacing: { after: 200 },
+          shading: {
+            fill: "F8FAFC"
+          },
+          border: {
+            bottom: {
+              color: "1E40AF",
+              size: 4,
+              style: "single"
+            }
+          }
+        }),
+
+        // Elegant Tagline
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Professional Lending Solutions",
+              italics: true,
+              size: 22,
+              color: "64748B"
+            })
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 600 }
         }),
 
         // Date and Borrower Info
@@ -131,48 +156,67 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
           spacing: { after: 200 }
         }),
 
-        // Loan Officer Info
+        // Modern Loan Officer Info Table
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
             new TableRow({
               children: [
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: "Prepared For:", bold: true })] })],
-                  width: { size: 25, type: WidthType.PERCENTAGE }
+                  children: [new Paragraph({ children: [new TextRun({ text: "Prepared For:", bold: true, size: 22, color: "1E40AF" })] })],
+                  width: { size: 25, type: WidthType.PERCENTAGE },
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 }),
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: data.borrowerName })] })],
-                  width: { size: 25, type: WidthType.PERCENTAGE }
+                  children: [new Paragraph({ children: [new TextRun({ text: data.borrowerName, size: 22 })] })],
+                  width: { size: 25, type: WidthType.PERCENTAGE },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 }),
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: "Loan Officer:", bold: true })] })],
-                  width: { size: 25, type: WidthType.PERCENTAGE }
+                  children: [new Paragraph({ children: [new TextRun({ text: "Loan Officer:", bold: true, size: 22, color: "1E40AF" })] })],
+                  width: { size: 25, type: WidthType.PERCENTAGE },
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 }),
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: data.loanOfficer })] })],
-                  width: { size: 25, type: WidthType.PERCENTAGE }
+                  children: [new Paragraph({ children: [new TextRun({ text: data.loanOfficer, size: 22 })] })],
+                  width: { size: 25, type: WidthType.PERCENTAGE },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 })
               ]
             }),
             new TableRow({
               children: [
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: "Property Address:", bold: true })] })]
+                  children: [new Paragraph({ children: [new TextRun({ text: "Property Address:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 }),
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: data.propertyAddress })] })]
+                  children: [new Paragraph({ children: [new TextRun({ text: data.propertyAddress, size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 }),
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: "Phone Number:", bold: true })] })]
+                  children: [new Paragraph({ children: [new TextRun({ text: "Phone Number:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 }),
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: data.phoneNumber })] })]
+                  children: [new Paragraph({ children: [new TextRun({ text: data.phoneNumber, size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 })
               ]
             })
           ],
-          margins: { top: 100, bottom: 100, left: 100, right: 100 }
+          borders: {
+            top: { style: "single", size: 1, color: "E2E8F0" },
+            bottom: { style: "single", size: 1, color: "E2E8F0" },
+            left: { style: "single", size: 1, color: "E2E8F0" },
+            right: { style: "single", size: 1, color: "E2E8F0" },
+            insideHorizontal: { style: "single", size: 1, color: "E2E8F0" },
+            insideVertical: { style: "single", size: 1, color: "E2E8F0" }
+          }
         }),
 
         // Quote Table Header
@@ -191,74 +235,179 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
           spacing: { before: 400, after: 200 }
         }),
 
-        // Quote Details Table
+        // Modern Quote Details Table
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
             // Row 1
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "# of Properties Quoted:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "1" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "LTV:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${data.ltv}%` })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "# of Properties Quoted:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "1", size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "LTV:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `${data.ltv}%`, size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             }),
             // Row 2
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Property Type:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: data.propertyType })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Loan Amount:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `$${data.loanAmount.toLocaleString()}` })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Property Type:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.propertyType, size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Loan Amount:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${data.loanAmount.toLocaleString()}`, size: 22, bold: true, color: "059669" })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             }),
             // Row 3
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Term:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${data.loanTerm} months` })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Appraised Value:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `$${Math.round(data.loanAmount / (data.ltv / 100)).toLocaleString()}` })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Term:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `${data.loanTerm} months`, size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Appraised Value:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${Math.round(data.loanAmount / (data.ltv / 100)).toLocaleString()}`, size: 22, bold: true, color: "059669" })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             }),
             // Row 4
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Amortization:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${data.loanTerm} months Fixed` })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Interest Rate:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${data.interestRate.toFixed(3)}%` })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Amortization:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `${data.loanTerm} months Fixed`, size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Interest Rate:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `${data.interestRate.toFixed(3)}%`, size: 22, bold: true, color: "DC2626" })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             }),
             // Row 5
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Interest Only:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "No" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Origination Fee:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${data.points.toFixed(3)}%` })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Interest Only:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "No", size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Origination Fee:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `${data.points.toFixed(3)}%`, size: 22, bold: true, color: "DC2626" })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             }),
             // Row 6
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Prepayment:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "5/4/3/2/1" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Interest Reserve:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "$0" })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Prepayment:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "5/4/3/2/1", size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Interest Reserve:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "$0", size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             }),
             // Row 7
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Monthly Payment (PITIA):" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `$${data.monthlyPayment.toLocaleString()}` })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "" })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Monthly Payment (PITIA):", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${data.monthlyPayment.toLocaleString()}`, size: 22, bold: true, color: "059669" })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "", size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "", size: 22 })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             })
-          ]
+          ],
+          borders: {
+            top: { style: "single", size: 1, color: "E2E8F0" },
+            bottom: { style: "single", size: 1, color: "E2E8F0" },
+            left: { style: "single", size: 1, color: "E2E8F0" },
+            right: { style: "single", size: 1, color: "E2E8F0" },
+            insideHorizontal: { style: "single", size: 1, color: "E2E8F0" },
+            insideVertical: { style: "single", size: 1, color: "E2E8F0" }
+          }
         }),
 
         // Property Details Header
@@ -277,25 +426,46 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
           spacing: { before: 400, after: 200 }
         }),
 
-        // Property Details Table
+        // Modern Property Details Table
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: [
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Loan Purpose:" })] })] }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "Loan Purpose:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
                 new TableCell({ 
                   children: [new Paragraph({ 
                     children: [new TextRun({ 
-                      text: data.refinanceType ? `${data.loanPurpose} - ${data.refinanceType}` : data.loanPurpose 
+                      text: data.refinanceType ? `${data.loanPurpose} - ${data.refinanceType}` : data.loanPurpose,
+                      size: 22
                     })] 
-                  })] 
+                  })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
                 }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "DSCR Ratio:" })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: data.dscr.toFixed(3) })] })] })
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: "DSCR Ratio:", bold: true, size: 22, color: "1E40AF" })] })],
+                  shading: { fill: "F1F5F9" },
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+                new TableCell({ 
+                  children: [new Paragraph({ children: [new TextRun({ text: data.dscr.toFixed(3), size: 22, bold: true, color: "059669" })] })],
+                  margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                })
               ]
             })
-          ]
+          ],
+          borders: {
+            top: { style: "single", size: 1, color: "E2E8F0" },
+            bottom: { style: "single", size: 1, color: "E2E8F0" },
+            left: { style: "single", size: 1, color: "E2E8F0" },
+            right: { style: "single", size: 1, color: "E2E8F0" },
+            insideHorizontal: { style: "single", size: 1, color: "E2E8F0" },
+            insideVertical: { style: "single", size: 1, color: "E2E8F0" }
+          }
         }),
 
         // Footer
