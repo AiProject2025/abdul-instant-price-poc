@@ -124,9 +124,13 @@ const Quote = () => {
       // Loan Details
       desired_ltv: normalizeNumericValue(formData.desiredLTV),
       desired_closing_date: formData.desiredClosingDate || '',
+      interest_reserves: normalizeTextValue(formData.interestReserves),
       
       // Calculated Rental Income
       market_rent: calculateTotalRental(),
+      
+      // Property Details
+      total_square_feet: normalizeNumericValue(formData.totalSquareFeet),
       
       // Annual Property Expenses (numeric values)
       annual_taxes: normalizeNumericValue(formData.annualTaxes),
