@@ -25,15 +25,16 @@ const Quote = () => {
     const quotesData = apiResponse.quotes || apiResponse;
     
     const results = Object.entries(quotesData).map(([noteBuyer, data]: [string, any]) => {
-      // Determine loan type based on loan purpose and refinance type
-      let loanType = "Purchase";
-      if (data.loan_purpose === 'refinance') {
+      // Determine loan purpose
+      const loanPurpose = data.loan_purpose === 'refinance' ? 'Refinance' : 'Purchase';
+      
+      // Determine refinance type if applicable
+      let refinanceType;
+      if (data.loan_purpose === 'refinance' && data.refinance_type) {
         if (data.refinance_type === 'cash-out') {
-          loanType = "Cash Out";
+          refinanceType = 'Cash Out';
         } else if (data.refinance_type === 'rate-term' || data.refinance_type === 'rate/term') {
-          loanType = "Rate/Term";
-        } else {
-          loanType = "Refinance";
+          refinanceType = 'Rate/Term';
         }
       }
 
@@ -47,7 +48,8 @@ const Quote = () => {
         loanAmount: parseFloat(data.loan_amount),
         dscr: data.final_dscr,
         propertyType: data.property_type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-        loanType: loanType,
+        loanPurpose: loanPurpose,
+        refinanceType: refinanceType,
         pppDuration: "5/4/3/2/1",
         ltv: parseFloat(data.ltv),
         points: data.points || 2.0, // Default to 2.0 if not provided by API

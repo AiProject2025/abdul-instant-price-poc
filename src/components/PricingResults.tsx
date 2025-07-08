@@ -15,7 +15,8 @@ interface PricingResultsProps {
     loanAmount: number;
     dscr: number;
     propertyType: string;
-    loanType: string;
+    loanPurpose: string;
+    refinanceType?: string;
     pppDuration: string;
     ltv: number;
     points: number;
@@ -127,8 +128,11 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsP
                 <div className="flex items-center space-x-2">
                   <FileText className="h-4 w-4 text-dominion-blue" />
                   <div>
-                    <div className="text-sm font-medium">{result.loanType}</div>
-                    <div className="text-xs text-dominion-gray">Loan Type</div>
+                    <div className="text-sm font-medium">
+                      {result.loanPurpose}
+                      {result.refinanceType && ` - ${result.refinanceType}`}
+                    </div>
+                    <div className="text-xs text-dominion-gray">Loan Purpose</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
