@@ -1,5 +1,9 @@
 // Zip code to county mapping data - comprehensive dataset
-const zipCodeToCountyMap: Record<string, { state: string; county: string }> = {};
+const zipCodeToCountyMap: Record<string, { state: string; county: string }> = {
+  // Direct entries for testing - these will be overwritten by ranges below
+  "41011": { state: "KY", county: "Kenton County" },
+  "21015": { state: "MD", county: "Harford County" },
+};
 
 // Helper function to add zip ranges to the map
 const addZipRange = (startZip: string, endZip: string, state: string, county: string) => {
