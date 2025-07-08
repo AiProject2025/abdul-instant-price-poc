@@ -117,6 +117,10 @@ const Quote = () => {
       // Loan Purpose (normalize dropdown values)
       loan_purpose: normalizeTextValue(formData.loanPurpose),
       
+      // Cross Collateral Information
+      cross_collateral_loan: normalizeTextValue(formData.crossCollateralLoan),
+      number_of_properties: normalizeNumericValue(formData.numberOfProperties),
+      
       // Property Details (normalize dropdown values)
       property_type: normalizeTextValue(formData.propertyType),
       property_condition: normalizeTextValue(formData.propertyCondition),

@@ -33,6 +33,10 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     // Purchase vs Refinance
     loanPurpose: '',
     
+    // Cross Collateral Information
+    crossCollateralLoan: '',
+    numberOfProperties: '',
+    
     // Subject Property Address
     streetAddress: '',
     city: '',
@@ -300,6 +304,50 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cross Collateral Loan */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dominion-blue">Cross Collateral Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Cross Collateral loan? *</label>
+              <Select value={formState.crossCollateralLoan} onValueChange={value => handleInputChange('crossCollateralLoan', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {/* Conditional Number of Properties - appears as sub-field */}
+              {formState.crossCollateralLoan === 'Yes' && (
+                <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <span className="text-blue-700">↳</span> How many properties? (Max 25)
+                  </label>
+                  <Input 
+                    type="number" 
+                    value={formState.numberOfProperties} 
+                    onChange={e => handleInputChange('numberOfProperties', e.target.value)} 
+                    placeholder="Enter number of properties" 
+                    className="bg-white"
+                    min="2"
+                    max="25"
+                  />
+                  {parseInt(formState.numberOfProperties) > 25 && (
+                    <div className="mt-2 text-sm text-red-600">
+                      Maximum of 25 properties allowed for cross collateral loans.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
