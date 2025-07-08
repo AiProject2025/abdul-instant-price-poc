@@ -18,6 +18,7 @@ interface PricingResultsProps {
     loanType: string;
     pppDuration: string;
     ltv: number;
+    points: number;
     isLocked?: boolean;
   }[];
   flags?: string[];
@@ -115,7 +116,7 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsP
               </div>
 
               {/* Secondary Details */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <Home className="h-4 w-4 text-dominion-blue" />
                   <div>
@@ -142,6 +143,13 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsP
                   <div>
                     <div className="text-sm font-medium">{result.ltv}%</div>
                     <div className="text-xs text-dominion-gray">LTV</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calculator className="h-4 w-4 text-dominion-blue" />
+                  <div>
+                    <div className="text-sm font-medium">{result.points}%</div>
+                    <div className="text-xs text-dominion-gray">Points</div>
                   </div>
                 </div>
               </div>

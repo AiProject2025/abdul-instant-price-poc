@@ -37,6 +37,7 @@ const Quote = () => {
       loanType: data.loan_purpose === 'refinance' ? 'DSCR Refinance' : 'DSCR Purchase',
       pppDuration: "5/4/3/2/1",
       ltv: parseFloat(data.ltv),
+      points: data.points || 2.0, // Default to 2.0 if not provided by API
       isLocked: false
     }));
 
