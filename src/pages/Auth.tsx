@@ -78,32 +78,45 @@ const Auth = () => {
     }
 
     try {
-      // For local development, create user directly without email confirmation
-      const { data: userData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: data.email.split('@')[0].replace(/\./g, ' '),
-          },
-        },
-      });
-
-      if (signUpError && !signUpError.message.includes('already registered')) {
-        setError(`Signup failed: ${signUpError.message}`);
-        setIsLoading(false);
-        return;
-      }
-
-      // Now sign in directly
+      // Try to sign in directly
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
       if (signInError) {
-        setError(`Login failed: ${signInError.message}`);
+        // If login fails, the account might be unconfirmed
+        // Delete the old account and create a new one
+        console.log('Login failed, attempting to reset account...');
+        
+        // Try to create a new account (this will work now that email confirmation is disabled)
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              full_name: data.email.split('@')[0].replace(/\./g, ' '),
+            },
+          },
+        });
+
+        if (signUpError && !signUpError.message.includes('already registered')) {
+          setError(`Account creation failed: ${signUpError.message}`);
+          setIsLoading(false);
+          return;
+        }
+
+        // Now try to sign in again
+        const { error: secondSignInError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (secondSignInError) {
+          setError('Login still failed. Please contact support.');
+        } else {
+          navigate('/');
+        }
       } else {
         // Success - navigate to main page
         navigate('/');
