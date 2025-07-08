@@ -28,14 +28,10 @@ const Quote = () => {
       // Determine loan purpose
       const loanPurpose = data.loan_purpose === 'refinance' ? 'Refinance' : 'Purchase';
       
-      // Determine refinance type if applicable
+      // Determine refinance type if applicable - check the form data since API doesn't return it
       let refinanceType;
-      if (data.loan_purpose === 'refinance' && data.refinance_type) {
-        if (data.refinance_type === 'cash-out') {
-          refinanceType = 'Cash Out';
-        } else if (data.refinance_type === 'rate-term' || data.refinance_type === 'rate/term') {
-          refinanceType = 'Rate/Term';
-        }
+      if (data.loan_purpose === 'refinance' && lastSubmittedFormData?.refinanceType) {
+        refinanceType = lastSubmittedFormData.refinanceType === 'CashOut' ? 'Cash Out' : 'Rate/Term';
       }
 
       return {
