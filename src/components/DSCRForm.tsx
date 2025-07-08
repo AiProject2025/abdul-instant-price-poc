@@ -42,6 +42,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     
     // Property Details - New Purchase
     propertyType: '',
+    propertyCondition: '',
     condoApprovalType: '',
     hasPurchaseContract: '',
     purchaseContractCloseDate: '',
@@ -397,6 +398,22 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     </div>
                   )}
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Property Condition *</label>
+                  <Select value={formState.propertyCondition} onValueChange={value => handleInputChange('propertyCondition', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="C1">C1</SelectItem>
+                      <SelectItem value="C2">C2</SelectItem>
+                      <SelectItem value="C3">C3</SelectItem>
+                      <SelectItem value="C4">C4</SelectItem>
+                      <SelectItem value="C5">C5</SelectItem>
+                      <SelectItem value="C6">C6</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -633,6 +650,25 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                       </Select>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Property Condition *</label>
+                  <Select value={formState.propertyCondition} onValueChange={value => handleInputChange('propertyCondition', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="C1">C1</SelectItem>
+                      <SelectItem value="C2">C2</SelectItem>
+                      <SelectItem value="C3">C3</SelectItem>
+                      <SelectItem value="C4">C4</SelectItem>
+                      <SelectItem value="C5">C5</SelectItem>
+                      <SelectItem value="C6">C6</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
