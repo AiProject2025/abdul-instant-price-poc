@@ -335,7 +335,6 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               onCountyChange={(county) => handleInputChange('propertyCounty', county)}
               onZipCodeChange={(zipCode) => handleInputChange('zipCode', zipCode)}
             />
-            </div>
           </CardContent>
         </Card>
 
