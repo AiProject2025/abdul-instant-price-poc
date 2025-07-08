@@ -68,6 +68,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     // Loan Details
     desiredLTV: '',
     desiredClosingDate: '',
+    interestReserves: '',
     
     // Property Rents (Monthly)
     unit1Rent: '',
@@ -918,6 +919,30 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                 />
               </div>
             </div>
+            
+            {/* Interest Reserves - Only show for refinance loans */}
+            {formState.loanPurpose === 'Refinance' && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Interest Reserves *
+                </label>
+                <p className="text-sm text-gray-600 mb-3">
+                  {formState.refinanceType === 'Rate/Term' 
+                    ? 'For Rate/Term refinance, liquidity needs to be 2x per loan guidelines.'
+                    : 'Applicable for Product B and H on Cash Out refinance, or when only 1 note buyer is available.'
+                  }
+                </p>
+                <Select value={formState.interestReserves} onValueChange={value => handleInputChange('interestReserves', value)}>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </CardContent>
         </Card>
 

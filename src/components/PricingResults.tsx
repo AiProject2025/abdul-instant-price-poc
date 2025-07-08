@@ -135,6 +135,35 @@ DSCR Loan System`;
     window.location.href = mailtoLink;
   };
 
+  const handleFeatureRequest = () => {
+    const borrowerName = lastSubmittedFormData 
+      ? `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower'
+      : 'Borrower';
+
+    const emailSubject = `DSCR System - Feature Request`;
+    
+    const emailBody = `Hi John,
+
+I would like to request a new feature for the DSCR loan system.
+
+FEATURE REQUEST DETAILS:
+- Requested by: ${borrowerName}
+- Date: ${new Date().toLocaleDateString()}
+- Current Context: Reviewing loan pricing results
+
+FEATURE DESCRIPTION:
+[Please describe the feature you would like to add]
+
+BUSINESS JUSTIFICATION:
+[Please explain why this feature would be valuable]
+
+Best regards,
+DSCR Loan System`;
+
+    const mailtoLink = `mailto:johnm@thedominiongroup.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    window.location.href = mailtoLink;
+  };
+
   return (
     <div className="space-y-6">
       {/* Show flags first if they exist */}
@@ -378,6 +407,45 @@ DSCR Loan System`;
         ))}
       </div>
 
+      {/* Interest Reserves Section for Price Team */}
+      {lastSubmittedFormData?.interestReserves && (
+        <Card className="bg-yellow-50 border border-yellow-200">
+          <CardHeader>
+            <CardTitle className="text-xl text-yellow-800">Price Team Review Required</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Interest Reserves Selected:</label>
+                <div className="p-2 bg-white border rounded text-sm font-medium">
+                  {lastSubmittedFormData.interestReserves}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Refinance Type:</label>
+                <div className="p-2 bg-white border rounded text-sm font-medium">
+                  {lastSubmittedFormData.refinanceType || 'N/A'}
+                </div>
+              </div>
+            </div>
+            <div className="p-4 bg-white border rounded">
+              <h4 className="font-medium text-gray-700 mb-2">Price Team Notes:</h4>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">
+                  • Applicable for Product B and H on Cash Out refinance
+                </p>
+                <p className="text-sm text-gray-600">
+                  • For Rate/Term refinance, liquidity needs to be 2x per loan guidelines
+                </p>
+                <p className="text-sm text-gray-600">
+                  • Same rules apply if only 1 note buyer is available
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="bg-dominion-blue text-white">
         <CardContent className="p-6">
           <div className="text-center">
@@ -385,13 +453,22 @@ DSCR Loan System`;
             <p className="mb-4 opacity-90">
               Our loan experts can help you compare these note buyer options and find the best fit for your investment goals.
             </p>
-            <Button 
-              variant="outline" 
-              className="bg-white text-dominion-blue hover:bg-gray-100"
-              onClick={handleEmailJosh}
-            >
-              Email Josh
-            </Button>
+            <div className="flex gap-3 justify-center">
+              <Button 
+                variant="outline" 
+                className="bg-white text-dominion-blue hover:bg-gray-100"
+                onClick={handleEmailJosh}
+              >
+                Email Josh
+              </Button>
+              <Button 
+                variant="outline" 
+                className="bg-white text-dominion-blue hover:bg-gray-100"
+                onClick={handleFeatureRequest}
+              >
+                Request Feature
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
