@@ -48,6 +48,8 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     purchaseContractCloseDate: '',
     numberOfUnits: '',
     numberOfLeasedUnits: '',
+    hasVacantUnits: '',
+    numberOfVacantUnits: '',
     nonconformingUnits: '',
     totalNetOperationIncome: '',
     leaseInPlace: '',
@@ -471,25 +473,65 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Number of Leased Units *</label>
-                    <Select value={formState.numberOfLeasedUnits} onValueChange={value => handleInputChange('numberOfLeasedUnits', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select leased units" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">0</SelectItem>
-                        <SelectItem value="1">1</SelectItem>
-                        <SelectItem value="2">2</SelectItem>
-                        <SelectItem value="3">3</SelectItem>
-                        <SelectItem value="4">4</SelectItem>
-                        <SelectItem value="5">5</SelectItem>
-                        <SelectItem value="6">6</SelectItem>
-                        <SelectItem value="7">7</SelectItem>
-                        <SelectItem value="8">8</SelectItem>
-                        <SelectItem value="9">9</SelectItem>
-                        <SelectItem value="10">10</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input 
+                      type="number" 
+                      value={formState.numberOfLeasedUnits} 
+                      onChange={e => handleInputChange('numberOfLeasedUnits', e.target.value)} 
+                      placeholder="Enter number of leased units" 
+                      min="0"
+                      max={formState.numberOfUnits || "10"}
+                    />
                   </div>
+                </div>
+
+                {/* Vacant Units Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Are there any vacant units? *</label>
+                  <Select value={formState.hasVacantUnits} onValueChange={value => handleInputChange('hasVacantUnits', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  {/* Conditional Vacant Units Count - appears as sub-field */}
+                  {formState.hasVacantUnits === 'Yes' && parseInt(formState.numberOfUnits) > 1 && (
+                    <div className="mt-4 ml-6 pl-4 border-l-2 border-orange-200 bg-orange-50/30 rounded-r-lg p-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <span className="text-orange-700">↳</span> How many units are vacant?
+                      </label>
+                      <Input 
+                        type="number" 
+                        value={formState.numberOfVacantUnits} 
+                        onChange={e => handleInputChange('numberOfVacantUnits', e.target.value)} 
+                        placeholder="Enter number of vacant units" 
+                        className="bg-white"
+                        min="1"
+                        max={formState.numberOfUnits || "10"}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Flag for 10+ units */}
+                  {parseInt(formState.numberOfUnits) > 10 && (
+                    <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-red-700">
+                            <strong>Bridge Product Required:</strong> Properties with more than 10 units require our bridge financing products. Please contact our team for specialized financing options.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                   
                 {/* Conditional Nonconforming Units - appears as sub-field */}
@@ -720,25 +762,65 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Number of Leased Units *</label>
-                    <Select value={formState.numberOfLeasedUnits} onValueChange={value => handleInputChange('numberOfLeasedUnits', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select leased units" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">0</SelectItem>
-                        <SelectItem value="1">1</SelectItem>
-                        <SelectItem value="2">2</SelectItem>
-                        <SelectItem value="3">3</SelectItem>
-                        <SelectItem value="4">4</SelectItem>
-                        <SelectItem value="5">5</SelectItem>
-                        <SelectItem value="6">6</SelectItem>
-                        <SelectItem value="7">7</SelectItem>
-                        <SelectItem value="8">8</SelectItem>
-                        <SelectItem value="9">9</SelectItem>
-                        <SelectItem value="10">10</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input 
+                      type="number" 
+                      value={formState.numberOfLeasedUnits} 
+                      onChange={e => handleInputChange('numberOfLeasedUnits', e.target.value)} 
+                      placeholder="Enter number of leased units" 
+                      min="0"
+                      max={formState.numberOfUnits || "10"}
+                    />
                   </div>
+                </div>
+
+                {/* Vacant Units Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Are there any vacant units? *</label>
+                  <Select value={formState.hasVacantUnits} onValueChange={value => handleInputChange('hasVacantUnits', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  {/* Conditional Vacant Units Count - appears as sub-field */}
+                  {formState.hasVacantUnits === 'Yes' && parseInt(formState.numberOfUnits) > 1 && (
+                    <div className="mt-4 ml-6 pl-4 border-l-2 border-orange-200 bg-orange-50/30 rounded-r-lg p-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <span className="text-orange-700">↳</span> How many units are vacant?
+                      </label>
+                      <Input 
+                        type="number" 
+                        value={formState.numberOfVacantUnits} 
+                        onChange={e => handleInputChange('numberOfVacantUnits', e.target.value)} 
+                        placeholder="Enter number of vacant units" 
+                        className="bg-white"
+                        min="1"
+                        max={formState.numberOfUnits || "10"}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Flag for 10+ units */}
+                  {parseInt(formState.numberOfUnits) > 10 && (
+                    <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-red-700">
+                            <strong>Bridge Product Required:</strong> Properties with more than 10 units require our bridge financing products. Please contact our team for specialized financing options.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                   
                 {/* Conditional Nonconforming Units */}
