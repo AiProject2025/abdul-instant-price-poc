@@ -38,14 +38,14 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
     // Try to auto-populate state and county if zip code is valid
     if (value.length >= 5) {
       const locationData = lookupCountyByZipCode(value);
-      console.log('Zip lookup result for', value, ':', locationData);
       if (locationData) {
-        console.log('Setting state to:', locationData.state);
-        console.log('Setting county to:', locationData.county);
-        onStateChange(locationData.state);
-        onCountyChange(locationData.county);
-      } else {
-        console.log('No location data found for zip code:', value);
+        // Use setTimeout to ensure state updates happen in correct order
+        setTimeout(() => {
+          onStateChange(locationData.state);
+          setTimeout(() => {
+            onCountyChange(locationData.county);
+          }, 50);
+        }, 50);
       }
     }
   };
