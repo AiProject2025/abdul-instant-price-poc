@@ -167,7 +167,20 @@ DSCR Loan System`;
   };
 
   // Generate all possible buyers for the ineligible reasons grid
-  const allBuyers = ['eResi', 'Blackstone', 'Anchor', 'Freddie Mac', 'Fannie Mae'];
+  const allBuyers = [
+    'Blackstone',
+    'Blackstone Express', 
+    'Bayview',
+    'Maxex',
+    'Onslow Bay',
+    'Venus',
+    'Deephaven',
+    'Colchis',
+    'eResi',
+    'SG Premier',
+    'SG Connect',
+    'Towboat'
+  ];
   
   return (
     <div className="space-y-6">
