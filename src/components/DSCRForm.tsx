@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { statesWithAbbreviations } from '@/utils/locationData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, FileText } from 'lucide-react';
+import StateCountySelector from '@/components/StateCountySelector';
 
 interface DSCRFormProps {
   initialData?: any;
@@ -326,43 +327,14 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                <Select value={formState.propertyState} onValueChange={(state) => handleInputChange('propertyState', state)}>
-                  <SelectTrigger className="bg-white">
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border shadow-lg max-h-60 overflow-y-auto z-50">
-                    {statesWithAbbreviations.map((state) => (
-                      <SelectItem key={state.abbreviation} value={state.abbreviation}>
-                        {state.displayName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Property County *</label>
-                <Input 
-                  type="text" 
-                  value={formState.propertyCounty} 
-                  onChange={e => handleInputChange('propertyCounty', e.target.value)} 
-                  required 
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
-                <Input 
-                  type="text" 
-                  value={formState.zipCode} 
-                  onChange={e => handleInputChange('zipCode', e.target.value)} 
-                  required 
-                />
-              </div>
+            <StateCountySelector
+              selectedState={formState.propertyState}
+              selectedCounty={formState.propertyCounty}
+              selectedZipCode={formState.zipCode}
+              onStateChange={(state) => handleInputChange('propertyState', state)}
+              onCountyChange={(county) => handleInputChange('propertyCounty', county)}
+              onZipCodeChange={(zipCode) => handleInputChange('zipCode', zipCode)}
+            />
             </div>
           </CardContent>
         </Card>
