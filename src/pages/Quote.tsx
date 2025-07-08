@@ -8,6 +8,7 @@ import { LoganChatbot } from "@/components/LoganChatbot";
 import { Button } from "@/components/ui/button";
 import QuoteTracker from "@/components/QuoteTracker";
 import { saveQuote } from "@/services/quoteTracker";
+import { generateLoanQuote } from "@/utils/documentGenerator";
 import { ArrowLeft } from "lucide-react";
 
 const Quote = () => {
@@ -312,9 +313,41 @@ const Quote = () => {
     setLastSubmittedFormData(null);
   };
 
-  const handleGenerateLoanQuote = () => {
-    // Handle loan quote generation logic here
+  const handleGenerateLoanQuote = async () => {
     console.log("Generating loan quote...");
+    
+    if (!lastSubmittedFormData || !pricingResults.length) {
+      console.error("Missing form data or pricing results");
+      return;
+    }
+
+    try {
+      // Use the first (best) pricing result
+      const bestResult = pricingResults[0];
+      
+      const quoteData = {
+        borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
+        propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
+        loanAmount: bestResult.loanAmount,
+        interestRate: bestResult.rate,
+        monthlyPayment: bestResult.monthlyPayment,
+        loanTerm: 360, // 30 years
+        ltv: bestResult.ltv,
+        dscr: bestResult.dscr,
+        propertyType: bestResult.propertyType,
+        loanPurpose: bestResult.loanPurpose,
+        refinanceType: bestResult.refinanceType,
+        points: bestResult.points,
+        noteBuyer: bestResult.noteBuyer,
+        loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
+        phoneNumber: '410-705-2277',
+        date: new Date().toLocaleDateString()
+      };
+
+      await generateLoanQuote(quoteData);
+    } catch (error) {
+      console.error('Error generating loan quote:', error);
+    }
   };
 
   const handleBackToQuestionnaire = () => {
