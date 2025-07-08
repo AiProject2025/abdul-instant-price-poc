@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
-import { Calculator, FileText, TrendingUp, Shield, Clock, DollarSign, Zap, Brain } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Calculator, FileText, TrendingUp, Shield, Clock, DollarSign, Zap, Brain, LogOut } from "lucide-react";
 const Index = () => {
+  const { signOut } = useAuth();
+
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       {/* ... keep existing code (animated background elements, header, hero section, features section, footer) */}
       
@@ -24,10 +27,19 @@ const Index = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-transparent rounded blur-sm"></div>
               </div>
             </div>
-            <nav className="flex space-x-8">
+            <nav className="flex space-x-8 items-center">
               <Link to="/quote" className="text-dominion-blue hover:text-dominion-green font-medium transition-all duration-300 hover:drop-shadow-sm">
                 Get Quote
               </Link>
+              <Button
+                onClick={signOut}
+                variant="outline"
+                size="sm"
+                className="text-dominion-blue border-dominion-blue hover:bg-dominion-blue hover:text-white"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </nav>
           </div>
         </div>
