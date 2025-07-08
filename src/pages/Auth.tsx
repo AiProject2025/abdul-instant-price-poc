@@ -18,8 +18,8 @@ const loginSchema = z.object({
 
 const signupSchema = z.object({
   email: z.string().email('Please enter a valid email address').refine(
-    (email) => email.endsWith('@thedominion.com'),
-    'Only @thedominion.com email addresses are allowed'
+    (email) => email.endsWith('@thedominiongroup.com'),
+    'Only @thedominiongroup.com email addresses are allowed'
   ),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().min(1, 'Full name is required'),
@@ -193,7 +193,7 @@ const Auth = () => {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="name@thedominion.com" {...field} />
+                          <Input type="email" placeholder="name@thedominiongroup.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
