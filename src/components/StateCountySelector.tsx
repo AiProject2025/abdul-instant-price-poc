@@ -39,13 +39,12 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
     if (value.length >= 5) {
       const locationData = lookupCountyByZipCode(value);
       if (locationData) {
-        // Use setTimeout to ensure state updates happen in correct order
+        // Force immediate state update
+        onStateChange(locationData.state);
+        // Small delay to let state dropdown update before setting county
         setTimeout(() => {
-          onStateChange(locationData.state);
-          setTimeout(() => {
-            onCountyChange(locationData.county);
-          }, 50);
-        }, 50);
+          onCountyChange(locationData.county);
+        }, 100);
       }
     }
   };
