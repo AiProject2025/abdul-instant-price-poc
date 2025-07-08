@@ -299,9 +299,9 @@ const Quote = () => {
     setLastSubmittedFormData(null);
   };
 
-  const handleStartApplication = () => {
-    // Handle application start logic here
-    console.log("Starting application...");
+  const handleGenerateLoanQuote = () => {
+    // Handle loan quote generation logic here
+    console.log("Generating loan quote...");
   };
 
   const handleBackToQuestionnaire = () => {
@@ -424,7 +424,7 @@ const Quote = () => {
               results={pricingResults}
               flags={flags}
               onBackToForm={handleBackToQuestionnaire}
-              onStartApplication={handleStartApplication}
+              onGenerateLoanQuote={handleGenerateLoanQuote}
             />
           )}
         </div>

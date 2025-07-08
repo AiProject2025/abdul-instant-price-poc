@@ -21,11 +21,11 @@ interface PricingResultsProps {
     isLocked?: boolean;
   }[];
   flags?: string[];
-  onStartApplication: () => void;
+  onGenerateLoanQuote: () => void;
   onBackToForm: () => void;
 }
 
-const PricingResults = ({ results, flags, onStartApplication }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, onGenerateLoanQuote }: PricingResultsProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -149,11 +149,11 @@ const PricingResults = ({ results, flags, onStartApplication }: PricingResultsPr
               {/* Action Buttons */}
               <div className="flex gap-3">
                 <Button 
-                  onClick={onStartApplication}
+                  onClick={onGenerateLoanQuote}
                   className="flex-1 bg-dominion-blue hover:bg-dominion-blue/90 text-white"
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  Start Application with {result.noteBuyer}
+                  Generate Loan Quote
                 </Button>
                 
                 {/* Lock Rate Button - only for non-Blackstone products */}
