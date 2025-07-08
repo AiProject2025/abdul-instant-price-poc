@@ -83,6 +83,58 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote, lastSubmittedForm
     onGenerateLoanQuote(selectedResult, editedData);
   };
 
+  const handleEmailJosh = () => {
+    const borrowerName = lastSubmittedFormData 
+      ? `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower'
+      : 'Borrower';
+
+    const propertyAddress = lastSubmittedFormData 
+      ? `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, '')
+      : 'Property Address Not Available';
+
+    const emailSubject = `DSCR Loan Quote - ${borrowerName} - Flagged Transaction`;
+    
+    const emailBody = `Hi Josh,
+
+A DSCR loan quote has been generated that requires your review due to flagged conditions.
+
+BORROWER INFORMATION:
+- Name: ${borrowerName}
+- Property Address: ${propertyAddress}
+
+TRANSACTION FLAGS:
+${flags && flags.length > 0 ? flags.map(flag => `- ${flag}`).join('\n') : '- No specific flags listed'}
+
+PRICING RESULTS (${results.length} offers found):
+
+${results.map((result, index) => `
+OFFER ${index + 1}:
+- Lender: ${result.lender}
+- Note Buyer: ${result.noteBuyer}
+- Product: ${result.product}
+- Interest Rate: ${formatRate(result.rate)}
+- Monthly Payment: ${formatCurrency(result.monthlyPayment)}
+- Loan Amount: ${formatCurrency(result.loanAmount)}
+- DSCR: ${result.dscr.toFixed(3)}
+- LTV: ${result.ltv}%
+- Points: ${result.points}%
+- Property Type: ${result.propertyType}
+- Loan Purpose: ${result.loanPurpose}${result.refinanceType ? ` - ${result.refinanceType}` : ''}
+- PPP Duration: ${result.pppDuration}
+${result.isLocked ? '- Status: Rate Locked' : ''}
+`).join('\n')}
+
+This transaction has been flagged for one buyer and requires manual review before proceeding.
+
+Please review and advise on next steps.
+
+Best regards,
+DSCR Loan System`;
+
+    const mailtoLink = `mailto:joshb@thedominiongroup.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    window.location.href = mailtoLink;
+  };
+
   return (
     <div className="space-y-6">
       {/* Show flags first if they exist */}
@@ -336,6 +388,7 @@ const PricingResults = ({ results, flags, onGenerateLoanQuote, lastSubmittedForm
             <Button 
               variant="outline" 
               className="bg-white text-dominion-blue hover:bg-gray-100"
+              onClick={handleEmailJosh}
             >
               Email Josh
             </Button>
