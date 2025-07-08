@@ -81,6 +81,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     unit8Rent: '',
     unit9Rent: '',
     unit10Rent: '',
+    totalSquareFeet: '',
     
     // Annual Property Expenses
     annualTaxes: '',
@@ -129,7 +130,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     'unit1Rent', 'unit2Rent', 'unit3Rent', 'unit4Rent', 'unit5Rent',
     'unit6Rent', 'unit7Rent', 'unit8Rent', 'unit9Rent', 'unit10Rent',
     'annualTaxes', 'annualInsurance', 'annualAssociationFees', 'annualFloodInsurance',
-    'creditScore', 'desiredLTV'
+    'creditScore', 'desiredLTV', 'totalSquareFeet'
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -958,6 +959,36 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {renderRentalIncomeFields()}
               </div>
+              
+              {/* Total Square Feet */}
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Total Square Feet
+                    </label>
+                    <Input 
+                      type="number" 
+                      value={formState.totalSquareFeet} 
+                      onChange={e => handleInputChange('totalSquareFeet', e.target.value)} 
+                      placeholder="2,000" 
+                    />
+                  </div>
+                  
+                  {/* Show per-unit square footage calculation */}
+                  {formState.totalSquareFeet && formState.numberOfUnits && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Square Feet Per Unit
+                      </label>
+                      <div className="p-3 bg-white border border-gray-300 rounded text-lg font-semibold text-dominion-blue">
+                        {Math.round(parseFloat(formState.totalSquareFeet) / parseInt(formState.numberOfUnits)).toLocaleString()} sq ft
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
               <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-700">Total Rental Income:</span>
