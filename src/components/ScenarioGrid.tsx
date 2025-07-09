@@ -569,7 +569,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                 <Badge variant="secondary">{noteBuyerScenarios.length} scenarios</Badge>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {noteBuyerScenarios.map((scenario) => (
                   <Card key={scenario.id} className="hover:shadow-md transition-shadow">
                     <CardHeader className="pb-2 px-3 pt-3">
