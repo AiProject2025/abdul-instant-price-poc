@@ -157,13 +157,14 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     // Only show non-deleted scenarios
     if (scenario.deleted_at) return false;
     
-    // Only show scenarios for current property address
+    // If we have a current property address, filter by it
     if (currentPropertyAddress && scenario.form_data?.streetAddress) {
       const scenarioAddress = `${scenario.form_data.streetAddress || ''} ${scenario.form_data.city || ''} ${scenario.form_data.propertyState || ''}`.trim();
       return scenarioAddress === currentPropertyAddress;
     }
     
-    return false;
+    // If no current property address, show all non-deleted scenarios
+    return true;
   });
 
   // Group filtered scenarios by note buyer for grid view

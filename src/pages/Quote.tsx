@@ -474,6 +474,18 @@ const Quote = () => {
                 className="h-8 mr-3"
               />
               
+              {/* Property and Client Info */}
+              {lastSubmittedFormData && (
+                <div className="ml-4 text-sm text-gray-600">
+                  <div className="font-medium text-gray-900">
+                    {lastSubmittedFormData.firstName} {lastSubmittedFormData.lastName}
+                  </div>
+                  <div>
+                    {lastSubmittedFormData.streetAddress} {lastSubmittedFormData.city}, {lastSubmittedFormData.propertyState}
+                  </div>
+                </div>
+              )}
+              
               {/* Back Button */}
               {currentStep !== "upload" && (
                 <Button
