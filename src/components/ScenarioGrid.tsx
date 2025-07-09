@@ -357,6 +357,11 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Debug info */}
+      <div className="text-xs text-muted-foreground">
+        Debug: {scenarios.length} scenarios, {comparisonScenarios.length} in comparison
+      </div>
+      
       {/* Comparison Drop Zone */}
       <Card 
         className={`border-2 border-dashed transition-all ${

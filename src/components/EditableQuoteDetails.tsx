@@ -98,6 +98,10 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
     const points = editData.points || 0;
     const interestOnly = editData.interestOnly === "Yes" ? "IO" : "";
     
+    // Debug logging
+    console.log('generateScenarioName - editData:', editData);
+    console.log('generateScenarioName - noteBuyer:', noteBuyer);
+    
     const formattedAmount = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -105,7 +109,9 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
       maximumFractionDigits: 0,
     }).format(loanAmount);
     
-    return `${noteBuyer} ${ltv}%LTV ${formattedAmount} ${rate}% ${points}pts ${interestOnly}`.trim();
+    const scenarioName = `${noteBuyer} ${ltv}%LTV ${formattedAmount} ${rate}% ${points}pts ${interestOnly}`.trim();
+    console.log('Generated scenario name:', scenarioName);
+    return scenarioName;
   };
 
   // Auto-populate scenario name when data changes or dialog opens
