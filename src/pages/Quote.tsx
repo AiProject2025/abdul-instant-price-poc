@@ -12,6 +12,7 @@ import { saveQuote } from "@/services/quoteTracker";
 import { generateLoanQuote } from "@/utils/documentGenerator";
 import { ArrowLeft, History } from "lucide-react";
 import { useScenarios, Scenario } from "@/hooks/useScenarios";
+import { useToast } from "@/hooks/use-toast";
 
 const Quote = () => {
   const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results" | "scenarios">("upload");
@@ -25,6 +26,7 @@ const Quote = () => {
   const [flags, setFlags] = useState<string[]>([]);
 
   const { saveScenarioResults } = useScenarios();
+  const { toast } = useToast();
 
   const transformApiResponseToResults = (apiResponse: any) => {
     // Handle the new response structure where quotes are under the 'quotes' key
@@ -452,13 +454,51 @@ const Quote = () => {
     }
   };
 
-  const handleScenarioSelect = (scenario: any) => {
-    console.log("Selected scenario:", scenario);
-    
-    // Restore the form data from the selected scenario
-    setFormData(scenario.form_data);
-    setLastSubmittedFormData(scenario.form_data);
-    setCurrentStep("questionnaire");
+  const handleScenarioSelect = async (scenario: any) => {
+    try {
+      console.log("Selected scenario:", scenario);
+      
+      // Restore the form data from the selected scenario
+      setFormData(scenario.form_data);
+      setLastSubmittedFormData(scenario.form_data);
+      
+      // Transform the form data for the API call
+      const transformedData = transformFormDataForAPI(scenario.form_data);
+      
+      // Make a fresh pricing API call
+      const response = await fetch('https://n8n-prod.onrender.com/webhook/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/pricing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transformedData),
+      });
+
+      const data = await response.json();
+      console.log('Re-Quote API Response:', data);
+
+      if (data.quotes) {
+        const transformedResults = transformApiResponseToResults(data);
+        const transformedIneligible = getIneligibleBuyers(data);
+        
+        setPricingResults(transformedResults);
+        setIneligibleBuyers(transformedIneligible);
+        setFlags(data.flags || []);
+        setCurrentStep("results");
+        
+        toast({
+          title: "Success",
+          description: "Scenario loaded and re-quoted successfully with fresh pricing"
+        });
+      }
+    } catch (error) {
+      console.error('Error re-quoting scenario:', error);
+      toast({
+        title: "Error",
+        description: "Failed to re-quote scenario. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -582,6 +622,7 @@ const Quote = () => {
               ineligibleBuyers={ineligibleBuyers}
               onBackToForm={handleBackToQuestionnaire}
               onGenerateLoanQuote={handleGenerateLoanQuote}
+              onSelectScenario={handleScenarioSelect}
               lastSubmittedFormData={lastSubmittedFormData}
             />
           )}

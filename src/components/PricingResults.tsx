@@ -36,10 +36,11 @@ interface PricingResultsProps {
   ineligibleBuyers?: { noteBuyer: string; flags: string[] }[];
   onGenerateLoanQuote: (selectedResult?: any, editedData?: any) => void;
   onBackToForm: () => void;
+  onSelectScenario?: (scenario: Scenario) => void;
   lastSubmittedFormData?: any;
 }
 
-const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, lastSubmittedFormData }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, onSelectScenario, lastSubmittedFormData }: PricingResultsProps) => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -144,8 +145,25 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   };
 
   const handleSelectScenario = (scenario: Scenario) => {
-    onBackToForm(); // Navigate back to form to load the scenario data
-    // You might want to emit an event or use a prop to load the scenario data
+    if (onSelectScenario) {
+      onSelectScenario(scenario);
+    }
+  };
+
+  const handleReQuote = async (scenario: Scenario) => {
+    try {
+      // Load the scenario data back into the form and trigger a fresh pricing API call
+      if (onSelectScenario) {
+        onSelectScenario(scenario);
+      }
+    } catch (error) {
+      console.error('Error re-quoting scenario:', error);
+      toast({
+        title: "Error",
+        description: "Failed to re-quote scenario",
+        variant: "destructive"
+      });
+    }
   };
 
   // Filter scenarios for current property address and exclude deleted ones
@@ -242,7 +260,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     setIsEditDialogOpen(false);
   };
 
-  const handleReQuote = async (editedData: any) => {
+  const handleReQuoteWithData = async (editedData: any) => {
     // Close the edit dialog and trigger a new quote with the updated data
     setIsEditDialogOpen(false);
     setSelectedResult(null);
@@ -479,19 +497,9 @@ DSCR Loan System`;
                                 <Button 
                                   size="sm" 
                                   className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white"
-                                  onClick={() => handleEditQuote({
-                                    loanAmount: scenario.form_data.loanAmount,
-                                    rate: 0,
-                                    monthlyPayment: 0,
-                                    ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV,
-                                    dscr: scenario.form_data.dscr,
-                                    propertyType: scenario.form_data.propertyType,
-                                    loanPurpose: scenario.form_data.loanPurpose,
-                                    points: 0,
-                                    noteBuyer: scenario.form_data.noteBuyer || 'TBD'
-                                  })}
+                                  onClick={() => handleReQuote(scenario)}
                                 >
-                                  Click to re-price →
+                                  Re-Quote →
                                 </Button>
                               </CardContent>
                             </Card>
@@ -971,7 +979,7 @@ DSCR Loan System`;
             date: new Date().toLocaleDateString()
           }}
           onSave={handleSaveEditedQuote}
-          onReQuote={handleReQuote}
+          onReQuote={handleReQuoteWithData}
           currentPricingResults={results}
         />
       )}
