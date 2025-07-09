@@ -7,13 +7,14 @@ import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
 import { Button } from "@/components/ui/button";
 import QuoteTracker from "@/components/QuoteTracker";
+import ScenarioGrid from "@/components/ScenarioGrid";
 import { saveQuote } from "@/services/quoteTracker";
 import { generateLoanQuote } from "@/utils/documentGenerator";
-import { ArrowLeft } from "lucide-react";
-import { useScenarios } from "@/hooks/useScenarios";
+import { ArrowLeft, History } from "lucide-react";
+import { useScenarios, Scenario } from "@/hooks/useScenarios";
 
 const Quote = () => {
-  const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results">("upload");
+  const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results" | "scenarios">("upload");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [extractedData, setExtractedData] = useState<any>(null);
   const [formData, setFormData] = useState<any>(null);
@@ -505,6 +506,20 @@ const Quote = () => {
                 </Button>
               </div>
             )}
+            
+            {/* Scenarios Button - Always visible when not on upload */}
+            {currentStep !== "upload" && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={currentStep === "scenarios" ? "default" : "outline"}
+                  onClick={() => setCurrentStep("scenarios")}
+                  className="text-sm"
+                >
+                  <History className="w-4 h-4 mr-2" />
+                  Saved Scenarios
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -557,6 +572,10 @@ const Quote = () => {
               onGenerateLoanQuote={handleGenerateLoanQuote}
               lastSubmittedFormData={lastSubmittedFormData}
             />
+          )}
+
+          {currentStep === "scenarios" && (
+            <ScenarioGrid onSelectScenario={handleScenarioSelect} />
           )}
         </div>
       </main>
