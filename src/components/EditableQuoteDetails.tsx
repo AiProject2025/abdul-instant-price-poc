@@ -173,6 +173,12 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
         description: "Scenario saved successfully"
       });
     }
+    
+    // Force a small delay to ensure the UI updates
+    setTimeout(() => {
+      // This ensures any parent components re-render
+      window.dispatchEvent(new CustomEvent('scenarioSaved', { detail: { scenarioId } }));
+    }, 100);
   };
 
   const formatCurrency = (amount: number) => {

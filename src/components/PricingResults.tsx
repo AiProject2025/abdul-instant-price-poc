@@ -49,8 +49,18 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
   const [scenarioViewMode, setScenarioViewMode] = useState<"list" | "grid">("grid");
   
-  const { scenarios, scenarioResults, saveScenario, saveScenarioResults, deleteScenario, fetchScenarioResults } = useScenarios();
+  const { scenarios, scenarioResults, saveScenario, saveScenarioResults, deleteScenario, fetchScenarioResults, refetchScenarios } = useScenarios();
   const { toast } = useToast();
+
+  // Listen for scenario saved events to refresh the list
+  useEffect(() => {
+    const handleScenarioSaved = () => {
+      refetchScenarios(); // Refresh scenarios list
+    };
+    
+    window.addEventListener('scenarioSaved', handleScenarioSaved);
+    return () => window.removeEventListener('scenarioSaved', handleScenarioSaved);
+  }, [refetchScenarios]);
 
   // Auto-populate scenario name when form data changes
   useEffect(() => {
