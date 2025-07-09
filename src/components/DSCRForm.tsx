@@ -47,9 +47,9 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     // Property Details - New Purchase
     propertyType: '',
     propertyCondition: '',
-    rural: '',
-    decliningMarket: '',
-    interestOnly: '',
+    rural: 'No',
+    decliningMarket: 'No',
+    interestOnly: 'No',
     condoApprovalType: '',
     hasPurchaseContract: '',
     purchaseContractCloseDate: '',
@@ -160,10 +160,19 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
         [field]: validValue
       }));
     } else {
-      setFormState(prev => ({
-        ...prev,
-        [field]: value
-      }));
+      setFormState(prev => {
+        const newState = {
+          ...prev,
+          [field]: value
+        };
+        
+        // Auto-sync numberOfLeasedUnits when numberOfUnits changes
+        if (field === 'numberOfUnits') {
+          newState.numberOfLeasedUnits = value;
+        }
+        
+        return newState;
+      });
     }
   };
 
