@@ -18,6 +18,7 @@ const Quote = () => {
   const [formData, setFormData] = useState<any>(null);
   const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
   const [pricingResults, setPricingResults] = useState<any[]>([]);
+  const [ineligibleBuyers, setIneligibleBuyers] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [flags, setFlags] = useState<string[]>([]);
 
@@ -25,37 +26,56 @@ const Quote = () => {
     // Handle the new response structure where quotes are under the 'quotes' key
     const quotesData = apiResponse.quotes || apiResponse;
     
-    const results = Object.entries(quotesData).map(([noteBuyer, data]: [string, any]) => {
-      // Determine loan purpose
-      const loanPurpose = data.loan_purpose === 'refinance' ? 'Refinance' : 'Purchase';
-      
-      // Determine refinance type if applicable - check the form data since API doesn't return it
-      let refinanceType;
-      if (data.loan_purpose === 'refinance' && lastSubmittedFormData?.refinanceType) {
-        refinanceType = lastSubmittedFormData.refinanceType === 'CashOut' ? 'Cash Out' : 'Rate/Term';
-      }
+    const results = Object.entries(quotesData)
+      .filter(([noteBuyer, data]: [string, any]) => {
+        // Only include buyers that have pricing data and empty flags
+        return data.flags && data.flags.length === 0 && data.adjusted_interest_rate;
+      })
+      .map(([noteBuyer, data]: [string, any]) => {
+        // Determine loan purpose
+        const loanPurpose = data.loan_purpose === 'refinance' ? 'Refinance' : 'Purchase';
+        
+        // Determine refinance type if applicable - check the form data since API doesn't return it
+        let refinanceType;
+        if (data.loan_purpose === 'refinance' && lastSubmittedFormData?.refinanceType) {
+          refinanceType = lastSubmittedFormData.refinanceType === 'CashOut' ? 'Cash Out' : 'Rate/Term';
+        }
 
-      return {
-        lender: "Dominion Financial",
-        noteBuyer: noteBuyer,
-        product: noteBuyer, // Using note buyer name as product
-        rate: data.adjusted_interest_rate,
-        monthlyPayment: Math.round(data.final_est_payment),
-        totalInterest: Math.round(parseFloat(data.loan_amount) * 0.65), // Keep existing calculation
-        loanAmount: parseFloat(data.loan_amount),
-        dscr: data.final_dscr,
-        propertyType: data.property_type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-        loanPurpose: loanPurpose,
-        refinanceType: refinanceType,
-        pppDuration: "5/4/3/2/1",
-        ltv: parseFloat(data.ltv),
-        points: data.points || 2.0, // Default to 2.0 if not provided by API
-        isLocked: false
-      };
-    });
+        return {
+          lender: "Dominion Financial",
+          noteBuyer: noteBuyer,
+          product: noteBuyer, // Using note buyer name as product
+          rate: data.adjusted_interest_rate,
+          monthlyPayment: Math.round(data.final_est_payment),
+          totalInterest: Math.round(parseFloat(data.loan_amount) * 0.65), // Keep existing calculation
+          loanAmount: parseFloat(data.loan_amount),
+          dscr: data.final_dscr,
+          propertyType: data.property_type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+          loanPurpose: loanPurpose,
+          refinanceType: refinanceType,
+          pppDuration: "5/4/3/2/1",
+          ltv: parseFloat(data.ltv),
+          points: data.points || 2.0, // Default to 2.0 if not provided by API
+          isLocked: false
+        };
+      });
 
     // Sort by rate (best rate first)
     return results.sort((a, b) => a.rate - b.rate);
+  };
+
+  const getIneligibleBuyers = (apiResponse: any) => {
+    const quotesData = apiResponse.quotes || {};
+    
+    return Object.entries(quotesData)
+      .filter(([noteBuyer, data]: [string, any]) => {
+        // Include buyers that have flags (rejection reasons)
+        return data.flags && data.flags.length > 0;
+      })
+      .map(([noteBuyer, data]: [string, any]) => ({
+        noteBuyer,
+        flags: data.flags
+      }));
   };
 
   const transformFormDataForAPI = (formData: any) => {
@@ -289,6 +309,10 @@ const Quote = () => {
       const results = transformApiResponseToResults(pricingResponse);
       setPricingResults(results);
       
+      // Get ineligible buyers
+      const ineligible = getIneligibleBuyers(pricingResponse);
+      setIneligibleBuyers(ineligible);
+      
       // Store the flags from the API response
       if (pricingResponse.flags) {
         setFlags(pricingResponse.flags);
@@ -516,6 +540,7 @@ const Quote = () => {
             <PricingResults
               results={pricingResults}
               flags={flags}
+              ineligibleBuyers={ineligibleBuyers}
               onBackToForm={handleBackToQuestionnaire}
               onGenerateLoanQuote={handleGenerateLoanQuote}
               lastSubmittedFormData={lastSubmittedFormData}

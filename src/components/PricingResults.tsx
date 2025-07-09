@@ -27,12 +27,13 @@ interface PricingResultsProps {
     isLocked?: boolean;
   }[];
   flags?: string[];
+  ineligibleBuyers?: { noteBuyer: string; flags: string[] }[];
   onGenerateLoanQuote: (selectedResult?: any, editedData?: any) => void;
   onBackToForm: () => void;
   lastSubmittedFormData?: any;
 }
 
-const PricingResults = ({ results, flags, onGenerateLoanQuote, lastSubmittedFormData }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, lastSubmittedFormData }: PricingResultsProps) => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedResult, setSelectedResult] = useState<any>(null);
@@ -166,19 +167,20 @@ DSCR Loan System`;
     window.location.href = mailtoLink;
   };
 
-  // Generate all possible buyers for the ineligible reasons grid
-  const allBuyers = [
-    'Blackstone',
-    'Bayview',
-    'Maxex',
-    'Onslow Bay',
-    'Venus',
-    'Deephaven',
-    'Colchis',
-    'eResi',
-    'SG Premier',
-    'SG Connect',
-    'Towboat'
+  // Combine eligible and ineligible buyers for the table
+  const allBuyersForTable = [
+    // Available buyers
+    ...results.map(result => ({
+      noteBuyer: result.noteBuyer,
+      isAvailable: true,
+      flags: []
+    })),
+    // Ineligible buyers
+    ...ineligibleBuyers.map(buyer => ({
+      noteBuyer: buyer.noteBuyer,
+      isAvailable: false,
+      flags: buyer.flags
+    }))
   ];
   
   return (
@@ -454,46 +456,36 @@ DSCR Loan System`;
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allBuyers.map((buyer) => {
-                    const hasQuote = results.some(result => result.noteBuyer === buyer);
-                    
-                    return (
-                      <TableRow key={buyer}>
-                        <TableCell className="font-medium">{buyer}</TableCell>
-                        <TableCell>
-                          {hasQuote ? (
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
-                              Available
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200">
-                              Ineligible
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {hasQuote ? (
-                            <span className="text-sm text-gray-600">Pricing available</span>
-                          ) : (
-                            <div className="space-y-1">
-                              {flags && flags.length > 0 ? (
-                                flags.map((flag, index) => (
-                                  <div key={index} className="text-sm text-red-700 flex items-start gap-1">
-                                    <span className="text-xs">•</span>
-                                    <span>{flag}</span>
-                                  </div>
-                                ))
-                              ) : (
-                                <span className="text-sm text-gray-500">
-                                  No specific reasons available
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {allBuyersForTable.map((buyer) => (
+                    <TableRow key={buyer.noteBuyer}>
+                      <TableCell className="font-medium">{buyer.noteBuyer}</TableCell>
+                      <TableCell>
+                        {buyer.isAvailable ? (
+                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                            Available
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200">
+                            Ineligible
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {buyer.isAvailable ? (
+                          <span className="text-sm text-gray-600">Pricing available</span>
+                        ) : (
+                          <div className="space-y-1">
+                            {buyer.flags.map((flag, index) => (
+                              <div key={index} className="text-sm text-red-700 flex items-start gap-1">
+                                <span className="text-xs">•</span>
+                                <span>{flag}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
