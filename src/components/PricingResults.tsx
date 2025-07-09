@@ -141,6 +141,9 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   };
 
   const handleShowComparisonPreview = () => {
+    console.log('Preview button clicked, selected scenarios:', selectedScenarios.size);
+    console.log('Selected scenario IDs:', Array.from(selectedScenarios));
+    
     if (selectedScenarios.size === 0) {
       toast({
         title: "No scenarios selected",
@@ -150,6 +153,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
       return;
     }
 
+    console.log('Setting showComparisonPreview to true');
     setShowComparisonPreview(true);
   };
 
