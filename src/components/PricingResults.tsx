@@ -247,7 +247,30 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
       noteBuyer: result.noteBuyer,
       loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
       phoneNumber: '410-705-2277',
-      date: new Date().toLocaleDateString()
+      date: new Date().toLocaleDateString(),
+      // Map all the property details from the original form data
+      payoffAmount: lastSubmittedFormData.mortgagePayoff || 0,
+      purchasePrice: lastSubmittedFormData.purchasePrice || 0,
+      datePurchased: lastSubmittedFormData.datePurchased || '',
+      rehabCosts: lastSubmittedFormData.rehabCostSpent || 0,
+      rentalStatus: lastSubmittedFormData.leaseInPlace === 'Yes' ? 'Leased' : 'Vacant',
+      annualTaxAmount: lastSubmittedFormData.annualTaxes || 0,
+      totalMonthlyRent: lastSubmittedFormData.unit1Rent || 0,
+      annualInsuranceCost: lastSubmittedFormData.annualInsurance || 0,
+      totalMarketRent: lastSubmittedFormData.unit1Rent || 0,
+      annualAssociationFees: lastSubmittedFormData.annualAssociationFees || 0,
+      creditScore: lastSubmittedFormData.creditScore || 750,
+      propertyCondition: lastSubmittedFormData.propertyCondition || 'C4 or better',
+      // Additional quote details
+      propertiesQuoted: 1,
+      appraised_value: lastSubmittedFormData.marketValue || 0,
+      interestOnly: lastSubmittedFormData.interestOnly || "No",
+      interestReserve: 0,
+      escrowForTaxes: "Required",
+      floodCertification: "$120 reimbursement",
+      processingFee: "$350 loan processing fee for title company coordination",
+      rateLockFee: "Upfront Cost of 0.35% of Proposed Loan Amount",
+      legalFees: "$500 loan doc prep to Dominion Financial Services LLC"
     };
 
     setSelectedResult(result);
@@ -976,7 +999,30 @@ DSCR Loan System`;
             noteBuyer: selectedResult.noteBuyer,
             loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
             phoneNumber: '410-705-2277',
-            date: new Date().toLocaleDateString()
+            date: new Date().toLocaleDateString(),
+            // Pass all the property details from original form data
+            payoffAmount: lastSubmittedFormData.mortgagePayoff || 0,
+            purchasePrice: lastSubmittedFormData.purchasePrice || 0,
+            datePurchased: lastSubmittedFormData.datePurchased || '',
+            rehabCosts: lastSubmittedFormData.rehabCostSpent || 0,
+            rentalStatus: lastSubmittedFormData.leaseInPlace === 'Yes' ? 'Leased' : 'Vacant',
+            annualTaxAmount: lastSubmittedFormData.annualTaxes || 0,
+            totalMonthlyRent: lastSubmittedFormData.unit1Rent || 0,
+            annualInsuranceCost: lastSubmittedFormData.annualInsurance || 0,
+            totalMarketRent: lastSubmittedFormData.unit1Rent || 0,
+            annualAssociationFees: lastSubmittedFormData.annualAssociationFees || 0,
+            creditScore: lastSubmittedFormData.creditScore || 750,
+            propertyCondition: lastSubmittedFormData.propertyCondition || 'C4 or better',
+            // Additional quote details
+            propertiesQuoted: 1,
+            appraised_value: lastSubmittedFormData.marketValue || 0,
+            interestOnly: lastSubmittedFormData.interestOnly || "No",
+            interestReserve: 0,
+            escrowForTaxes: "Required",
+            floodCertification: "$120 reimbursement",
+            processingFee: "$350 loan processing fee for title company coordination",
+            rateLockFee: "Upfront Cost of 0.35% of Proposed Loan Amount",
+            legalFees: "$500 loan doc prep to Dominion Financial Services LLC"
           }}
           onSave={handleSaveEditedQuote}
           onReQuote={handleReQuoteWithData}
