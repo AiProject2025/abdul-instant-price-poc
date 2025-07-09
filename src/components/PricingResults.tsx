@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, DollarSign, Calculator, FileText, Home, Clock, Percent, Lock, Unlock, Grid, List, Edit, AlertTriangle, Save, Eye, Trash2 } from "lucide-react";
+import { TrendingUp, DollarSign, Calculator, FileText, Home, Clock, Percent, Lock, Unlock, Grid, List, Edit, AlertTriangle, Save, Eye, Trash2, MoreVertical, RotateCcw, Activity } from "lucide-react";
 import FlagsDisplay from "@/components/FlagsDisplay";
 import EditableQuoteDetails from "@/components/EditableQuoteDetails";
+import AuditLogDialog from "@/components/AuditLogDialog";
+import DeletedScenariosDialog from "@/components/DeletedScenariosDialog";
 import { useState, useEffect } from "react";
 import { useScenarios, Scenario, ScenarioResult } from "@/hooks/useScenarios";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface PricingResultsProps {
   results: {
@@ -43,6 +46,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   const [editData, setEditData] = useState<any>({});
   const [newScenarioName, setNewScenarioName] = useState("");
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
+  const [scenarioViewMode, setScenarioViewMode] = useState<"list" | "grid">("grid");
   
   const { scenarios, scenarioResults, saveScenario, saveScenarioResults, deleteScenario, fetchScenarioResults } = useScenarios();
   const { toast } = useToast();
@@ -122,6 +126,38 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
       }
     }
   };
+
+  const handleDeleteScenario = async (scenarioId: string) => {
+    try {
+      await deleteScenario(scenarioId);
+      toast({
+        title: "Success",
+        description: "Scenario deleted successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete scenario",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSelectScenario = (scenario: Scenario) => {
+    onBackToForm(); // Navigate back to form to load the scenario data
+    // You might want to emit an event or use a prop to load the scenario data
+  };
+
+  // Group scenarios by note buyer for grid view
+  const groupedScenarios = scenarios.reduce((groups, scenario) => {
+    // Extract note buyer from scenario results or form data
+    const noteBuyer = scenario.form_data.noteBuyer || 'Unknown';
+    if (!groups[noteBuyer]) {
+      groups[noteBuyer] = [];
+    }
+    groups[noteBuyer].push(scenario);
+    return groups;
+  }, {} as Record<string, Scenario[]>);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -328,42 +364,179 @@ DSCR Loan System`;
         </TabsList>
         
         <TabsContent value="results" className="space-y-6">
-          {/* Saved Scenarios Section - now within Current Results */}
+          {/* Saved Scenarios Section with Grid View and Soft Delete */}
           {scenarios.length > 0 && (
             <Card className="bg-blue-50 border-blue-200">
               <CardHeader>
-                <CardTitle className="text-blue-800">Saved Scenarios - Click to Re-Price</CardTitle>
-                <CardDescription>Previously saved scenarios you can reload and re-price</CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="text-blue-800">Saved Scenarios - Click to Re-Price</CardTitle>
+                    <CardDescription>Previously saved scenarios you can reload and re-price</CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <AuditLogDialog />
+                    <DeletedScenariosDialog />
+                    <div className="flex gap-1">
+                      <Button
+                        variant={scenarioViewMode === 'list' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setScenarioViewMode('list')}
+                      >
+                        <List className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={scenarioViewMode === 'grid' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setScenarioViewMode('grid')}
+                      >
+                        <Grid className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {scenarios.slice(0, 6).map((scenario) => (
-                    <Card key={scenario.id} className="cursor-pointer hover:shadow-md transition-shadow border-blue-200 bg-white" 
-                          onClick={() => handleEditQuote({
-                            loanAmount: scenario.form_data.loanAmount,
-                            rate: 0, // Will be re-priced
-                            monthlyPayment: 0,
-                            ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV,
-                            dscr: scenario.form_data.dscr,
-                            propertyType: scenario.form_data.propertyType,
-                            loanPurpose: scenario.form_data.loanPurpose,
-                            points: 0,
-                            noteBuyer: scenario.form_data.noteBuyer || 'TBD'
-                          })}>
-                      <CardContent className="p-3">
-                        <div className="text-sm font-medium text-blue-800 mb-1">{scenario.name}</div>
-                        <div className="text-xs text-gray-600 space-y-1">
-                          <div>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
-                          <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
-                          <div className="text-xs text-blue-600">Click to re-price →</div>
+                {scenarioViewMode === 'grid' ? (
+                  /* Grid View - Grouped by Note Buyer */
+                  <div className="space-y-6">
+                    {Object.entries(groupedScenarios).map(([noteBuyer, buyerScenarios]) => (
+                      <div key={noteBuyer}>
+                        <h3 className="text-lg font-semibold text-blue-800 mb-3">{noteBuyer}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {buyerScenarios.map((scenario) => (
+                            <Card key={scenario.id} className="border-blue-200 bg-white hover:shadow-md transition-shadow">
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="text-sm font-medium text-blue-800 truncate pr-2">{scenario.name}</div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                        <MoreVertical className="h-3 w-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleSelectScenario(scenario)}
+                                      >
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        Load Scenario
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleDeleteScenario(scenario.id)}
+                                        className="text-red-600"
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                                <div className="space-y-1 text-xs text-gray-600">
+                                  <div>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
+                                  <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
+                                  <div>Created: {new Date(scenario.created_at).toLocaleDateString()}</div>
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white"
+                                  onClick={() => handleEditQuote({
+                                    loanAmount: scenario.form_data.loanAmount,
+                                    rate: 0,
+                                    monthlyPayment: 0,
+                                    ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV,
+                                    dscr: scenario.form_data.dscr,
+                                    propertyType: scenario.form_data.propertyType,
+                                    loanPurpose: scenario.form_data.loanPurpose,
+                                    points: 0,
+                                    noteBuyer: scenario.form_data.noteBuyer || 'TBD'
+                                  })}
+                                >
+                                  Click to re-price →
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          ))}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                {scenarios.length > 6 && (
-                  <div className="text-center mt-3">
-                    <Button variant="outline" size="sm">View All {scenarios.length} Scenarios</Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* List View */
+                  <div className="space-y-4">
+                    {scenarios.map((scenario) => (
+                      <Card key={scenario.id} className="border-blue-200 bg-white">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleToggleScenarioExpand(scenario.id)}
+                                  className="text-blue-800 font-medium"
+                                >
+                                  {scenario.name}
+                                  {expandedScenario === scenario.id ? ' ▼' : ' ▶'}
+                                </Button>
+                              </div>
+                              <div className="text-xs text-gray-600 mt-1">
+                                <span>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</span>
+                                <span className="mx-2">•</span>
+                                <span>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</span>
+                                <span className="mx-2">•</span>
+                                <span>Created: {new Date(scenario.created_at).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleSelectScenario(scenario)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                Load
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDeleteScenario(scenario.id)}
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Expanded pricing results */}
+                          {expandedScenario === scenario.id && scenarioResults[scenario.id] && (
+                            <div className="mt-4 pt-4 border-t border-blue-200">
+                              <h4 className="text-sm font-medium text-blue-800 mb-2">Pricing Results:</h4>
+                              <div className="overflow-x-auto">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="text-xs">Buyer</TableHead>
+                                      <TableHead className="text-xs">Rate</TableHead>
+                                      <TableHead className="text-xs">Price</TableHead>
+                                      <TableHead className="text-xs">Amount</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {scenarioResults[scenario.id].map((result: ScenarioResult) => (
+                                      <TableRow key={result.id}>
+                                        <TableCell className="text-xs">{result.buyer_name}</TableCell>
+                                        <TableCell className="text-xs">{formatRate(result.rate)}</TableCell>
+                                        <TableCell className="text-xs">{formatCurrency(result.price)}</TableCell>
+                                        <TableCell className="text-xs">{formatCurrency(result.loan_amount)}</TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </CardContent>
