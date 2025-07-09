@@ -5,57 +5,122 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, CalendarIcon } from "lucide-react";
 import { statesWithAbbreviations } from "@/utils/locationData";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface LoanPassViewProps {
   onBack: () => void;
   onSubmit: (data: any) => void;
   isLoading?: boolean;
+  initialData?: any; // For auto-populating from DSCR Questionnaire
 }
 
-const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
+const LoanPassView = ({ onBack, onSubmit, isLoading, initialData }: LoanPassViewProps) => {
   const [formData, setFormData] = useState({
-    loanStatus: "",
-    borrowerEmail: "",
-    entityOrPersonal: "Entity",
-    firstTimeInvestor: "No",
-    citizenType: "",
-    desiredLoanTerm: "360 month(s)",
-    creditEvent: "No",
-    creditEventType: "",
-    mortgageLatePayments: "No",
-    mortgageLateType: "",
-    state: "",
-    propertyType: "",
-    condoApprovalType: "",
-    propertyCondition: "",
-    vacant: "No",
-    nonconformingUse: "No",
-    canRebuild: "",
-    shortTermRental: "No",
-    m2mLease: "No",
-    section8: "No",
-    ruralProperty: "No",
-    decliningMarkets: "No",
-    existingDebt: "No",
-    crossCollateralized: "No",
-    interestOnly: "No",
-    loanPurpose: "",
-    delayedPurchase: "No",
-    thirdPartyValuationStatus: "Pending",
-    interestReserves: "No",
-    prepaymentPenaltyTerm: "",
-    prepaymentPenaltyStructure: "",
-    isProductAApproved: "No",
-    generateLoanQuote: "No",
-    loanOfficerName: "",
-    exceptionRequest: "No",
-    managerException: "No",
-    pricingException: "No"
+    // LOAN STATUS
+    loanStatus: initialData?.loanStatus || "Initial Loan Quote",
+    
+    // BORROWER INFORMATION
+    borrowerEmail: initialData?.borrowerEmail || "",
+    businessName: initialData?.businessName || "",
+    borrowerPhone: initialData?.borrowerPhone || "",
+    entityOrPersonal: initialData?.entityOrPersonal || "Entity",
+    firstTimeInvestor: initialData?.firstTimeInvestor || "No",
+    citizenshipType: initialData?.citizenshipType || "US Citizen",
+    decisionCreditScore: initialData?.decisionCreditScore || "",
+    monthsOfReserves: initialData?.monthsOfReserves || "12",
+    desiredLoanTerm: initialData?.desiredLoanTerm || "360",
+    
+    // BROKER INFORMATION
+    brokerCompanyName: initialData?.brokerCompanyName || "",
+    brokerLastName: initialData?.brokerLastName || "",
+    brokerFirstName: initialData?.brokerFirstName || "",
+    brokerPhoneNumber: initialData?.brokerPhoneNumber || "",
+    brokerEmail: initialData?.brokerEmail || "",
+    
+    // PROPERTY INFORMATION
+    numberOfPropertiesOnLoan: initialData?.numberOfPropertiesOnLoan || "1",
+    creditEvent: initialData?.creditEvent || "No",
+    mortgageLatePayments: initialData?.mortgageLatePayments || "No",
+    
+    // PROPERTY DETAILS
+    state: initialData?.state || "",
+    county: initialData?.county || "",
+    zipCode: initialData?.zipCode || "",
+    streetAddress: initialData?.streetAddress || "",
+    city: initialData?.city || "",
+    propertyType: initialData?.propertyType || "",
+    numberOfUnits: initialData?.numberOfUnits || "",
+    propertyCondition: initialData?.propertyCondition || "C1",
+    vacant: initialData?.vacant || "No",
+    numberOfLeasedUnits: initialData?.numberOfLeasedUnits || "",
+    nonconformingUse: initialData?.nonconformingUse || "No",
+    shortTermRental: initialData?.shortTermRental || "No",
+    m2mLease: initialData?.m2mLease || "No",
+    section8: initialData?.section8 || "No",
+    ruralProperty: initialData?.ruralProperty || "No",
+    decliningMarkets: initialData?.decliningMarkets || "No",
+    propertySquareFootage: initialData?.propertySquareFootage || "",
+    
+    // CONDITIONAL FIELDS
+    condoApprovalType: initialData?.condoApprovalType || "",
+    monthlyNOI: initialData?.monthlyNOI || "",
+    hasPurchaseContract: initialData?.hasPurchaseContract || "No",
+    purchaseContractCloseDate: initialData?.purchaseContractCloseDate || null,
+    datePurchased: initialData?.datePurchased || null,
+    hasMortgage: initialData?.hasMortgage || "No",
+    mortgagePayoff: initialData?.mortgagePayoff || "",
+    
+    // DATES
+    acquisitionDate: initialData?.acquisitionDate || null,
+    expectedClosingDate: initialData?.expectedClosingDate || null,
+    
+    // FINANCIAL INFORMATION
+    existingDebt: initialData?.existingDebt || "No",
+    marketRent: initialData?.marketRent || "",
+    inPlaceLease: initialData?.inPlaceLease || "",
+    monthlyTaxes: initialData?.monthlyTaxes || "",
+    monthlyInsurance: initialData?.monthlyInsurance || "",
+    monthlyHOASpecialAssess: initialData?.monthlyHOASpecialAssess || "0.00",
+    monthlyFloodInsurance: initialData?.monthlyFloodInsurance || "0.00",
+    
+    // LOAN DETAILS
+    crossCollateralized: initialData?.crossCollateralized || "No",
+    interestOnly: initialData?.interestOnly || "No",
+    loanPurpose: initialData?.loanPurpose || "",
+    refinanceType: initialData?.refinanceType || "",
+    cashOutAmount: initialData?.cashOutAmount || "",
+    delayedPurchase: initialData?.delayedPurchase || "No",
+    appraisedValue: initialData?.appraisedValue || "",
+    thirdPartyValuationStatus: initialData?.thirdPartyValuationStatus || "Pending",
+    purchasePrice: initialData?.purchasePrice || "",
+    rehabCost: initialData?.rehabCost || "",
+    baseLoanAmount: initialData?.baseLoanAmount || "",
+    interestReserves: initialData?.interestReserves || "No",
+    originationPoints: initialData?.originationPoints || "",
+    prepaymentPenaltyTerm: initialData?.prepaymentPenaltyTerm || "5 Year",
+    prepaymentPenaltyStructure: initialData?.prepaymentPenaltyStructure || "Step-Down",
+    isProductAApproved: initialData?.isProductAApproved || "Yes",
+    
+    // BROKER FEES
+    brokerPointsOrFee: initialData?.brokerPointsOrFee || "",
+    brokerProcessingFee: initialData?.brokerProcessingFee || "",
+    
+    // EXPORT/SUBMISSION OPTIONS
+    generateLoanQuote: initialData?.generateLoanQuote || "No",
+    loanOfficerName: initialData?.loanOfficerName || "",
+    exceptionRequest: initialData?.exceptionRequest || "",
+    managerException: initialData?.managerException || "",
+    pricingException: initialData?.pricingException || "",
+    brokerSubmission: initialData?.brokerSubmission || ""
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | Date | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -64,28 +129,31 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
     onSubmit(formData);
   };
 
+  // Calculate NOI if needed
+  const shouldShowMonthlyNOI = formData.numberOfUnits && parseInt(formData.numberOfUnits) >= 5;
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-4 mb-6">
         <Button variant="outline" onClick={onBack} className="flex items-center gap-2">
           <ArrowLeft size={16} />
           Back
         </Button>
-        <h1 className="text-2xl font-bold text-dominion-blue">Loan Pass View</h1>
+        <h1 className="text-2xl font-bold">Loan Pass View</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
+        {/* LOAN STATUS SECTION */}
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>Loan Status</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <div>
               <Label htmlFor="loanStatus">Loan Status</Label>
               <Select value={formData.loanStatus} onValueChange={(value) => handleInputChange('loanStatus', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select loan status" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Initial Loan Quote">Initial Loan Quote</SelectItem>
@@ -99,7 +167,15 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
                 </SelectContent>
               </Select>
             </div>
-            
+          </CardContent>
+        </Card>
+
+        {/* BORROWER INFORMATION */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Borrower Information</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="borrowerEmail">Borrower Email Address</Label>
               <Input
@@ -109,162 +185,208 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
                 onChange={(e) => handleInputChange('borrowerEmail', e.target.value)}
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Borrower Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Borrower Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            
             <div>
-              <Label>Is Bwr closing under an entity or personal name?</Label>
-              <RadioGroup
-                value={formData.entityOrPersonal}
-                onValueChange={(value) => handleInputChange('entityOrPersonal', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Entity" id="entity" />
-                  <Label htmlFor="entity">Entity</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Personal" id="personal" />
-                  <Label htmlFor="personal">Personal</Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="businessName">Business Name</Label>
+              <Input
+                id="businessName"
+                value={formData.businessName}
+                onChange={(e) => handleInputChange('businessName', e.target.value)}
+              />
             </div>
             
             <div>
-              <Label>First Time Investor</Label>
-              <RadioGroup
-                value={formData.firstTimeInvestor}
-                onValueChange={(value) => handleInputChange('firstTimeInvestor', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="firstTimeYes" />
-                  <Label htmlFor="firstTimeYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="firstTimeNo" />
-                  <Label htmlFor="firstTimeNo">No</Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="borrowerPhone">Borrower Phone #</Label>
+              <Input
+                id="borrowerPhone"
+                type="tel"
+                value={formData.borrowerPhone}
+                onChange={(e) => handleInputChange('borrowerPhone', e.target.value)}
+              />
             </div>
             
             <div>
-              <Label htmlFor="citizenType">Citizen Type</Label>
-              <Select value={formData.citizenType} onValueChange={(value) => handleInputChange('citizenType', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select citizen type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="US Citizen">US Citizen</SelectItem>
-                  <SelectItem value="Foreign National">Foreign National</SelectItem>
-                  <SelectItem value="Non-Permanent Resident Alien">Non-Permanent Resident Alien</SelectItem>
-                  <SelectItem value="Permanent Resident Alien">Permanent Resident Alien</SelectItem>
-                  <SelectItem value="ITIN">ITIN</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="desiredLoanTerm">Desired Loan Term</Label>
-              <Select value={formData.desiredLoanTerm} onValueChange={(value) => handleInputChange('desiredLoanTerm', value)}>
+              <Label>Is borrower closing under an entity or personal name?</Label>
+              <Select value={formData.entityOrPersonal} onValueChange={(value) => handleInputChange('entityOrPersonal', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="360 month(s)">360 month(s)</SelectItem>
+                  <SelectItem value="Entity">Entity</SelectItem>
+                  <SelectItem value="Personal">Personal</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label>Credit Event</Label>
-              <div className="space-y-2">
-                <RadioGroup
-                  value={formData.creditEvent}
-                  onValueChange={(value) => handleInputChange('creditEvent', value)}
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Yes" id="creditEventYes" />
-                    <Label htmlFor="creditEventYes">Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="No" id="creditEventNo" />
-                    <Label htmlFor="creditEventNo">No</Label>
-                  </div>
-                </RadioGroup>
-                
-                {formData.creditEvent === "Yes" && (
-                  <Select value={formData.creditEventType} onValueChange={(value) => handleInputChange('creditEventType', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select credit event type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Chapter 7 Bankruptcy">Chapter 7 Bankruptcy</SelectItem>
-                      <SelectItem value="Chapter 11 Bankruptcy">Chapter 11 Bankruptcy</SelectItem>
-                      <SelectItem value="Chapter 13 Bankruptcy">Chapter 13 Bankruptcy</SelectItem>
-                      <SelectItem value="Deed-In-Lieu">Deed-In-Lieu</SelectItem>
-                      <SelectItem value="Forbearance">Forbearance</SelectItem>
-                      <SelectItem value="Foreclosure">Foreclosure</SelectItem>
-                      <SelectItem value="Short Sale">Short Sale</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
+              <Label>First Time Investor</Label>
+              <Select value={formData.firstTimeInvestor} onValueChange={(value) => handleInputChange('firstTimeInvestor', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div>
-              <Label>Mortgage Late Payments</Label>
-              <div className="space-y-2">
-                <RadioGroup
-                  value={formData.mortgageLatePayments}
-                  onValueChange={(value) => handleInputChange('mortgageLatePayments', value)}
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Yes" id="latePaymentsYes" />
-                    <Label htmlFor="latePaymentsYes">Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="No" id="latePaymentsNo" />
-                    <Label htmlFor="latePaymentsNo">No</Label>
-                  </div>
-                </RadioGroup>
-                
-                {formData.mortgageLatePayments === "Yes" && (
-                  <Select value={formData.mortgageLateType} onValueChange={(value) => handleInputChange('mortgageLateType', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select late payment type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="x30x6">x30x6</SelectItem>
-                      <SelectItem value="x30x12">x30x12</SelectItem>
-                      <SelectItem value="x30x24">x30x24</SelectItem>
-                      <SelectItem value="x60x12">x60x12</SelectItem>
-                      <SelectItem value="x60x24">x60x24</SelectItem>
-                      <SelectItem value="x90x12">x90x12</SelectItem>
-                      <SelectItem value="x90x24">x90x24</SelectItem>
-                      <SelectItem value="x120x12">x120x12</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
+              <Label>Citizenship Type</Label>
+              <Select value={formData.citizenshipType} onValueChange={(value) => handleInputChange('citizenshipType', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="US Citizen">US Citizen</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="decisionCreditScore">Decision Credit Score</Label>
+              <Input
+                id="decisionCreditScore"
+                type="number"
+                value={formData.decisionCreditScore}
+                onChange={(e) => handleInputChange('decisionCreditScore', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="monthsOfReserves">Months of Reserves</Label>
+              <Input
+                id="monthsOfReserves"
+                type="number"
+                value={formData.monthsOfReserves}
+                onChange={(e) => handleInputChange('monthsOfReserves', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="desiredLoanTerm">Desired Loan Term</Label>
+              <div className="flex">
+                <Input
+                  id="desiredLoanTerm"
+                  type="number"
+                  value={formData.desiredLoanTerm}
+                  onChange={(e) => handleInputChange('desiredLoanTerm', e.target.value)}
+                  className="rounded-r-none"
+                />
+                <div className="flex items-center px-3 bg-muted border border-l-0 rounded-r-md text-sm">
+                  months
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Property Information */}
+        {/* BROKER INFORMATION */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Broker Information</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="brokerCompanyName">Broker Company Name</Label>
+              <Input
+                id="brokerCompanyName"
+                value={formData.brokerCompanyName}
+                onChange={(e) => handleInputChange('brokerCompanyName', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="brokerLastName">Broker Last Name</Label>
+              <Input
+                id="brokerLastName"
+                value={formData.brokerLastName}
+                onChange={(e) => handleInputChange('brokerLastName', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="brokerFirstName">Broker First Name</Label>
+              <Input
+                id="brokerFirstName"
+                value={formData.brokerFirstName}
+                onChange={(e) => handleInputChange('brokerFirstName', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="brokerPhoneNumber">Broker Phone Number</Label>
+              <Input
+                id="brokerPhoneNumber"
+                type="tel"
+                value={formData.brokerPhoneNumber}
+                onChange={(e) => handleInputChange('brokerPhoneNumber', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="brokerEmail">Broker Email</Label>
+              <Input
+                id="brokerEmail"
+                type="email"
+                value={formData.brokerEmail}
+                onChange={(e) => handleInputChange('brokerEmail', e.target.value)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* PROPERTY INFORMATION */}
         <Card>
           <CardHeader>
             <CardTitle>Property Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="numberOfPropertiesOnLoan">Number of Properties on Loan</Label>
+              <Input
+                id="numberOfPropertiesOnLoan"
+                type="number"
+                value={formData.numberOfPropertiesOnLoan}
+                onChange={(e) => handleInputChange('numberOfPropertiesOnLoan', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label>Credit Event</Label>
+              <Select value={formData.creditEvent} onValueChange={(value) => handleInputChange('creditEvent', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Mortgage Late Payments</Label>
+              <Select value={formData.mortgageLatePayments} onValueChange={(value) => handleInputChange('mortgageLatePayments', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* PROPERTY DETAILS */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Property Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="state">State</Label>
               <Select value={formData.state} onValueChange={(value) => handleInputChange('state', value)}>
@@ -282,44 +404,100 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
             </div>
             
             <div>
-              <Label htmlFor="propertyType">Property Type</Label>
+              <Label htmlFor="county">County</Label>
+              <Input
+                id="county"
+                value={formData.county}
+                onChange={(e) => handleInputChange('county', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="zipCode">Zip Code</Label>
+              <Input
+                id="zipCode"
+                value={formData.zipCode}
+                onChange={(e) => handleInputChange('zipCode', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="streetAddress">Street Address</Label>
+              <Input
+                id="streetAddress"
+                value={formData.streetAddress}
+                onChange={(e) => handleInputChange('streetAddress', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label>Property Type</Label>
               <Select value={formData.propertyType} onValueChange={(value) => handleInputChange('propertyType', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select property type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Single Family">Single Family</SelectItem>
-                  <SelectItem value="Condominium">Condominium</SelectItem>
                   <SelectItem value="Two to Four Family">Two to Four Family</SelectItem>
-                  <SelectItem value="Mixed-Use">Mixed-Use</SelectItem>
-                  <SelectItem value="Modular Home">Modular Home</SelectItem>
-                  <SelectItem value="Manufactured Home">Manufactured Home</SelectItem>
-                  <SelectItem value="Multi Family (5-10)">Multi Family (5-10)</SelectItem>
+                  <SelectItem value="Multi-Family">Multi-Family</SelectItem>
+                  <SelectItem value="Mixed Use">Mixed Use</SelectItem>
+                  <SelectItem value="Condominium">Condominium</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             {formData.propertyType === "Condominium" && (
               <div>
-                <Label htmlFor="condoApprovalType">Condo Approval Type</Label>
+                <Label>Condo Approval Type</Label>
                 <Select value={formData.condoApprovalType} onValueChange={(value) => handleInputChange('condoApprovalType', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select condo approval type" />
+                    <SelectValue placeholder="Select approval type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Warrantable">Warrantable</SelectItem>
                     <SelectItem value="Non-Warrantable">Non-Warrantable</SelectItem>
-                    <SelectItem value="Condotel">Condotel</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             )}
             
             <div>
-              <Label htmlFor="propertyCondition">Property Condition</Label>
+              <Label htmlFor="numberOfUnits">Number of Units</Label>
+              <Input
+                id="numberOfUnits"
+                type="number"
+                value={formData.numberOfUnits}
+                onChange={(e) => handleInputChange('numberOfUnits', e.target.value)}
+              />
+            </div>
+            
+            {shouldShowMonthlyNOI && (
+              <div>
+                <Label htmlFor="monthlyNOI">Monthly NOI</Label>
+                <Input
+                  id="monthlyNOI"
+                  type="number"
+                  step="0.01"
+                  value={formData.monthlyNOI}
+                  onChange={(e) => handleInputChange('monthlyNOI', e.target.value)}
+                />
+              </div>
+            )}
+            
+            <div>
+              <Label>Property Condition</Label>
               <Select value={formData.propertyCondition} onValueChange={(value) => handleInputChange('propertyCondition', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select property condition" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="C1">C1</SelectItem>
@@ -334,247 +512,528 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
             
             <div>
               <Label>Vacant</Label>
-              <RadioGroup
-                value={formData.vacant}
-                onValueChange={(value) => handleInputChange('vacant', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="vacantYes" />
-                  <Label htmlFor="vacantYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="vacantNo" />
-                  <Label htmlFor="vacantNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label>Nonconforming/Grandfathered Use?</Label>
-              <div className="space-y-2">
-                <RadioGroup
-                  value={formData.nonconformingUse}
-                  onValueChange={(value) => handleInputChange('nonconformingUse', value)}
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Yes" id="nonconformingYes" />
-                    <Label htmlFor="nonconformingYes">Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="No" id="nonconformingNo" />
-                    <Label htmlFor="nonconformingNo">No</Label>
-                  </div>
-                </RadioGroup>
-                
-                {formData.nonconformingUse === "Yes" && (
-                  <div>
-                    <Label>Can the property be legally rebuilt if destroyed?</Label>
-                    <RadioGroup
-                      value={formData.canRebuild}
-                      onValueChange={(value) => handleInputChange('canRebuild', value)}
-                      className="flex gap-4 mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Yes" id="canRebuildYes" />
-                        <Label htmlFor="canRebuildYes">Yes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="No" id="canRebuildNo" />
-                        <Label htmlFor="canRebuildNo">No</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <Label>Short Term Rental</Label>
-              <RadioGroup
-                value={formData.shortTermRental}
-                onValueChange={(value) => handleInputChange('shortTermRental', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="shortTermRentalYes" />
-                  <Label htmlFor="shortTermRentalYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="shortTermRentalNo" />
-                  <Label htmlFor="shortTermRentalNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label>MTM Lease</Label>
-              <RadioGroup
-                value={formData.m2mLease}
-                onValueChange={(value) => handleInputChange('m2mLease', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="m2mLeaseYes" />
-                  <Label htmlFor="m2mLeaseYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="m2mLeaseNo" />
-                  <Label htmlFor="m2mLeaseNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label>Section 8</Label>
-              <RadioGroup
-                value={formData.section8}
-                onValueChange={(value) => handleInputChange('section8', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="section8Yes" />
-                  <Label htmlFor="section8Yes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="section8No" />
-                  <Label htmlFor="section8No">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label>Rural Property</Label>
-              <RadioGroup
-                value={formData.ruralProperty}
-                onValueChange={(value) => handleInputChange('ruralProperty', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="ruralYes" />
-                  <Label htmlFor="ruralYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="ruralNo" />
-                  <Label htmlFor="ruralNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label>Declining Markets</Label>
-              <RadioGroup
-                value={formData.decliningMarkets}
-                onValueChange={(value) => handleInputChange('decliningMarkets', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="decliningMarketsYes" />
-                  <Label htmlFor="decliningMarketsYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="decliningMarketsNo" />
-                  <Label htmlFor="decliningMarketsNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label>Existing Debt</Label>
-              <RadioGroup
-                value={formData.existingDebt}
-                onValueChange={(value) => handleInputChange('existingDebt', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="existingDebtYes" />
-                  <Label htmlFor="existingDebtYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="existingDebtNo" />
-                  <Label htmlFor="existingDebtNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Loan Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Loan Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Cross Collateralized</Label>
-              <RadioGroup
-                value={formData.crossCollateralized}
-                onValueChange={(value) => handleInputChange('crossCollateralized', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="crossCollateralizedYes" />
-                  <Label htmlFor="crossCollateralizedYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="crossCollateralizedNo" />
-                  <Label htmlFor="crossCollateralizedNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label>Interest Only</Label>
-              <RadioGroup
-                value={formData.interestOnly}
-                onValueChange={(value) => handleInputChange('interestOnly', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="interestOnlyYes" />
-                  <Label htmlFor="interestOnlyYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="interestOnlyNo" />
-                  <Label htmlFor="interestOnlyNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            <div>
-              <Label htmlFor="loanPurpose">Loan Purpose</Label>
-              <Select value={formData.loanPurpose} onValueChange={(value) => handleInputChange('loanPurpose', value)}>
+              <Select value={formData.vacant} onValueChange={(value) => handleInputChange('vacant', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select loan purpose" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Refinance">Refinance</SelectItem>
-                  <SelectItem value="Purchase">Purchase</SelectItem>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label>Delayed Purchase</Label>
-              <RadioGroup
-                value={formData.delayedPurchase}
-                onValueChange={(value) => handleInputChange('delayedPurchase', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="delayedPurchaseYes" />
-                  <Label htmlFor="delayedPurchaseYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="delayedPurchaseNo" />
-                  <Label htmlFor="delayedPurchaseNo">No</Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="numberOfLeasedUnits">Number of Leased Units</Label>
+              <Input
+                id="numberOfLeasedUnits"
+                type="number"
+                value={formData.numberOfLeasedUnits}
+                onChange={(e) => handleInputChange('numberOfLeasedUnits', e.target.value)}
+              />
             </div>
             
             <div>
-              <Label htmlFor="thirdPartyValuationStatus">Third Party Valuation Status</Label>
+              <Label>Nonconforming/Grandfathered use?</Label>
+              <Select value={formData.nonconformingUse} onValueChange={(value) => handleInputChange('nonconformingUse', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Short Term Rental</Label>
+              <Select value={formData.shortTermRental} onValueChange={(value) => handleInputChange('shortTermRental', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>M2M Lease</Label>
+              <Select value={formData.m2mLease} onValueChange={(value) => handleInputChange('m2mLease', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Section 8?</Label>
+              <Select value={formData.section8} onValueChange={(value) => handleInputChange('section8', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Rural Property</Label>
+              <Select value={formData.ruralProperty} onValueChange={(value) => handleInputChange('ruralProperty', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Declining Markets</Label>
+              <Select value={formData.decliningMarkets} onValueChange={(value) => handleInputChange('decliningMarkets', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="propertySquareFootage">Property Square Footage</Label>
+              <Input
+                id="propertySquareFootage"
+                type="number"
+                value={formData.propertySquareFootage}
+                onChange={(e) => handleInputChange('propertySquareFootage', e.target.value)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CONDITIONAL FIELDS FOR PURCHASE */}
+        {formData.loanPurpose === "Purchase" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Purchase Details</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Has Purchase Contract</Label>
+                <Select value={formData.hasPurchaseContract} onValueChange={(value) => handleInputChange('hasPurchaseContract', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {formData.hasPurchaseContract === "Yes" && (
+                <div>
+                  <Label>Purchase Contract Close Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.purchaseContractCloseDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.purchaseContractCloseDate ? (
+                          format(formData.purchaseContractCloseDate, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={formData.purchaseContractCloseDate}
+                        onSelect={(date) => handleInputChange('purchaseContractCloseDate', date)}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* CONDITIONAL FIELDS FOR REFINANCE */}
+        {formData.loanPurpose === "Refinance" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Refinance Details</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Date Purchased</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.datePurchased && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.datePurchased ? (
+                        format(formData.datePurchased, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.datePurchased}
+                      onSelect={(date) => handleInputChange('datePurchased', date)}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              <div>
+                <Label>Has Mortgage</Label>
+                <Select value={formData.hasMortgage} onValueChange={(value) => handleInputChange('hasMortgage', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {formData.hasMortgage === "Yes" && (
+                <div>
+                  <Label htmlFor="mortgagePayoff">Mortgage Payoff</Label>
+                  <Input
+                    id="mortgagePayoff"
+                    type="number"
+                    step="0.01"
+                    value={formData.mortgagePayoff}
+                    onChange={(e) => handleInputChange('mortgagePayoff', e.target.value)}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* DATES */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Dates</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Acquisition Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.acquisitionDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.acquisitionDate ? (
+                      format(formData.acquisitionDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.acquisitionDate}
+                    onSelect={(date) => handleInputChange('acquisitionDate', date)}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div>
+              <Label>Expected Closing Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.expectedClosingDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.expectedClosingDate ? (
+                      format(formData.expectedClosingDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.expectedClosingDate}
+                    onSelect={(date) => handleInputChange('expectedClosingDate', date)}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* FINANCIAL INFORMATION */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Financial Information</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Existing Debt</Label>
+              <Select value={formData.existingDebt} onValueChange={(value) => handleInputChange('existingDebt', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="marketRent">Market Rent</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="marketRent"
+                  type="number"
+                  step="0.01"
+                  value={formData.marketRent}
+                  onChange={(e) => handleInputChange('marketRent', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="inPlaceLease">In-Place Lease</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="inPlaceLease"
+                  type="number"
+                  step="0.01"
+                  value={formData.inPlaceLease}
+                  onChange={(e) => handleInputChange('inPlaceLease', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="monthlyTaxes">Monthly Taxes</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="monthlyTaxes"
+                  type="number"
+                  step="0.01"
+                  value={formData.monthlyTaxes}
+                  onChange={(e) => handleInputChange('monthlyTaxes', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="monthlyInsurance">Monthly Insurance</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="monthlyInsurance"
+                  type="number"
+                  step="0.01"
+                  value={formData.monthlyInsurance}
+                  onChange={(e) => handleInputChange('monthlyInsurance', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="monthlyHOASpecialAssess">Monthly HOA/Special Assess</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="monthlyHOASpecialAssess"
+                  type="number"
+                  step="0.01"
+                  value={formData.monthlyHOASpecialAssess}
+                  onChange={(e) => handleInputChange('monthlyHOASpecialAssess', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="monthlyFloodInsurance">Monthly Flood Insurance</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="monthlyFloodInsurance"
+                  type="number"
+                  step="0.01"
+                  value={formData.monthlyFloodInsurance}
+                  onChange={(e) => handleInputChange('monthlyFloodInsurance', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* LOAN DETAILS */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Loan Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Cross Collateralized</Label>
+              <Select value={formData.crossCollateralized} onValueChange={(value) => handleInputChange('crossCollateralized', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Interest Only</Label>
+              <Select value={formData.interestOnly} onValueChange={(value) => handleInputChange('interestOnly', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Loan Purpose</Label>
+              <Select value={formData.loanPurpose} onValueChange={(value) => handleInputChange('loanPurpose', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select loan purpose" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Purchase">Purchase</SelectItem>
+                  <SelectItem value="Refinance">Refinance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {formData.loanPurpose === "Refinance" && (
+              <div>
+                <Label>Refinance Type</Label>
+                <Select value={formData.refinanceType} onValueChange={(value) => handleInputChange('refinanceType', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select refinance type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Cash Out">Cash Out</SelectItem>
+                    <SelectItem value="Rate & Term">Rate & Term</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {formData.refinanceType === "Cash Out" && (
+              <div>
+                <Label htmlFor="cashOutAmount">Cash-Out Amount</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="cashOutAmount"
+                    type="number"
+                    step="0.01"
+                    value={formData.cashOutAmount}
+                    onChange={(e) => handleInputChange('cashOutAmount', e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+            )}
+            
+            <div>
+              <Label>Delayed Purchase</Label>
+              <Select value={formData.delayedPurchase} onValueChange={(value) => handleInputChange('delayedPurchase', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="appraisedValue">Appraised Value</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="appraisedValue"
+                  type="number"
+                  step="0.01"
+                  value={formData.appraisedValue}
+                  onChange={(e) => handleInputChange('appraisedValue', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label>Third Party Valuation Status</Label>
               <Select value={formData.thirdPartyValuationStatus} onValueChange={(value) => handleInputChange('thirdPartyValuationStatus', value)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -587,28 +1046,79 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
             </div>
             
             <div>
-              <Label>Interest Reserves</Label>
-              <RadioGroup
-                value={formData.interestReserves}
-                onValueChange={(value) => handleInputChange('interestReserves', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="interestReservesYes" />
-                  <Label htmlFor="interestReservesYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="interestReservesNo" />
-                  <Label htmlFor="interestReservesNo">No</Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="purchasePrice">Purchase Price</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="purchasePrice"
+                  type="number"
+                  step="0.01"
+                  value={formData.purchasePrice}
+                  onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
             </div>
             
             <div>
-              <Label htmlFor="prepaymentPenaltyTerm">Prepayment Penalty Term</Label>
+              <Label htmlFor="rehabCost">Rehab Cost</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="rehabCost"
+                  type="number"
+                  step="0.01"
+                  value={formData.rehabCost}
+                  onChange={(e) => handleInputChange('rehabCost', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="baseLoanAmount">Base Loan Amount</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="baseLoanAmount"
+                  type="number"
+                  step="0.01"
+                  value={formData.baseLoanAmount}
+                  onChange={(e) => handleInputChange('baseLoanAmount', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label>Interest Reserves</Label>
+              <Select value={formData.interestReserves} onValueChange={(value) => handleInputChange('interestReserves', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="originationPoints">Origination Points</Label>
+              <Input
+                id="originationPoints"
+                type="number"
+                step="0.001"
+                value={formData.originationPoints}
+                onChange={(e) => handleInputChange('originationPoints', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label>Prepayment Penalty Term</Label>
               <Select value={formData.prepaymentPenaltyTerm} onValueChange={(value) => handleInputChange('prepaymentPenaltyTerm', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select prepayment penalty term" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="No Prepay">No Prepay</SelectItem>
@@ -617,174 +1127,156 @@ const LoanPassView = ({ onBack, onSubmit, isLoading }: LoanPassViewProps) => {
                   <SelectItem value="3 Year">3 Year</SelectItem>
                   <SelectItem value="4 Year">4 Year</SelectItem>
                   <SelectItem value="5 Year">5 Year</SelectItem>
-                  <SelectItem value="7 Year">7 Year</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label htmlFor="prepaymentPenaltyStructure">Prepayment Penalty Structure</Label>
+              <Label>Prepayment Penalty Structure</Label>
               <Select value={formData.prepaymentPenaltyStructure} onValueChange={(value) => handleInputChange('prepaymentPenaltyStructure', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select prepayment penalty structure" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Step-Down">Step-Down</SelectItem>
-                  <SelectItem value="Fixed 5%">Fixed 5%</SelectItem>
-                  <SelectItem value="Fixed 4%">Fixed 4%</SelectItem>
-                  <SelectItem value="Fixed 3%">Fixed 3%</SelectItem>
-                  <SelectItem value="Fixed 2%">Fixed 2%</SelectItem>
-                  <SelectItem value="Fixed 1%">Fixed 1%</SelectItem>
-                  <SelectItem value="6 Months Interest">6 Months Interest</SelectItem>
+                  <SelectItem value="Flat">Flat</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
               <Label>Is Product A Approved?</Label>
-              <RadioGroup
-                value={formData.isProductAApproved}
-                onValueChange={(value) => handleInputChange('isProductAApproved', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="productAYes" />
-                  <Label htmlFor="productAYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="productANo" />
-                  <Label htmlFor="productANo">No</Label>
-                </div>
-              </RadioGroup>
+              <Select value={formData.isProductAApproved} onValueChange={(value) => handleInputChange('isProductAApproved', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
 
-        {/* Export PDF Options */}
+        {/* BROKER FEES */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Broker Fees</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="brokerPointsOrFee">Broker Points or Fee</Label>
+              <Input
+                id="brokerPointsOrFee"
+                value={formData.brokerPointsOrFee}
+                onChange={(e) => handleInputChange('brokerPointsOrFee', e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="brokerProcessingFee">Broker Processing Fee</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  id="brokerProcessingFee"
+                  type="number"
+                  step="0.01"
+                  value={formData.brokerProcessingFee}
+                  onChange={(e) => handleInputChange('brokerProcessingFee', e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* EXPORT PDF OPTIONS */}
         <Card>
           <CardHeader>
             <CardTitle>Export PDF Options</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="generateLoanQuote">Generate Loan Quote</Label>
+              <Label>Generate Loan Quote</Label>
               <Select value={formData.generateLoanQuote} onValueChange={(value) => handleInputChange('generateLoanQuote', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select quote type" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
                   <SelectItem value="No">No</SelectItem>
-                  <SelectItem value="Initial Loan Quote">Initial Loan Quote</SelectItem>
-                  <SelectItem value="Final Loan Quote">Final Loan Quote</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
               <Label htmlFor="loanOfficerName">Loan Officer Name</Label>
-              <Select value={formData.loanOfficerName} onValueChange={(value) => handleInputChange('loanOfficerName', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select loan officer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="John McClelland">John McClelland</SelectItem>
-                  <SelectItem value="Wade Susini">Wade Susini</SelectItem>
-                  <SelectItem value="Ethan Alioto">Ethan Alioto</SelectItem>
-                  <SelectItem value="Brendan Corcoran">Brendan Corcoran</SelectItem>
-                  <SelectItem value="Peter Yecco">Peter Yecco</SelectItem>
-                  <SelectItem value="Travis Beach">Travis Beach</SelectItem>
-                  <SelectItem value="Geary Springham">Geary Springham</SelectItem>
-                  <SelectItem value="Christopher Bozel">Christopher Bozel</SelectItem>
-                  <SelectItem value="Taylor Jones">Taylor Jones</SelectItem>
-                  <SelectItem value="Craig Fuhr">Craig Fuhr</SelectItem>
-                  <SelectItem value="Robert Wooldridge">Robert Wooldridge</SelectItem>
-                  <SelectItem value="Morgan Pritchett">Morgan Pritchett</SelectItem>
-                  <SelectItem value="Colin Faux">Colin Faux</SelectItem>
-                  <SelectItem value="Taylor Trantham">Taylor Trantham</SelectItem>
-                  <SelectItem value="Sean Barre">Sean Barre</SelectItem>
-                  <SelectItem value="Gregory Clarke">Gregory Clarke</SelectItem>
-                  <SelectItem value="Steven Milovich">Steven Milovich</SelectItem>
-                  <SelectItem value="Not Applicable">Not Applicable</SelectItem>
-                  <SelectItem value="Kyle Deutschman">Kyle Deutschman</SelectItem>
-                  <SelectItem value="Noah Barros">Noah Barros</SelectItem>
-                  <SelectItem value="Corey Warren">Corey Warren</SelectItem>
-                  <SelectItem value="Blake Cunningham">Blake Cunningham</SelectItem>
-                  <SelectItem value="Jeffrey Sosnicki">Jeffrey Sosnicki</SelectItem>
-                  <SelectItem value="Keith LaSheir">Keith LaSheir</SelectItem>
-                  <SelectItem value="Paul Richter">Paul Richter</SelectItem>
-                  <SelectItem value="Danni Boord">Danni Boord</SelectItem>
-                  <SelectItem value="Jose Arrapalo">Jose Arrapalo</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="loanOfficerName"
+                value={formData.loanOfficerName}
+                onChange={(e) => handleInputChange('loanOfficerName', e.target.value)}
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <Label htmlFor="exceptionRequest">Exception Request</Label>
+              <Textarea
+                id="exceptionRequest"
+                value={formData.exceptionRequest}
+                onChange={(e) => handleInputChange('exceptionRequest', e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <Label htmlFor="managerException">Manager Exception</Label>
+              <Textarea
+                id="managerException"
+                value={formData.managerException}
+                onChange={(e) => handleInputChange('managerException', e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <Label htmlFor="pricingException">Pricing Exception</Label>
+              <Textarea
+                id="pricingException"
+                value={formData.pricingException}
+                onChange={(e) => handleInputChange('pricingException', e.target.value)}
+                rows={3}
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Exception Request */}
+        {/* BROKER SUBMISSION SECTION */}
         <Card>
           <CardHeader>
-            <CardTitle>Exception Request</CardTitle>
+            <CardTitle>Broker Submission Section</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent>
             <div>
-              <Label>Exception Request</Label>
-              <RadioGroup
-                value={formData.exceptionRequest}
-                onValueChange={(value) => handleInputChange('exceptionRequest', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="exceptionRequestYes" />
-                  <Label htmlFor="exceptionRequestYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="exceptionRequestNo" />
-                  <Label htmlFor="exceptionRequestNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <div>
-              <Label>Manager Exception</Label>
-              <RadioGroup
-                value={formData.managerException}
-                onValueChange={(value) => handleInputChange('managerException', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="managerExceptionYes" />
-                  <Label htmlFor="managerExceptionYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="managerExceptionNo" />
-                  <Label htmlFor="managerExceptionNo">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <div>
-              <Label>Pricing Exception</Label>
-              <RadioGroup
-                value={formData.pricingException}
-                onValueChange={(value) => handleInputChange('pricingException', value)}
-                className="flex gap-4 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Yes" id="pricingExceptionYes" />
-                  <Label htmlFor="pricingExceptionYes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="pricingExceptionNo" />
-                  <Label htmlFor="pricingExceptionNo">No</Label>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="brokerSubmission">Broker Submission</Label>
+              <Textarea
+                id="brokerSubmission"
+                value={formData.brokerSubmission}
+                onChange={(e) => handleInputChange('brokerSubmission', e.target.value)}
+                rows={4}
+                placeholder="Enter broker submission details or upload document..."
+              />
             </div>
           </CardContent>
         </Card>
 
+        {/* SUBMIT BUTTON */}
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onBack}>
-            Cancel
+          <Button variant="outline" onClick={onBack}>
+            Back
           </Button>
-          <Button type="submit" disabled={isLoading} className="bg-dominion-blue hover:bg-dominion-blue/90">
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? "Processing..." : "Submit Loan Pass"}
           </Button>
         </div>
