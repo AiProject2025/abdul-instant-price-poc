@@ -456,7 +456,32 @@ const Quote = () => {
 
   const handleScenarioSelect = async (scenario: any) => {
     try {
-      console.log("Selected scenario:", scenario);
+      console.log("Loading scenario for editing:", scenario);
+      
+      // Restore the form data from the selected scenario
+      setFormData(scenario.form_data);
+      setLastSubmittedFormData(scenario.form_data);
+      
+      // Navigate back to the questionnaire for editing
+      setCurrentStep("questionnaire");
+      
+      toast({
+        title: "Success",
+        description: "Scenario loaded for editing"
+      });
+    } catch (error) {
+      console.error('Error loading scenario:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load scenario. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleScenarioReQuote = async (scenario: any) => {
+    try {
+      console.log("Re-quoting scenario:", scenario);
       
       // Restore the form data from the selected scenario
       setFormData(scenario.form_data);
@@ -488,7 +513,7 @@ const Quote = () => {
         
         toast({
           title: "Success",
-          description: "Scenario loaded and re-quoted successfully with fresh pricing"
+          description: "Scenario re-quoted successfully with fresh pricing"
         });
       }
     } catch (error) {
@@ -642,6 +667,7 @@ const Quote = () => {
               onBackToForm={handleBackToQuestionnaire}
               onGenerateLoanQuote={handleGenerateLoanQuote}
               onSelectScenario={handleScenarioSelect}
+              onReQuoteScenario={handleScenarioReQuote}
               lastSubmittedFormData={lastSubmittedFormData}
             />
           )}

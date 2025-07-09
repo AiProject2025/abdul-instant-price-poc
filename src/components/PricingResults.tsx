@@ -37,10 +37,11 @@ interface PricingResultsProps {
   onGenerateLoanQuote: (selectedResult?: any, editedData?: any) => void;
   onBackToForm: () => void;
   onSelectScenario?: (scenario: Scenario) => void;
+  onReQuoteScenario?: (scenario: any) => void;
   lastSubmittedFormData?: any;
 }
 
-const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, onSelectScenario, lastSubmittedFormData }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, onSelectScenario, onReQuoteScenario, lastSubmittedFormData }: PricingResultsProps) => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -161,18 +162,8 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   };
 
   const handleReQuote = async (scenario: Scenario) => {
-    try {
-      // Load the scenario data back into the form and trigger a fresh pricing API call
-      if (onSelectScenario) {
-        onSelectScenario(scenario);
-      }
-    } catch (error) {
-      console.error('Error re-quoting scenario:', error);
-      toast({
-        title: "Error",
-        description: "Failed to re-quote scenario",
-        variant: "destructive"
-      });
+    if (onReQuoteScenario) {
+      onReQuoteScenario(scenario);
     }
   };
 
