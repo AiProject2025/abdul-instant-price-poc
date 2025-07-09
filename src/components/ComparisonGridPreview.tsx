@@ -549,37 +549,9 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
           </div>
 
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-bold text-lg mb-3">Quick Analysis</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {editableScenarios.map((scenario, index) => {
-                const formData = scenario.form_data || scenario;
-                const results = scenario.results || [];
-                const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
-                  current.rate < best.rate ? current : best
-                ) : null;
-                
-                const cashFlow = calculateCashFlow(scenario);
-                const downPayment = calculateDownPayment(scenario);
-                const rate = bestResult?.rate || 0;
-                const ltv = formData.ltv || 75;
-                const noteBuyer = scenario.name ? scenario.name.split(' - ').pop() : `Product ${String.fromCharCode(65 + index)}`;
-                
-                return (
-                  <div key={index} className="bg-white p-3 rounded border">
-                    <h4 className="font-semibold text-dominion-blue">
-                      {noteBuyer}
-                    </h4>
-                    <div className="text-sm space-y-1">
-                      <div>Rate: {formatRate(rate)}</div>
-                      <div>LTV: {ltv}%</div>
-                      <div className={getCashFlowClass(cashFlow)}>
-                        Cash Flow: {formatCurrency(cashFlow)}
-                      </div>
-                      <div>Down: {formatCurrency(downPayment)}</div>
-                    </div>
-                  </div>
-                );
-              })}
+            <h3 className="font-bold text-lg mb-3">AI Analysis</h3>
+            <div className="text-center py-8 text-gray-600">
+              <p>AI Analysis for recoup on cost, ntb, and competitor quote upload comparison coming soon.</p>
             </div>
           </div>
         </CardContent>
