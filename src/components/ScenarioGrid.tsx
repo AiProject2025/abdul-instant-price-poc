@@ -7,6 +7,7 @@ import { Trash2, Eye, Grid3X3, List, FileText, X } from 'lucide-react';
 import { useScenarios, Scenario, ScenarioResult } from '@/hooks/useScenarios';
 import DeletedScenariosDialog from '@/components/DeletedScenariosDialog';
 import AuditLogDialog from '@/components/AuditLogDialog';
+import ClientPresentationPreview from '@/components/ClientPresentationPreview';
 import { useToast } from '@/hooks/use-toast';
 import {
   Table,
@@ -26,6 +27,8 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(new Set());
+  const [showPresentationPreview, setShowPresentationPreview] = useState(false);
+  const [scenariosForPresentation, setScenariosForPresentation] = useState<any[]>([]);
   const [isGeneratingPresentation, setIsGeneratingPresentation] = useState(false);
   const { toast } = useToast();
 
@@ -89,7 +92,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
     setIsGeneratingPresentation(true);
     
     try {
-      console.log('Starting presentation generation...');
+      console.log('Preparing presentation preview...');
       
       // Get selected scenarios with their results
       const selectedScenariosData = scenarios.filter(s => selectedScenarios.has(s.id));
@@ -109,23 +112,17 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
         })
       );
 
-      console.log('Scenarios with results:', scenariosWithResults);
+      console.log('Scenarios with results prepared:', scenariosWithResults);
 
-      // Generate Word document
-      console.log('Generating document...');
-      await generateMultiScenarioDocument(scenariosWithResults);
-      console.log('Document generation completed');
-      
-      toast({
-        title: "Presentation downloaded",
-        description: `Client presentation with ${selectedScenarios.size} scenarios has been downloaded to your computer.`,
-      });
+      // Set data for preview and show it
+      setScenariosForPresentation(scenariosWithResults);
+      setShowPresentationPreview(true);
       
     } catch (error) {
-      console.error('Error generating presentation:', error);
+      console.error('Error preparing presentation:', error);
       toast({
         title: "Error",
-        description: "Failed to generate client presentation. Please try again.",
+        description: "Failed to prepare presentation preview. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -587,7 +584,14 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   }
 
   return (
-    <div className="space-y-4">
+    <>
+      <ClientPresentationPreview 
+        scenarios={scenariosForPresentation}
+        open={showPresentationPreview}
+        onOpenChange={setShowPresentationPreview}
+      />
+      
+      <div className="space-y-4">
       {/* Selection Panel - shows when scenarios are selected */}
       {selectedScenarios.size > 0 && (
         <Card className="bg-primary/5 border-primary/20">
@@ -935,6 +939,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
