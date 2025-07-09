@@ -53,9 +53,10 @@ interface EditableQuoteDetailsProps {
   };
   onSave: (data: any) => void;
   onReQuote?: (data: any) => void;
+  currentPricingResults?: any[];
 }
 
-const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote }: EditableQuoteDetailsProps) => {
+const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote, currentPricingResults }: EditableQuoteDetailsProps) => {
   const [editData, setEditData] = useState({
     ...initialData,
     // Set defaults for new fields
@@ -84,7 +85,7 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote 
   const [scenarioName, setScenarioName] = useState("");
   const [isRequoting, setIsRequoting] = useState(false);
   
-  const { saveScenario } = useScenarios();
+  const { saveScenario, saveScenarioResults } = useScenarios();
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: any) => {
@@ -128,10 +129,18 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote 
     }
 
     const scenarioId = await saveScenario(scenarioName, editData);
-    if (scenarioId) {
+    if (scenarioId && currentPricingResults && currentPricingResults.length > 0) {
+      // Also save the current pricing results with this scenario
+      await saveScenarioResults(scenarioId, currentPricingResults);
       setScenarioName("");
       toast({
         title: "Success",
+        description: "Scenario and pricing results saved successfully"
+      });
+    } else if (scenarioId) {
+      setScenarioName("");
+      toast({
+        title: "Success", 
         description: "Scenario saved successfully"
       });
     }

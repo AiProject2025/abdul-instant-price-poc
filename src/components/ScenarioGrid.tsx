@@ -87,7 +87,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                   onClick={() => handleToggleExpand(scenario.id)}
                 >
                   <Eye className="w-4 h-4" />
-                  {expandedScenario === scenario.id ? 'Hide' : 'View'} Results
+                  {expandedScenario === scenario.id ? 'Hide' : 'View'} Details
                 </Button>
                 {onSelectScenario && (
                   <Button
@@ -109,53 +109,115 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
             </div>
           </CardHeader>
           
-          {expandedScenario === scenario.id && (
-            <CardContent>
-              <div className="space-y-4">
+          <CardContent>
+            {/* Always show key scenario info */}
+            <div className="mb-4">
+              <h4 className="font-semibold mb-2">Scenario Summary:</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-muted/50 p-4 rounded-lg">
                 <div>
-                  <h4 className="font-semibold mb-2">Form Data:</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                    <div><strong>Loan Amount:</strong> {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
-                    <div><strong>Property Type:</strong> {scenario.form_data.propertyType || 'N/A'}</div>
-                    <div><strong>LTV:</strong> {scenario.form_data.ltv || 0}%</div>
-                    <div><strong>DSCR:</strong> {scenario.form_data.dscr || 0}</div>
+                  <strong>Borrower:</strong> 
+                  <div>{scenario.form_data.borrowerName || 'N/A'}</div>
+                </div>
+                <div>
+                  <strong>Loan Amount:</strong> 
+                  <div>{formatCurrency(scenario.form_data.loanAmount || 0)}</div>
+                </div>
+                <div>
+                  <strong>Property Type:</strong> 
+                  <div>{scenario.form_data.propertyType || 'N/A'}</div>
+                </div>
+                <div>
+                  <strong>LTV:</strong> 
+                  <div>{scenario.form_data.ltv || 0}%</div>
+                </div>
+                <div>
+                  <strong>DSCR:</strong> 
+                  <div>{scenario.form_data.dscr || 0}</div>
+                </div>
+                <div>
+                  <strong>Points:</strong> 
+                  <div>{scenario.form_data.points || 0}%</div>
+                </div>
+                <div>
+                  <strong>Interest Only:</strong> 
+                  <div>{scenario.form_data.interestOnly || 'No'}</div>
+                </div>
+                <div>
+                  <strong>Note Buyer:</strong> 
+                  <div>{scenario.form_data.noteBuyer || 'N/A'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Show pricing results if available */}
+            {scenarioResults[scenario.id] && scenarioResults[scenario.id].length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Pricing Results by Note Buyer:</h4>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Note Buyer</TableHead>
+                      <TableHead>Rate</TableHead>
+                      <TableHead>Points</TableHead>
+                      <TableHead>Monthly Payment</TableHead>
+                      <TableHead>Loan Amount</TableHead>
+                      <TableHead>Features</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {scenarioResults[scenario.id].map((result) => (
+                      <TableRow key={result.id}>
+                        <TableCell className="font-medium">{result.buyer_name}</TableCell>
+                        <TableCell>{formatRate(result.rate)}</TableCell>
+                        <TableCell>{result.additional_data?.points || 0}%</TableCell>
+                        <TableCell>{formatCurrency(result.additional_data?.monthlyPayment || 0)}</TableCell>
+                        <TableCell>{formatCurrency(result.loan_amount)}</TableCell>
+                        <TableCell>
+                          <div className="text-xs">
+                            {result.additional_data?.interestOnly === 'Yes' && 
+                              <Badge variant="secondary" className="mr-1">Interest Only</Badge>
+                            }
+                            {result.additional_data?.points > 0 && 
+                              <Badge variant="outline">{result.additional_data.points}% Points</Badge>
+                            }
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            {expandedScenario === scenario.id && (
+              <div className="space-y-4 border-t pt-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Complete Form Data:</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm bg-muted/20 p-4 rounded-lg max-h-60 overflow-y-auto">
+                    {Object.entries(scenario.form_data).map(([key, value]) => (
+                      <div key={key}>
+                        <strong>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong>
+                        <div className="text-muted-foreground">
+                          {typeof value === 'number' && key.toLowerCase().includes('amount') 
+                            ? formatCurrency(value as number)
+                            : String(value)
+                          }
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
-                {scenarioResults[scenario.id] && scenarioResults[scenario.id].length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Pricing Results:</h4>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Note Buyer</TableHead>
-                          <TableHead>Rate</TableHead>
-                          <TableHead>Price</TableHead>
-                          <TableHead>Loan Amount</TableHead>
-                          <TableHead>Monthly Payment</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {scenarioResults[scenario.id].map((result) => (
-                          <TableRow key={result.id}>
-                            <TableCell className="font-medium">{result.buyer_name}</TableCell>
-                            <TableCell>{formatRate(result.rate)}</TableCell>
-                            <TableCell>{formatCurrency(result.price)}</TableCell>
-                            <TableCell>{formatCurrency(result.loan_amount)}</TableCell>
-                            <TableCell>{formatCurrency(result.additional_data?.monthlyPayment || 0)}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-
-                {scenarioResults[scenario.id] && scenarioResults[scenario.id].length === 0 && (
-                  <div className="text-muted-foreground">No pricing results found for this scenario.</div>
-                )}
               </div>
-            </CardContent>
-          )}
+            )}
+
+            {(!scenarioResults[scenario.id] || scenarioResults[scenario.id].length === 0) && (
+              <div className="text-muted-foreground text-center py-4 border border-dashed rounded-lg">
+                No pricing results found for this scenario. 
+                <br />
+                <span className="text-sm">Load this scenario and run pricing to see results here.</span>
+              </div>
+            )}
+          </CardContent>
         </Card>
       ))}
     </div>

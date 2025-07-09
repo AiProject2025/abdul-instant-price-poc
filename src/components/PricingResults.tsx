@@ -604,6 +604,7 @@ DSCR Loan System`;
           }}
           onSave={handleSaveEditedQuote}
           onReQuote={handleReQuote}
+          currentPricingResults={results}
         />
       )}
     </div>
