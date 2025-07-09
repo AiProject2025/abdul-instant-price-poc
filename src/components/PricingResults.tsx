@@ -452,9 +452,33 @@ DSCR Loan System`;
       {/* Comparison Grid Preview Modal */}
       {showComparisonPreview && (
         <ComparisonGridPreview
-          selectedScenarios={Array.from(selectedScenarios).map(id => 
-            filteredScenarios.find(s => s.id === id)!
-          ).filter(Boolean)}
+          selectedScenarios={Array.from(selectedScenarios).map(id => {
+            const scenario = filteredScenarios.find(s => s.id === id);
+            if (!scenario) return null;
+            
+            // Merge current pricing results with the saved scenario
+            const currentResults = results.map(result => ({
+              id: `${scenario.id}-${result.noteBuyer}`,
+              scenario_id: scenario.id,
+              buyer_name: result.noteBuyer,
+              rate: result.rate,
+              price: result.rate, // Using rate as price for now
+              loan_amount: result.loanAmount,
+              additional_data: {
+                monthlyPayment: result.monthlyPayment,
+                points: result.points,
+                ltv: result.ltv,
+                dscr: result.dscr,
+                propertyType: result.propertyType
+              },
+              created_at: new Date().toISOString()
+            }));
+            
+            return {
+              ...scenario,
+              results: currentResults
+            };
+          }).filter(Boolean)}
           onClose={() => setShowComparisonPreview(false)}
           onGenerateDocument={handleGenerateSelectedQuotes}
         />

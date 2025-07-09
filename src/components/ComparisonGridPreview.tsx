@@ -182,6 +182,15 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
   const calculateMonthlyPayment = (scenario: any) => {
     const formData = scenario.form_data || scenario;
     const results = scenario.results || [];
+    
+    // First check if we have a result with monthlyPayment already calculated
+    if (results.length > 0) {
+      const resultWithPayment = results.find((r: any) => r.additional_data?.monthlyPayment);
+      if (resultWithPayment) {
+        return resultWithPayment.additional_data.monthlyPayment;
+      }
+    }
+    
     const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
       current.rate < best.rate ? current : best
     ) : null;
