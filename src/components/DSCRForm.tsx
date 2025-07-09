@@ -114,9 +114,17 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
   // Initialize form with data if available
   useEffect(() => {
     if (initialData) {
+      const updatedData = { ...initialData };
+      
+      // Auto-sync numberOfLeasedUnits when numberOfUnits is provided in initial data
+      if (updatedData.numberOfUnits && !updatedData.numberOfLeasedUnits) {
+        updatedData.numberOfLeasedUnits = updatedData.numberOfUnits;
+        console.log('Auto-populating numberOfLeasedUnits from initialData:', updatedData.numberOfUnits);
+      }
+      
       setFormState(prev => ({
         ...prev,
-        ...initialData
+        ...updatedData
       }));
     }
   }, [initialData]);
