@@ -558,20 +558,24 @@ DSCR Loan System`;
                   <div className="space-y-4">
                     {filteredScenarios.map((scenario) => (
                       <Card key={scenario.id} className="border-blue-200 bg-white">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleToggleScenarioExpand(scenario.id)}
-                                  className="text-blue-800 font-medium"
-                                >
-                                  {scenario.name}
-                                  {expandedScenario === scenario.id ? ' ▼' : ' ▶'}
-                                </Button>
-                              </div>
+                         <CardContent className="p-4">
+                           <div className="flex justify-between items-start">
+                             <div className="flex-1">
+                               <div className="flex items-center gap-2">
+                                 <Checkbox
+                                   checked={selectedScenarios.has(scenario.id)}
+                                   onCheckedChange={(checked) => handleScenarioCheck(scenario.id, !!checked)}
+                                 />
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={() => handleToggleScenarioExpand(scenario.id)}
+                                   className="text-blue-800 font-medium"
+                                 >
+                                   {formatScenarioName(scenario.name)}
+                                   {expandedScenario === scenario.id ? ' ▼' : ' ▶'}
+                                 </Button>
+                               </div>
                               <div className="text-xs text-gray-600 mt-1">
                                 <span>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</span>
                                 <span className="mx-2">•</span>
