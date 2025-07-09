@@ -455,35 +455,7 @@ const Quote = () => {
   };
 
   const handleScenarioSelect = async (scenario: any) => {
-    try {
-      console.log("Loading scenario for editing:", scenario);
-      console.log("Current step before change:", currentStep);
-      
-      // Restore the form data from the selected scenario
-      setFormData(scenario.form_data);
-      setLastSubmittedFormData(scenario.form_data);
-      
-      // Navigate back to the questionnaire for editing
-      setCurrentStep("questionnaire");
-      console.log("Step changed to questionnaire");
-      
-      // Force a small delay to ensure state update
-      setTimeout(() => {
-        console.log("Current step after change:", currentStep);
-      }, 100);
-      
-      toast({
-        title: "Success",
-        description: "Scenario loaded for editing - navigate to questionnaire"
-      });
-    } catch (error) {
-      console.error('Error loading scenario:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load scenario. Please try again.",
-        variant: "destructive"
-      });
-    }
+    // This function is no longer used - we handle editing directly in PricingResults
   };
 
   const handleScenarioReQuote = async (scenario: any) => {
@@ -673,7 +645,6 @@ const Quote = () => {
               ineligibleBuyers={ineligibleBuyers}
               onBackToForm={handleBackToQuestionnaire}
               onGenerateLoanQuote={handleGenerateLoanQuote}
-              onSelectScenario={handleScenarioSelect}
               onReQuoteScenario={handleScenarioReQuote}
               lastSubmittedFormData={lastSubmittedFormData}
             />

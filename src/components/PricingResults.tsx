@@ -41,7 +41,7 @@ interface PricingResultsProps {
   lastSubmittedFormData?: any;
 }
 
-const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, onSelectScenario, onReQuoteScenario, lastSubmittedFormData }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, onReQuoteScenario, lastSubmittedFormData }: PricingResultsProps) => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -156,9 +156,25 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   };
 
   const handleSelectScenario = (scenario: Scenario) => {
-    if (onSelectScenario) {
-      onSelectScenario(scenario);
-    }
+    // Open edit dialog with scenario data
+    const scenarioData = {
+      borrowerName: scenario.form_data.borrowerName || `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim() || 'Borrower',
+      propertyAddress: scenario.form_data.propertyAddress || `${scenario.form_data.streetAddress || ''}, ${scenario.form_data.city || ''}, ${scenario.form_data.propertyState || ''}`.trim(),
+      loanAmount: scenario.form_data.loanAmount || 0,
+      interestRate: scenario.form_data.interestRate || 0,
+      monthlyPayment: scenario.form_data.monthlyPayment || 0,
+      loanTerm: 360,
+      ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV || 0,
+      dscr: scenario.form_data.dscr || 0,
+      propertyType: scenario.form_data.propertyType || '',
+      loanPurpose: scenario.form_data.loanPurpose || '',
+      refinanceType: scenario.form_data.refinanceType || '',
+      points: scenario.form_data.points || 0,
+      noteBuyer: scenario.form_data.noteBuyer || ''
+    };
+
+    setSelectedResult(scenarioData);
+    setIsEditDialogOpen(true);
   };
 
   const handleReQuote = async (scenario: Scenario) => {
