@@ -150,8 +150,22 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
 
   // Group scenarios by note buyer for grid view
   const groupedScenarios = scenarios.reduce((groups, scenario) => {
-    // Extract note buyer from scenario results or form data
-    const noteBuyer = scenario.form_data.noteBuyer || 'Unknown';
+    // Extract note buyer from scenario name (first word before space or %)
+    let noteBuyer = 'Unknown';
+    const scenarioName = scenario.name;
+    
+    // Try to extract buyer name from the beginning of the scenario name
+    const buyerMatch = scenarioName.match(/^([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?:\s+\d|%|$)/);
+    if (buyerMatch) {
+      noteBuyer = buyerMatch[1].trim();
+    } else {
+      // Fallback: take first word
+      const firstWord = scenarioName.split(/\s+/)[0];
+      if (firstWord && firstWord.length > 2) {
+        noteBuyer = firstWord;
+      }
+    }
+    
     if (!groups[noteBuyer]) {
       groups[noteBuyer] = [];
     }
