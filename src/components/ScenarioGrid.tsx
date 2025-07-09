@@ -89,13 +89,17 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
     setIsGeneratingPresentation(true);
     
     try {
+      console.log('Starting presentation generation...');
+      
       // Get selected scenarios with their results
       const selectedScenariosData = scenarios.filter(s => selectedScenarios.has(s.id));
+      console.log('Selected scenarios:', selectedScenariosData.length);
       
       // Fetch results for each selected scenario
       const scenariosWithResults = await Promise.all(
         selectedScenariosData.map(async (scenario) => {
           if (!scenarioResults[scenario.id]) {
+            console.log('Fetching results for scenario:', scenario.name);
             await fetchScenarioResults(scenario.id);
           }
           return {
@@ -105,12 +109,16 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
         })
       );
 
+      console.log('Scenarios with results:', scenariosWithResults);
+
       // Generate Word document
+      console.log('Generating document...');
       await generateMultiScenarioDocument(scenariosWithResults);
+      console.log('Document generation completed');
       
       toast({
-        title: "Presentation generated",
-        description: `Client presentation with ${selectedScenarios.size} scenarios has been downloaded.`,
+        title: "Presentation downloaded",
+        description: `Client presentation with ${selectedScenarios.size} scenarios has been downloaded to your computer.`,
       });
       
     } catch (error) {
