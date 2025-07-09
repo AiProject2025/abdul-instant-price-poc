@@ -191,6 +191,10 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   const handleEditQuote = (result: any) => {
     if (!lastSubmittedFormData) return;
 
+    // Debug logging
+    console.log('handleEditQuote - result object:', result);
+    console.log('handleEditQuote - result.noteBuyer:', result.noteBuyer);
+
     const quoteData = {
       borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
       propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
@@ -204,7 +208,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
       loanPurpose: result.loanPurpose,
       refinanceType: result.refinanceType,
       points: result.points,
-      noteBuyer: result.noteBuyer,
+      noteBuyer: result.noteBuyer, // This MUST be the correct buyer name
       loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
       phoneNumber: '410-705-2277',
       date: new Date().toLocaleDateString(),

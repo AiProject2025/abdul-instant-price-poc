@@ -38,6 +38,9 @@ const Quote = () => {
         return data.flags && data.flags.length === 0 && data.adjusted_interest_rate;
       })
       .map(([noteBuyer, data]: [string, any]) => {
+        // Debug logging
+        console.log('🔍 Processing result for noteBuyer:', noteBuyer, 'data:', data);
+        
         // Determine loan purpose
         const loanPurpose = data.loan_purpose === 'refinance' ? 'Refinance' : 'Purchase';
         
@@ -47,7 +50,7 @@ const Quote = () => {
           refinanceType = lastSubmittedFormData.refinanceType === 'CashOut' ? 'Cash Out' : 'Rate/Term';
         }
 
-        return {
+        const resultObj = {
           lender: "Dominion Financial",
           noteBuyer: noteBuyer,
           product: noteBuyer, // Using note buyer name as product
@@ -58,12 +61,16 @@ const Quote = () => {
           dscr: data.final_dscr,
           propertyType: data.property_type.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
           loanPurpose: loanPurpose,
-          refinanceType: refinanceType,
-          pppDuration: "5/4/3/2/1",
           ltv: parseFloat(data.ltv),
-          points: data.points || 2.0, // Default to 2.0 if not provided by API
+          points: data.adjusted_price - 100, // Convert adjusted_price to points
+          pppDuration: `${data.rate_lock_period_days} days`,
+          refinanceType: refinanceType || 'Rate/Term',
+          rateLockDays: data.rate_lock_period_days,
           isLocked: false
         };
+        
+        console.log('✅ Final result object:', resultObj);
+        return resultObj;
       });
 
     // Sort by rate (best rate first)
