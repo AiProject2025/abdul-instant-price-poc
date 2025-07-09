@@ -46,7 +46,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     
     // Property Details - New Purchase
     propertyType: '',
-    propertyCondition: '',
+    propertyCondition: 'C3',
     rural: 'No',
     decliningMarket: 'No',
     interestOnly: 'No',
