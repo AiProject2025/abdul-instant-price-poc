@@ -126,8 +126,12 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   };
 
   const generateMultiScenarioDocument = async (scenariosWithResults: any[]) => {
-    const { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow, HeadingLevel, AlignmentType, WidthType } = await import('docx');
+    const { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow, HeadingLevel, AlignmentType, WidthType, TableRowHeight, LevelFormat, BorderStyle } = await import('docx');
     const { saveAs } = await import('file-saver');
+
+    // Extract property information from first scenario
+    const firstScenario = scenariosWithResults[0];
+    const propertyInfo = firstScenario?.form_data || {};
 
     const doc = new Document({
       sections: [{
@@ -137,155 +141,399 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Loan Scenario Comparison",
+                text: "Multiple Note Buyer Options Comparison",
                 bold: true,
                 size: 32,
+                color: "003366",
               }),
             ],
             heading: HeadingLevel.TITLE,
             alignment: AlignmentType.CENTER,
-            spacing: { after: 400 },
+            spacing: { after: 200 },
           }),
 
+          // Property Header
           new Paragraph({
             children: [
               new TextRun({
-                text: `Generated on ${new Date().toLocaleDateString()}`,
-                italics: true,
+                text: `Property: ${propertyInfo.propertyAddress || 'Property Address'} | ${propertyInfo.propertyType || 'Property Type'} | Value: ${formatCurrency(propertyInfo.propertyValue || 0)}`,
                 size: 20,
+                color: "666666",
               }),
             ],
             alignment: AlignmentType.CENTER,
-            spacing: { after: 600 },
-          }),
-
-          // Executive Summary
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Executive Summary",
-                bold: true,
-                size: 24,
-              }),
-            ],
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400, after: 200 },
-          }),
-
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `This presentation compares ${scenariosWithResults.length} loan scenarios to help you make an informed decision. Each scenario includes detailed pricing from multiple note buyers, terms, and key loan features.`,
-                size: 20,
-              }),
-            ],
             spacing: { after: 400 },
           }),
 
-          // Scenarios section
-          ...scenariosWithResults.map((scenario, index) => [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Scenario ${index + 1}: ${scenario.name}`,
-                  bold: true,
-                  size: 24,
-                }),
-              ],
-              heading: HeadingLevel.HEADING_1,
-              spacing: { before: 600, after: 200 },
-            }),
-
-            // Scenario details table
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [new Paragraph({ children: [new TextRun({ text: "Property Details", bold: true })] })],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                    }),
-                    new TableCell({
-                      children: [new Paragraph({ children: [new TextRun({ text: "Loan Details", bold: true })] })],
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      children: [
-                        new Paragraph({ children: [new TextRun(`Borrower: ${scenario.form_data.borrowerName || 'N/A'}`)] }),
-                        new Paragraph({ children: [new TextRun(`Property Type: ${scenario.form_data.propertyType || 'N/A'}`)] }),
-                        new Paragraph({ children: [new TextRun(`Address: ${scenario.form_data.propertyAddress || 'N/A'}`)] }),
-                        new Paragraph({ children: [new TextRun(`Property Value: ${formatCurrency(scenario.form_data.propertyValue || 0)}`)] }),
-                      ],
-                    }),
-                    new TableCell({
-                      children: [
-                        new Paragraph({ children: [new TextRun(`Loan Amount: ${formatCurrency(scenario.form_data.loanAmount || 0)}`)] }),
-                        new Paragraph({ children: [new TextRun(`LTV: ${scenario.form_data.ltv || 0}%`)] }),
-                        new Paragraph({ children: [new TextRun(`DSCR: ${scenario.form_data.dscr || 0}`)] }),
-                        new Paragraph({ children: [new TextRun(`Interest Only: ${scenario.form_data.interestOnly || 'No'}`)] }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-
-            new Paragraph({ text: "", spacing: { after: 200 } }),
-
-            // Pricing results
-            ...(scenario.results && scenario.results.length > 0 ? [
-              new Paragraph({
+          // Main Comparison Table
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              // Header row
+              new TableRow({
                 children: [
-                  new TextRun({
-                    text: "Pricing Options",
-                    bold: true,
-                    size: 20,
+                  new TableCell({ 
+                    children: [new Paragraph({ 
+                      children: [new TextRun({ text: "Loan Parameters", bold: true, color: "FFFFFF" })],
+                      alignment: AlignmentType.CENTER 
+                    })],
+                    shading: { fill: "003366" },
+                    width: { size: 20, type: WidthType.PERCENTAGE },
                   }),
-                ],
-                spacing: { before: 200, after: 100 },
-              }),
-
-              new Table({
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                rows: [
-                  new TableRow({
-                    children: [
-                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Note Buyer", bold: true })] })] }),
-                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Rate", bold: true })] })] }),
-                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Points", bold: true })] })] }),
-                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Monthly Payment", bold: true })] })] }),
-                    ],
-                  }),
-                  ...scenario.results.map((result: any) =>
-                    new TableRow({
+                  ...scenariosWithResults.map((scenario, index) => 
+                    new TableCell({ 
                       children: [
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun(result.buyer_name)] })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun(formatRate(result.rate))] })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun(`${result.additional_data?.points || 0}%`)] })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun(formatCurrency(result.additional_data?.monthlyPayment || 0))] })] }),
+                        new Paragraph({ 
+                          children: [new TextRun({ text: `Option ${index + 1}`, bold: true, color: "FFFFFF" })],
+                          alignment: AlignmentType.CENTER 
+                        }),
+                        new Paragraph({ 
+                          children: [new TextRun({ text: scenario.name, size: 18, color: "FFFFFF" })],
+                          alignment: AlignmentType.CENTER 
+                        })
                       ],
+                      shading: { fill: "003366" },
+                      width: { size: Math.floor(80 / scenariosWithResults.length), type: WidthType.PERCENTAGE },
                     })
                   ),
                 ],
               }),
-            ] : [
-              new Paragraph({
+
+              // LOAN STRUCTURE Section Header
+              new TableRow({
                 children: [
-                  new TextRun({
-                    text: "No pricing results available for this scenario.",
-                    italics: true,
+                  new TableCell({ 
+                    children: [new Paragraph({ 
+                      children: [new TextRun({ text: "LOAN STRUCTURE", bold: true, size: 14 })] 
+                    })],
+                    shading: { fill: "F0F0F0" },
+                  }),
+                  ...scenariosWithResults.map(() => 
+                    new TableCell({ 
+                      children: [new Paragraph("")],
+                      shading: { fill: "F0F0F0" },
+                    })
+                  ),
+                ],
+              }),
+
+              // Loan Amount
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Loan Amount", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => 
+                    new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(formatCurrency(scenario.form_data.loanAmount || 0))],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    })
+                  ),
+                ],
+              }),
+
+              // LTV Ratio
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "LTV Ratio", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => {
+                    const ltv = scenario.form_data.loanAmount && scenario.form_data.propertyValue ? 
+                      ((scenario.form_data.loanAmount / scenario.form_data.propertyValue) * 100).toFixed(1) : 
+                      scenario.form_data.ltv || 'N/A';
+                    return new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(`${ltv}%`)],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    });
                   }),
                 ],
-                spacing: { after: 200 },
               }),
-            ]),
 
-            new Paragraph({ text: "", spacing: { after: 400 } }),
+              // Property Type
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Property Type", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => 
+                    new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(scenario.form_data.propertyType || 'N/A')],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    })
+                  ),
+                ],
+              }),
+
+              // PRICING & RATES Section Header
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ 
+                      children: [new TextRun({ text: "PRICING & RATES", bold: true, size: 14 })] 
+                    })],
+                    shading: { fill: "F0F0F0" },
+                  }),
+                  ...scenariosWithResults.map(() => 
+                    new TableCell({ 
+                      children: [new Paragraph("")],
+                      shading: { fill: "F0F0F0" },
+                    })
+                  ),
+                ],
+              }),
+
+              // Best Interest Rate
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Best Interest Rate", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => {
+                    const bestRate = scenario.results?.length > 0 ? 
+                      Math.min(...scenario.results.map((r: any) => r.rate)) : 0;
+                    return new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(formatRate(bestRate))],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    });
+                  }),
+                ],
+              }),
+
+              // Best Pricing
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Best Pricing", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => {
+                    const bestPrice = scenario.results?.length > 0 ? 
+                      Math.max(...scenario.results.map((r: any) => r.price)) : 0;
+                    return new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(`${bestPrice.toFixed(3)}%`)],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    });
+                  }),
+                ],
+              }),
+
+              // CASH FLOW ANALYSIS Section Header
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ 
+                      children: [new TextRun({ text: "CASH FLOW ANALYSIS", bold: true, size: 14 })] 
+                    })],
+                    shading: { fill: "F0F0F0" },
+                  }),
+                  ...scenariosWithResults.map(() => 
+                    new TableCell({ 
+                      children: [new Paragraph("")],
+                      shading: { fill: "F0F0F0" },
+                    })
+                  ),
+                ],
+              }),
+
+              // Monthly Rental Income
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Monthly Rental Income", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => 
+                    new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(formatCurrency(scenario.form_data.monthlyRent || 0))],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    })
+                  ),
+                ],
+              }),
+
+              // DSCR
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "DSCR", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => 
+                    new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(`${scenario.form_data.dscr || 'N/A'}`)],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    })
+                  ),
+                ],
+              }),
+
+              // NOTE BUYERS Section Header
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ 
+                      children: [new TextRun({ text: "NOTE BUYERS", bold: true, size: 14 })] 
+                    })],
+                    shading: { fill: "F0F0F0" },
+                  }),
+                  ...scenariosWithResults.map(() => 
+                    new TableCell({ 
+                      children: [new Paragraph("")],
+                      shading: { fill: "F0F0F0" },
+                    })
+                  ),
+                ],
+              }),
+
+              // Available Buyers Count
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Available Buyers", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => 
+                    new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(`${scenario.results?.length || 0} buyers`)],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    })
+                  ),
+                ],
+              }),
+
+              // Top Buyer Names
+              new TableRow({
+                children: [
+                  new TableCell({ 
+                    children: [new Paragraph({ children: [new TextRun({ text: "Top Buyers", bold: true })] })],
+                    shading: { fill: "E8F4FD" },
+                  }),
+                  ...scenariosWithResults.map(scenario => {
+                    const topBuyers = scenario.results?.slice(0, 2).map((r: any) => r.buyer_name).join(', ') || 'None';
+                    return new TableCell({ 
+                      children: [new Paragraph({ 
+                        children: [new TextRun(topBuyers)],
+                        alignment: AlignmentType.CENTER 
+                      })] 
+                    });
+                  }),
+                ],
+              }),
+            ],
+          }),
+
+          // Summary Section
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Option Summary & Recommendations",
+                bold: true,
+                size: 24,
+                color: "003366",
+              }),
+            ],
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 600, after: 300 },
+          }),
+
+          // Individual option summaries
+          ...scenariosWithResults.map((scenario, index) => [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Option ${index + 1}: ${scenario.name}`,
+                  bold: true,
+                  size: 20,
+                  color: "003366",
+                }),
+              ],
+              heading: HeadingLevel.HEADING_3,
+              spacing: { before: 300, after: 100 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun(`Loan Amount: ${formatCurrency(scenario.form_data.loanAmount || 0)}`),
+              ],
+              spacing: { after: 50 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun(`Property Value: ${formatCurrency(scenario.form_data.propertyValue || 0)}`),
+              ],
+              spacing: { after: 50 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun(`LTV: ${scenario.form_data.loanAmount && scenario.form_data.propertyValue ? 
+                  ((scenario.form_data.loanAmount / scenario.form_data.propertyValue) * 100).toFixed(1) : 
+                  scenario.form_data.ltv || 'N/A'}%`),
+              ],
+              spacing: { after: 50 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun(`DSCR: ${scenario.form_data.dscr || 'N/A'}`),
+              ],
+              spacing: { after: 50 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun(`Available Note Buyers: ${scenario.results?.length || 0}`),
+              ],
+              spacing: { after: 100 },
+            }),
+
+            ...(scenario.results?.length > 0 ? 
+              scenario.results.slice(0, 3).map((result: any) => 
+                new Paragraph({
+                  children: [
+                    new TextRun(`• ${result.buyer_name}: ${formatRate(result.rate)} rate, ${result.price.toFixed(3)}% price`),
+                  ],
+                  spacing: { after: 50 },
+                })
+              ) : [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: "No pricing results available for this scenario.",
+                      italics: true
+                    }),
+                  ],
+                  spacing: { after: 50 },
+                })
+              ]
+            ),
+
+            new Paragraph({
+              text: "",
+              spacing: { after: 200 },
+            }),
           ]).flat(),
         ],
       }],
@@ -294,7 +542,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
     const buffer = await Packer.toBuffer(doc);
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
     
-    const fileName = `loan-scenarios-comparison-${new Date().toISOString().split('T')[0]}.docx`;
+    const fileName = `client-presentation-${new Date().toISOString().split('T')[0]}.docx`;
     saveAs(blob, fileName);
   };
 
