@@ -46,7 +46,6 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editData, setEditData] = useState<any>({});
-  const [newScenarioName, setNewScenarioName] = useState("");
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
   const [scenarioViewMode, setScenarioViewMode] = useState<"list" | "grid">("grid");
   
@@ -62,71 +61,6 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     window.addEventListener('scenarioSaved', handleScenarioSaved);
     return () => window.removeEventListener('scenarioSaved', handleScenarioSaved);
   }, [refetchScenarios]);
-
-  // Auto-populate scenario name when form data changes
-  useEffect(() => {
-    if (lastSubmittedFormData && results.length > 0) {
-      const autoName = generateScenarioName();
-      if (autoName && autoName !== newScenarioName) {
-        setNewScenarioName(autoName);
-      }
-    }
-  }, [lastSubmittedFormData, results]);
-  
-  // Auto-generate scenario name based on key loan details
-  const generateScenarioName = () => {
-    if (!lastSubmittedFormData || !results.length) return "";
-    
-    const firstResult = results[0];
-    const ltv = firstResult.ltv || lastSubmittedFormData.desiredLTV || "N/A";
-    const noteBuyer = firstResult.noteBuyer || "N/A";
-    const loanAmount = firstResult.loanAmount || lastSubmittedFormData.loanAmount || 0;
-    const rate = firstResult.rate ? firstResult.rate.toFixed(3) : "N/A";
-    const points = firstResult.points || 0;
-    const interestOnly = lastSubmittedFormData.interestOnly === "Yes" ? "IO" : "";
-    
-    const formattedAmount = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(loanAmount);
-    
-    return `${noteBuyer} ${ltv}%LTV ${formattedAmount} ${rate}% ${points}pts ${interestOnly}`.trim();
-  };
-
-  const handleSaveCurrentScenario = async () => {
-    const scenarioName = newScenarioName.trim();
-    
-    if (!scenarioName) {
-      toast({
-        title: "Error",
-        description: "Unable to generate scenario name",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!lastSubmittedFormData) {
-      toast({
-        title: "Error", 
-        description: "No form data available to save",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const scenarioId = await saveScenario(scenarioName, lastSubmittedFormData);
-    if (scenarioId && results.length > 0) {
-      // Save the current pricing results with this scenario
-      await saveScenarioResults(scenarioId, results);
-      setNewScenarioName(generateScenarioName()); // Auto-generate new name for next scenario
-      toast({
-        title: "Success",
-        description: "Scenario and pricing results saved successfully"
-      });
-    }
-  };
 
   const handleToggleScenarioExpand = async (scenarioId: string) => {
     if (expandedScenario === scenarioId) {
@@ -428,33 +362,6 @@ DSCR Loan System`;
           We found {results.length} competitive offers from our network of note buyers
         </p>
       </div>
-
-      {/* Save Current Scenario Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Save className="h-5 w-5" />
-            Save Current Scenario
-          </CardTitle>
-          <CardDescription>
-            Save the current pricing results to compare with future scenarios
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter custom scenario name..."
-              value={newScenarioName}
-              onChange={(e) => setNewScenarioName(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleSaveCurrentScenario}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Scenario
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <Tabs defaultValue="results" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
