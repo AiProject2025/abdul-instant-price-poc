@@ -115,7 +115,7 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
       maximumFractionDigits: 0,
     }).format(loanAmount);
     
-    const scenarioName = `${noteBuyer} ${ltv}%LTV ${formattedAmount} ${rate}% ${points}pts ${interestOnly}`.trim();
+    const scenarioName = `${noteBuyer} ${ltv}%LTV ${formattedAmount} ${rate}% ${Math.round(points * 10) / 10}pts ${interestOnly}`.trim();
     console.log('Generated scenario name:', scenarioName);
     return scenarioName;
   };

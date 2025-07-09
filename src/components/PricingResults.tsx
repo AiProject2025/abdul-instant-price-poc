@@ -244,6 +244,10 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     return `${rate.toFixed(3)}%`;
   };
 
+  const formatPoints = (points: number) => {
+    return `${Math.round(points * 10) / 10}pts`;
+  };
+
   const handleLockRate = (index: number) => {
     console.log(`Locking rate for ${results[index].noteBuyer} - ${results[index].product}`);
     // Add lock rate logic here
@@ -522,11 +526,11 @@ DSCR Loan System`;
                                      </DropdownMenuContent>
                                    </DropdownMenu>
                                  </div>
-                                <div className="space-y-1 text-xs text-gray-600">
-                                  <div>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
-                                  <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
-                                  <div>Created: {new Date(scenario.created_at).toLocaleDateString()}</div>
-                                </div>
+                                 <div className="space-y-1 text-xs text-gray-600">
+                                   <div>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
+                                   <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
+                                   <div>Created: {new Date(scenario.created_at).toLocaleDateString()}</div>
+                                 </div>
                                 <Button 
                                   size="sm" 
                                   className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white"
@@ -611,32 +615,34 @@ DSCR Loan System`;
                                       </TableRow>
                                     ))}
                                   </TableBody>
-                                </Table>
-                 </div>
-                   {selectedScenarios.size > 0 && (
-                     <div className="mt-4 p-4 bg-blue-100 border-t border-blue-200">
-                       <div className="flex justify-between items-center">
-                         <span className="text-sm font-medium text-blue-800">
-                           {selectedScenarios.size} scenario{selectedScenarios.size > 1 ? 's' : ''} selected
-                         </span>
-                         <Button 
-                           onClick={handleGenerateSelectedQuotes}
-                           className="bg-blue-600 hover:bg-blue-700 text-white"
-                         >
-                           <FileText className="mr-2 h-4 w-4" />
-                           Generate Client Presentation
-                         </Button>
-                       </div>
-                     </div>
-                   )}
+                                 </Table>
+                               </div>
                  </div>
                           )}
                         </CardContent>
                       </Card>
                     ))}
-                  </div>
-                )}
-              </CardContent>
+                   </div>
+                 )}
+                 
+                 {/* Selection Panel */}
+                 {selectedScenarios.size > 0 && (
+                   <div className="mt-4 p-4 bg-blue-100 border-t border-blue-200 rounded-b-lg">
+                     <div className="flex justify-between items-center">
+                       <span className="text-sm font-medium text-blue-800">
+                         {selectedScenarios.size} scenario{selectedScenarios.size > 1 ? 's' : ''} selected
+                       </span>
+                       <Button 
+                         onClick={handleGenerateSelectedQuotes}
+                         className="bg-blue-600 hover:bg-blue-700 text-white"
+                       >
+                         <FileText className="mr-2 h-4 w-4" />
+                         Generate Client Presentation
+                       </Button>
+                     </div>
+                   </div>
+                 )}
+               </CardContent>
             </Card>
           )}
 
