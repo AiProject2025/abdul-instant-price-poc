@@ -46,6 +46,13 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   
   const { scenarios, scenarioResults, saveScenario, saveScenarioResults, deleteScenario, fetchScenarioResults } = useScenarios();
   const { toast } = useToast();
+
+  // Auto-populate scenario name when form data changes
+  useEffect(() => {
+    if (lastSubmittedFormData && results.length > 0 && !newScenarioName) {
+      setNewScenarioName(generateScenarioName());
+    }
+  }, [lastSubmittedFormData, results]);
   
   // Auto-generate scenario name based on key loan details
   const generateScenarioName = () => {
@@ -70,7 +77,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   };
 
   const handleSaveCurrentScenario = async () => {
-    const scenarioName = newScenarioName.trim() || generateScenarioName();
+    const scenarioName = newScenarioName.trim();
     
     if (!scenarioName) {
       toast({
@@ -298,7 +305,7 @@ DSCR Loan System`;
         <CardContent>
           <div className="flex gap-2">
             <Input
-              placeholder={generateScenarioName() || "Enter scenario name..."}
+              placeholder="Enter custom scenario name..."
               value={newScenarioName}
               onChange={(e) => setNewScenarioName(e.target.value)}
               className="flex-1"
