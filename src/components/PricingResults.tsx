@@ -312,13 +312,54 @@ DSCR Loan System`;
       </Card>
 
       <Tabs defaultValue="results" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="results">Current Results ({results.length})</TabsTrigger>
           <TabsTrigger value="ineligible">Ineligible ({ineligibleBuyers.length})</TabsTrigger>
-          <TabsTrigger value="scenarios">Saved Scenarios ({scenarios.length})</TabsTrigger>
         </TabsList>
         
         <TabsContent value="results" className="space-y-6">
+          {/* Saved Scenarios Section - now within Current Results */}
+          {scenarios.length > 0 && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardHeader>
+                <CardTitle className="text-blue-800">Saved Scenarios - Click to Re-Price</CardTitle>
+                <CardDescription>Previously saved scenarios you can reload and re-price</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {scenarios.slice(0, 6).map((scenario) => (
+                    <Card key={scenario.id} className="cursor-pointer hover:shadow-md transition-shadow border-blue-200 bg-white" 
+                          onClick={() => handleEditQuote({
+                            loanAmount: scenario.form_data.loanAmount,
+                            rate: 0, // Will be re-priced
+                            monthlyPayment: 0,
+                            ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV,
+                            dscr: scenario.form_data.dscr,
+                            propertyType: scenario.form_data.propertyType,
+                            loanPurpose: scenario.form_data.loanPurpose,
+                            points: 0,
+                            noteBuyer: scenario.form_data.noteBuyer || 'TBD'
+                          })}>
+                      <CardContent className="p-3">
+                        <div className="text-sm font-medium text-blue-800 mb-1">{scenario.name}</div>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <div>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
+                          <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
+                          <div className="text-xs text-blue-600">Click to re-price →</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {scenarios.length > 6 && (
+                  <div className="text-center mt-3">
+                    <Button variant="outline" size="sm">View All {scenarios.length} Scenarios</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Current pricing results content */}
           <div className="flex justify-end">
             <div className="flex gap-2">
@@ -606,173 +647,6 @@ DSCR Loan System`;
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="scenarios" className="space-y-4">
-          <div className="space-y-4">
-            {scenarios.length === 0 ? (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="text-center text-muted-foreground">
-                    No scenarios saved yet. Save your current pricing results above to start comparing scenarios.
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              scenarios.map((scenario) => (
-                <Card key={scenario.id} className="border-l-4 border-l-primary">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{scenario.name}</CardTitle>
-                        <CardDescription>
-                          Saved on {new Date(scenario.created_at).toLocaleDateString()}
-                        </CardDescription>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleToggleScenarioExpand(scenario.id)}
-                        >
-                          <Eye className="w-4 h-4" />
-                          {expandedScenario === scenario.id ? 'Hide' : 'View'} Details
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => deleteScenario(scenario.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    {/* Key scenario summary - always visible */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-muted/50 rounded-lg">
-                      <div>
-                        <strong>Borrower:</strong>
-                        <div className="text-sm text-muted-foreground">
-                          {scenario.form_data.borrowerName || 
-                           `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim() || 'N/A'}
-                        </div>
-                      </div>
-                      <div>
-                        <strong>Loan Amount:</strong>
-                        <div className="text-sm text-muted-foreground">
-                          {formatCurrency(scenario.form_data.loanAmount || 0)}
-                        </div>
-                      </div>
-                      <div>
-                        <strong>LTV:</strong>
-                        <div className="text-sm text-muted-foreground">
-                          {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%
-                        </div>
-                      </div>
-                      <div>
-                        <strong>Property Type:</strong>
-                        <div className="text-sm text-muted-foreground">
-                          {scenario.form_data.propertyType || 'N/A'}
-                        </div>
-                      </div>
-                      <div>
-                        <strong>Interest Only:</strong>
-                        <div className="text-sm text-muted-foreground">
-                          {scenario.form_data.interestOnly || 'No'}
-                        </div>
-                      </div>
-                      <div>
-                        <strong>DSCR:</strong>
-                        <div className="text-sm text-muted-foreground">
-                          {scenario.form_data.dscr || 'N/A'}
-                        </div>
-                      </div>
-                      <div>
-                        <strong>Credit Score:</strong>
-                        <div className="text-sm text-muted-foreground">
-                          {scenario.form_data.creditScore || 'N/A'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Pricing results by note buyer */}
-                    {scenarioResults[scenario.id] && scenarioResults[scenario.id].length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="font-semibold mb-2">Pricing Results by Note Buyer:</h4>
-                        <div className="overflow-x-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Note Buyer</TableHead>
-                                <TableHead>Rate</TableHead>
-                                <TableHead>Points</TableHead>
-                                <TableHead>Monthly Payment</TableHead>
-                                <TableHead>Loan Amount</TableHead>
-                                <TableHead>Features</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {scenarioResults[scenario.id].map((result) => (
-                                <TableRow key={result.id}>
-                                  <TableCell className="font-medium">{result.buyer_name}</TableCell>
-                                  <TableCell>{formatRate(result.rate)}</TableCell>
-                                  <TableCell>{result.additional_data?.points || 0}%</TableCell>
-                                  <TableCell>{formatCurrency(result.additional_data?.monthlyPayment || 0)}</TableCell>
-                                  <TableCell>{formatCurrency(result.loan_amount)}</TableCell>
-                                  <TableCell>
-                                    <div className="flex gap-1">
-                                      {result.additional_data?.interestOnly === 'Yes' && 
-                                        <Badge variant="secondary" className="text-xs">IO</Badge>
-                                      }
-                                      {result.additional_data?.points > 0 && 
-                                        <Badge variant="outline" className="text-xs">{result.additional_data.points}pts</Badge>
-                                      }
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </div>
-                    )}
-
-                    {(!scenarioResults[scenario.id] || scenarioResults[scenario.id].length === 0) && (
-                      <div className="text-center py-4 text-muted-foreground border border-dashed rounded-lg">
-                        No pricing results saved with this scenario
-                      </div>
-                    )}
-
-                    {/* Expanded details */}
-                    {expandedScenario === scenario.id && (
-                      <div className="mt-4 pt-4 border-t">
-                        <h4 className="font-semibold mb-2">Complete Form Data:</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm bg-muted/20 p-4 rounded-lg max-h-40 overflow-y-auto">
-                          {Object.entries(scenario.form_data)
-                            .filter(([key]) => !['borrowerName', 'firstName', 'lastName'].includes(key))
-                            .map(([key, value]) => (
-                            <div key={key}>
-                              <strong className="text-xs">
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
-                              </strong>
-                              <div className="text-muted-foreground text-xs truncate">
-                                {typeof value === 'number' && key.toLowerCase().includes('amount') 
-                                  ? formatCurrency(value as number)
-                                  : String(value)
-                                }
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
         </TabsContent>
       </Tabs>
 
