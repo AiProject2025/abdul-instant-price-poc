@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Eye, Grid3X3, List, FileText, X, GripVertical, Plus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Trash2, Eye, Grid3X3, List, FileText, X } from 'lucide-react';
 import { useScenarios, Scenario, ScenarioResult } from '@/hooks/useScenarios';
 import DeletedScenariosDialog from '@/components/DeletedScenariosDialog';
 import AuditLogDialog from '@/components/AuditLogDialog';
@@ -24,13 +25,9 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   const { scenarios, scenarioResults, loading, deleteScenario, fetchScenarioResults } = useScenarios();
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [comparisonScenarios, setComparisonScenarios] = useState<Scenario[]>([]);
+  const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(new Set());
   const [isGeneratingPresentation, setIsGeneratingPresentation] = useState(false);
-  const [draggedScenario, setDraggedScenario] = useState<Scenario | null>(null);
   const { toast } = useToast();
-
-  // Debug - log when component renders
-  console.log('ScenarioGrid rendered with drag & drop functionality');
 
   const handleToggleExpand = async (scenarioId: string) => {
     if (expandedScenario === scenarioId) {
@@ -57,61 +54,33 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   };
 
   const handleScenarioSelect = (scenarioId: string, checked: boolean) => {
-    // Legacy function - can be removed
-  };
-
-  const handleDragStart = (e: React.DragEvent, scenario: Scenario) => {
-    setDraggedScenario(scenario);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', scenario.id);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (draggedScenario) {
-      // Check if already in comparison
-      if (comparisonScenarios.find(s => s.id === draggedScenario.id)) {
-        toast({
-          title: "Already added",
-          description: "This scenario is already in the comparison.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Check limit
-      if (comparisonScenarios.length >= 5) {
-        toast({
-          title: "Maximum reached",
-          description: "You can compare up to 5 scenarios at a time.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setComparisonScenarios([...comparisonScenarios, draggedScenario]);
-      setDraggedScenario(null);
+    const newSelected = new Set(selectedScenarios);
+    if (checked) {
+      newSelected.add(scenarioId);
+    } else {
+      newSelected.delete(scenarioId);
     }
+    setSelectedScenarios(newSelected);
   };
 
-  const removeFromComparison = (scenarioId: string) => {
-    setComparisonScenarios(comparisonScenarios.filter(s => s.id !== scenarioId));
-  };
-
-  const clearComparison = () => {
-    setComparisonScenarios([]);
+  const clearSelection = () => {
+    setSelectedScenarios(new Set());
   };
 
   const generateClientPresentation = async () => {
-    if (comparisonScenarios.length === 0) {
+    if (selectedScenarios.size === 0) {
       toast({
-        title: "No scenarios to compare",
-        description: "Please drag scenarios to the comparison area first.",
+        title: "No scenarios selected",
+        description: "Please select at least one scenario to generate a presentation.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (selectedScenarios.size > 5) {
+      toast({
+        title: "Too many scenarios selected", 
+        description: "Please select 5 or fewer scenarios for a clean presentation.",
         variant: "destructive"
       });
       return;
@@ -120,9 +89,12 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
     setIsGeneratingPresentation(true);
     
     try {
-      // Fetch results for each comparison scenario
+      // Get selected scenarios with their results
+      const selectedScenariosData = scenarios.filter(s => selectedScenarios.has(s.id));
+      
+      // Fetch results for each selected scenario
       const scenariosWithResults = await Promise.all(
-        comparisonScenarios.map(async (scenario) => {
+        selectedScenariosData.map(async (scenario) => {
           if (!scenarioResults[scenario.id]) {
             await fetchScenarioResults(scenario.id);
           }
@@ -138,7 +110,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
       
       toast({
         title: "Presentation generated",
-        description: `Client presentation with ${comparisonScenarios.length} scenarios has been downloaded.`,
+        description: `Client presentation with ${selectedScenarios.size} scenarios has been downloaded.`,
       });
       
     } catch (error) {
@@ -360,28 +332,19 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
 
   return (
     <div className="space-y-4">
-      {/* Debug info */}
-      <div className="text-xs text-muted-foreground">
-        Debug: {scenarios.length} scenarios, {comparisonScenarios.length} in comparison
-      </div>
-      
-      {/* Comparison Drop Zone */}
-      <Card 
-        className={`border-2 border-dashed transition-all ${
-          draggedScenario ? 'border-primary bg-primary/5' : 'border-muted-foreground/30'
-        }`}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold">Comparison Workspace</h3>
-              <Badge variant="secondary">
-                {comparisonScenarios.length}/5 scenarios
-              </Badge>
-            </div>
-            {comparisonScenarios.length > 0 && (
+      {/* Selection Panel - shows when scenarios are selected */}
+      {selectedScenarios.size > 0 && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge variant="default" className="bg-primary">
+                  {selectedScenarios.size} scenarios selected
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Ready to generate client presentation
+                </span>
+              </div>
               <div className="flex gap-2">
                 <Button
                   onClick={generateClientPresentation}
@@ -393,58 +356,24 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={clearComparison}
+                  onClick={clearSelection}
                   size="sm"
                 >
                   <X className="w-4 h-4" />
-                  Clear
+                  Clear Selection
                 </Button>
               </div>
-            )}
-          </div>
-
-          {comparisonScenarios.length === 0 ? (
-            <div className="text-center py-8">
-              <Plus className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-muted-foreground">
-                Drag scenarios here to build a comparison for your client
-              </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {comparisonScenarios.map((scenario) => (
-                <Card key={scenario.id} className="bg-muted/50 border-primary/20">
-                  <CardContent className="p-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">{scenario.name}</h4>
-                        <p className="text-xs text-muted-foreground">
-                          {formatCurrency(scenario.form_data.loanAmount || 0)}
-                        </p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFromComparison(scenario.id)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-bold">Saved Scenarios</h2>
-          {comparisonScenarios.length > 0 && (
+          {selectedScenarios.size > 0 && (
             <Badge variant="secondary" className="ml-2">
-              {comparisonScenarios.length} in comparison
+              {selectedScenarios.size} selected
             </Badge>
           )}
         </div>
@@ -474,164 +403,270 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
         </div>
       </div>
       {viewMode === 'list' ? (
-        // Compact List View
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {scenarios.map((scenario) => (
-            <Card 
-              key={scenario.id} 
-              className="hover:shadow-md transition-all cursor-move group"
-              draggable
-              onDragStart={(e) => handleDragStart(e, scenario)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <GripVertical className="w-4 h-4 text-muted-foreground group-hover:text-primary mt-0.5" />
-                  <div className="flex gap-1">
-                    {onSelectScenario && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onSelectScenario(scenario)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Eye className="w-3 h-3" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteScenario(scenario.id)}
-                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div>
-                    <h4 className="font-medium text-sm line-clamp-2">{scenario.name}</h4>
-                    <p className="text-xs text-muted-foreground">
+        // List View with Checkboxes
+        scenarios.map((scenario) => (
+          <Card key={scenario.id}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedScenarios.has(scenario.id)}
+                    onCheckedChange={(checked) => handleScenarioSelect(scenario.id, checked as boolean)}
+                  />
+                  <CardTitle className="flex items-center gap-2">
+                    {scenario.name}
+                    <Badge variant="outline">
                       {new Date(scenario.created_at).toLocaleDateString()}
-                    </p>
+                    </Badge>
+                  </CardTitle>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleToggleExpand(scenario.id)}
+                  >
+                    <Eye className="w-4 h-4" />
+                    {expandedScenario === scenario.id ? 'Hide' : 'View'} Details
+                  </Button>
+                  {onSelectScenario && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onSelectScenario(scenario)}
+                    >
+                      Load Scenario
+                    </Button>
+                  )}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteScenario(scenario.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              {/* Always show key scenario info */}
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Scenario Summary:</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-muted/50 p-4 rounded-lg">
+                  <div>
+                    <strong>Borrower:</strong> 
+                    <div>{scenario.form_data.borrowerName || 'N/A'}</div>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-muted-foreground">Loan:</span>
-                      <div className="font-medium">{formatCurrency(scenario.form_data.loanAmount || 0)}</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">LTV:</span>
-                      <div className="font-medium">{scenario.form_data.ltv || 0}%</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">DSCR:</span>
-                      <div className="font-medium">{scenario.form_data.dscr || 0}</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Buyer:</span>
-                      <div className="font-medium text-xs truncate">{scenario.form_data.noteBuyer || 'N/A'}</div>
-                    </div>
+                  <div>
+                    <strong>Loan Amount:</strong> 
+                    <div>{formatCurrency(scenario.form_data.loanAmount || 0)}</div>
                   </div>
-                  
-                  <div className="flex flex-wrap gap-1">
-                    {scenario.form_data.interestOnly === 'Yes' && (
-                      <Badge variant="secondary" className="text-xs h-5">IO</Badge>
-                    )}
-                    {scenario.form_data.points > 0 && (
-                      <Badge variant="outline" className="text-xs h-5">{scenario.form_data.points}% pts</Badge>
-                    )}
-                    {scenarioResults[scenario.id] && scenarioResults[scenario.id].length > 0 && (
-                      <Badge variant="default" className="text-xs h-5">
-                        {scenarioResults[scenario.id].length} results
-                      </Badge>
-                    )}
+                  <div>
+                    <strong>Property Type:</strong> 
+                    <div>{scenario.form_data.propertyType || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <strong>LTV:</strong> 
+                    <div>{scenario.form_data.ltv || 0}%</div>
+                  </div>
+                  <div>
+                    <strong>DSCR:</strong> 
+                    <div>{scenario.form_data.dscr || 0}</div>
+                  </div>
+                  <div>
+                    <strong>Points:</strong> 
+                    <div>{scenario.form_data.points || 0}%</div>
+                  </div>
+                  <div>
+                    <strong>Interest Only:</strong> 
+                    <div>{scenario.form_data.interestOnly || 'No'}</div>
+                  </div>
+                  <div>
+                    <strong>Note Buyer:</strong> 
+                    <div>{scenario.form_data.noteBuyer || 'N/A'}</div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+              {/* Show pricing results if available */}
+              {scenarioResults[scenario.id] && scenarioResults[scenario.id].length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-semibold mb-2">Pricing Results by Note Buyer:</h4>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Note Buyer</TableHead>
+                        <TableHead>Rate</TableHead>
+                        <TableHead>Points</TableHead>
+                        <TableHead>Monthly Payment</TableHead>
+                        <TableHead>Loan Amount</TableHead>
+                        <TableHead>Features</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {scenarioResults[scenario.id].map((result) => (
+                        <TableRow key={result.id}>
+                          <TableCell className="font-medium">{result.buyer_name}</TableCell>
+                          <TableCell>{formatRate(result.rate)}</TableCell>
+                          <TableCell>{result.additional_data?.points || 0}%</TableCell>
+                          <TableCell>{formatCurrency(result.additional_data?.monthlyPayment || 0)}</TableCell>
+                          <TableCell>{formatCurrency(result.loan_amount)}</TableCell>
+                          <TableCell>
+                            <div className="text-xs">
+                              {result.additional_data?.interestOnly === 'Yes' && 
+                                <Badge variant="secondary" className="mr-1">Interest Only</Badge>
+                              }
+                              {result.additional_data?.points > 0 && 
+                                <Badge variant="outline">{result.additional_data.points}% Points</Badge>
+                              }
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              {expandedScenario === scenario.id && (
+                <div className="space-y-4 border-t pt-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">Complete Form Data:</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm bg-muted/20 p-4 rounded-lg max-h-60 overflow-y-auto">
+                      {Object.entries(scenario.form_data).map(([key, value]) => (
+                        <div key={key}>
+                          <strong>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong>
+                          <div className="text-muted-foreground">
+                            {typeof value === 'number' && key.toLowerCase().includes('amount') 
+                              ? formatCurrency(value as number)
+                              : String(value)
+                            }
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(!scenarioResults[scenario.id] || scenarioResults[scenario.id].length === 0) && (
+                <div className="text-muted-foreground text-center py-4 border border-dashed rounded-lg">
+                  No pricing results found for this scenario. 
+                  <br />
+                  <span className="text-sm">Load this scenario and run pricing to see results here.</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))
       ) : (
-        // Compact Grid View by Note Buyer
+        // Grid View by Note Buyer with Checkboxes
         <div className="space-y-6">
           {Object.entries(groupedByNoteBuyer).map(([noteBuyer, noteBuyerScenarios]) => (
             <div key={noteBuyer} className="space-y-4">
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold">{noteBuyer}</h3>
+                <h3 className="text-xl font-semibold">{noteBuyer}</h3>
                 <Badge variant="secondary">{noteBuyerScenarios.length} scenarios</Badge>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {noteBuyerScenarios.map((scenario) => (
-                  <Card 
-                    key={scenario.id} 
-                    className="hover:shadow-md transition-all cursor-move group"
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, scenario)}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-start justify-between mb-2">
-                        <GripVertical className="w-3 h-3 text-muted-foreground group-hover:text-primary mt-0.5" />
-                        <div className="flex gap-1">
+                  <Card key={scenario.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-2 flex-1">
+                          <Checkbox
+                            checked={selectedScenarios.has(scenario.id)}
+                            onCheckedChange={(checked) => handleScenarioSelect(scenario.id, checked as boolean)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <CardTitle className="text-lg leading-tight mb-1">
+                              {scenario.name}
+                            </CardTitle>
+                            <Badge variant="outline" className="text-xs">
+                              {new Date(scenario.created_at).toLocaleDateString()}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 ml-2">
                           {onSelectScenario && (
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => onSelectScenario(scenario)}
-                              className="h-5 w-5 p-0"
+                              className="px-2"
                             >
-                              <Eye className="w-2.5 h-2.5" />
+                              Load
                             </Button>
                           )}
                           <Button
-                            variant="ghost"
+                            variant="destructive"
                             size="sm"
                             onClick={() => deleteScenario(scenario.id)}
-                            className="h-5 w-5 p-0 text-destructive hover:text-destructive"
+                            className="px-2"
                           >
-                            <Trash2 className="w-2.5 h-2.5" />
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <div>
-                          <h4 className="font-medium text-xs line-clamp-2">{scenario.name}</h4>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(scenario.created_at).toLocaleDateString()}
-                          </p>
+                    </CardHeader>
+                    
+                    <CardContent className="pt-0">
+                      <div className="space-y-2 text-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <span className="font-medium">Borrower:</span>
+                            <div className="text-muted-foreground truncate">
+                              {scenario.form_data.borrowerName || 'N/A'}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="font-medium">Loan Amount:</span>
+                            <div className="text-muted-foreground">
+                              {formatCurrency(scenario.form_data.loanAmount || 0)}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="font-medium">LTV:</span>
+                            <div className="text-muted-foreground">
+                              {scenario.form_data.ltv || 0}%
+                            </div>
+                          </div>
+                          <div>
+                            <span className="font-medium">DSCR:</span>
+                            <div className="text-muted-foreground">
+                              {scenario.form_data.dscr || 0}
+                            </div>
+                          </div>
                         </div>
                         
-                        <div className="space-y-1 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Loan:</span>
-                            <span className="font-medium">{formatCurrency(scenario.form_data.loanAmount || 0)}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">LTV:</span>
-                            <span className="font-medium">{scenario.form_data.ltv || 0}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">DSCR:</span>
-                            <span className="font-medium">{scenario.form_data.dscr || 0}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-1">
-                          {scenario.form_data.interestOnly === 'Yes' && (
-                            <Badge variant="secondary" className="text-xs h-4">IO</Badge>
-                          )}
+                        <div className="flex gap-1 flex-wrap mt-2">
                           {scenario.form_data.points > 0 && (
-                            <Badge variant="outline" className="text-xs h-4">{scenario.form_data.points}%</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {scenario.form_data.points}% Points
+                            </Badge>
                           )}
-                          {scenarioResults[scenario.id] && scenarioResults[scenario.id].length > 0 && (
-                            <Badge variant="default" className="text-xs h-4">
-                              {scenarioResults[scenario.id].length}
+                          {scenario.form_data.interestOnly === 'Yes' && (
+                            <Badge variant="secondary" className="text-xs">
+                              Interest Only
+                            </Badge>
+                          )}
+                          {scenario.form_data.propertyType && (
+                            <Badge variant="outline" className="text-xs">
+                              {scenario.form_data.propertyType}
                             </Badge>
                           )}
                         </div>
+
+                        {/* Show pricing results count if available */}
+                        {scenarioResults[scenario.id] && scenarioResults[scenario.id].length > 0 && (
+                          <div className="mt-2 pt-2 border-t">
+                            <Badge variant="default" className="text-xs">
+                              {scenarioResults[scenario.id].length} pricing result{scenarioResults[scenario.id].length !== 1 ? 's' : ''}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
