@@ -593,6 +593,20 @@ const Quote = () => {
                 onClientSelect={(client) => {
                   console.log('Client selected:', client);
                   // Pre-populate form with client data
+                  const clientData = {
+                    borrowerName: client.name,
+                    email: client.email,
+                    phone: client.phone,
+                    // If client has properties, use the first one as default
+                    ...(client.properties.length > 0 && {
+                      propertyAddress: client.properties[0].address,
+                      city: client.properties[0].city,
+                      propertyState: client.properties[0].state,
+                      zipCode: client.properties[0].zip_code,
+                      propertyType: client.properties[0].property_type
+                    })
+                  };
+                  setLastSubmittedFormData(clientData);
                   setCurrentStep('questionnaire');
                 }}
                 isLoading={isProcessing}

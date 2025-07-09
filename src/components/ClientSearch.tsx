@@ -2,64 +2,23 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, MapPin } from "lucide-react";
+import { Search, User, MapPin, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useClients, ClientWithProperties } from "@/hooks/useClients";
 
 interface ClientSearchProps {
-  onClientSelect: (client: ClientInfo) => void;
-}
-
-interface ClientInfo {
-  name: string;
-  address: string;
-  lastQuoteDate?: string;
-  totalQuotes?: number;
+  onClientSelect: (client: ClientWithProperties) => void;
 }
 
 const ClientSearch = ({ onClientSelect }: ClientSearchProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<ClientInfo[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const { clients, loading, error, searchClients } = useClients();
 
-  // Mock data - in real app this would come from API/database
-  const mockClients: ClientInfo[] = [
-    {
-      name: "John Smith",
-      address: "123 Main St, Baltimore, MD 21201",
-      lastQuoteDate: "2024-01-15",
-      totalQuotes: 3
-    },
-    {
-      name: "Sarah Johnson",
-      address: "456 Oak Ave, Annapolis, MD 21401",
-      lastQuoteDate: "2024-01-10",
-      totalQuotes: 1
-    },
-    {
-      name: "Michael Brown",
-      address: "789 Pine Rd, Frederick, MD 21701",
-      lastQuoteDate: "2024-01-08",
-      totalQuotes: 5
-    }
-  ];
-
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchTerm.trim()) {
-      setSearchResults([]);
       return;
     }
-
-    setIsSearching(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      const filtered = mockClients.filter(client => 
-        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.address.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setSearchResults(filtered);
-      setIsSearching(false);
-    }, 500);
+    await searchClients(searchTerm);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -88,19 +47,19 @@ const ClientSearch = ({ onClientSelect }: ClientSearchProps) => {
           />
           <Button 
             onClick={handleSearch}
-            disabled={isSearching}
+            disabled={loading}
             className="bg-dominion-blue hover:bg-dominion-blue/90"
           >
             <Search className="h-4 w-4" />
           </Button>
         </div>
 
-        {searchResults.length > 0 && (
+        {clients.length > 0 && (
           <div className="space-y-2 max-h-60 overflow-y-auto">
             <h4 className="font-medium text-dominion-blue">Search Results:</h4>
-            {searchResults.map((client, index) => (
+            {clients.map((client) => (
               <div
-                key={index}
+                key={client.id}
                 className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition-colors"
                 onClick={() => onClientSelect(client)}
               >
@@ -110,17 +69,30 @@ const ClientSearch = ({ onClientSelect }: ClientSearchProps) => {
                       <User className="h-4 w-4 text-dominion-blue" />
                       <span className="font-medium text-dominion-blue">{client.name}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                      <MapPin className="h-3 w-3" />
-                      <span>{client.address}</span>
-                    </div>
+                    
+                    {client.properties.length > 0 && (
+                      <div className="space-y-1 mb-2">
+                        {client.properties.map((property) => (
+                          <div key={property.id} className="flex items-center gap-2 text-sm text-gray-600">
+                            <MapPin className="h-3 w-3" />
+                            <span>{property.address}</span>
+                            {property.property_type && (
+                              <Badge variant="outline" className="text-xs">
+                                {property.property_type}
+                              </Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
                     <div className="flex gap-2">
                       {client.lastQuoteDate && (
                         <Badge variant="secondary" className="text-xs">
                           Last quote: {new Date(client.lastQuoteDate).toLocaleDateString()}
                         </Badge>
                       )}
-                      {client.totalQuotes && (
+                      {client.totalQuotes > 0 && (
                         <Badge variant="outline" className="text-xs">
                           {client.totalQuotes} quote{client.totalQuotes !== 1 ? 's' : ''}
                         </Badge>
@@ -133,9 +105,15 @@ const ClientSearch = ({ onClientSelect }: ClientSearchProps) => {
           </div>
         )}
 
-        {searchTerm && searchResults.length === 0 && !isSearching && (
+        {searchTerm && clients.length === 0 && !loading && (
           <div className="text-center py-4 text-gray-500">
             No clients found matching "{searchTerm}"
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center py-4 text-red-500">
+            Error: {error}
           </div>
         )}
       </CardContent>

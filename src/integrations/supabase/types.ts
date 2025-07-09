@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -40,6 +70,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string
+          city: string | null
+          client_id: string
+          created_at: string
+          id: string
+          property_type: string | null
+          state: string | null
+          updated_at: string
+          user_id: string
+          zip_code: string | null
+        }
+        Insert: {
+          address: string
+          city?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          property_type?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string
+          city?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          property_type?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scenario_audit_log: {
         Row: {
@@ -117,36 +194,57 @@ export type Database = {
       }
       scenarios: {
         Row: {
+          client_id: string | null
           created_at: string
           deleted_at: string | null
           deleted_by_name: string | null
           form_data: Json
           id: string
           name: string
+          property_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          client_id?: string | null
           created_at?: string
           deleted_at?: string | null
           deleted_by_name?: string | null
           form_data: Json
           id?: string
           name: string
+          property_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          client_id?: string | null
           created_at?: string
           deleted_at?: string | null
           deleted_by_name?: string | null
           form_data?: Json
           id?: string
           name?: string
+          property_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "scenarios_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenarios_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

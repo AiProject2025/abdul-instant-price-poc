@@ -3,18 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2 } from "lucide-react";
 import ClientSearch from "./ClientSearch";
-
-interface ClientInfo {
-  name: string;
-  address: string;
-  lastQuoteDate?: string;
-  totalQuotes?: number;
-}
+import { ClientWithProperties } from "@/hooks/useClients";
 
 interface QuestionnaireUploadProps {
   onFileUpload: (file: File) => void;
   onManualEntry: () => void;
-  onClientSelect?: (client: ClientInfo) => void;
+  onClientSelect?: (client: ClientWithProperties) => void;
   isLoading: boolean;
 }
 const QuestionnaireUpload = ({
@@ -55,7 +49,7 @@ const QuestionnaireUpload = ({
         </CardContent>
       </Card>;
   }
-  const handleClientSelect = (client: ClientInfo) => {
+  const handleClientSelect = (client: ClientWithProperties) => {
     if (onClientSelect) {
       onClientSelect(client);
     }

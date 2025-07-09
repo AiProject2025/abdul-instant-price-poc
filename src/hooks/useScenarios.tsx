@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useClients } from './useClients';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Scenario {
@@ -35,6 +36,7 @@ export interface ScenarioResult {
 }
 
 export const useScenarios = () => {
+  const { findOrCreateClient, findOrCreateProperty } = useClients();
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [deletedScenarios, setDeletedScenarios] = useState<Scenario[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -92,7 +94,33 @@ export const useScenarios = () => {
   };
 
   const saveScenario = async (name: string, formData: any): Promise<string | null> => {
+    setLoading(true);
     try {
+      // Extract client information from form data
+      const clientName = formData.borrowerName || `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
+      const clientEmail = formData.email;
+      const clientPhone = formData.phone;
+      
+      // Extract property information from form data
+      const propertyAddress = formData.propertyAddress || `${formData.streetAddress || ''}, ${formData.city || ''}, ${formData.propertyState || ''}`.trim();
+      const propertyCity = formData.city;
+      const propertyState = formData.propertyState;
+      const propertyZip = formData.zipCode;
+      const propertyType = formData.propertyType;
+      
+      // Create or find client
+      const client = await findOrCreateClient(clientName, clientEmail, clientPhone);
+      
+      // Create or find property
+      const property = await findOrCreateProperty(
+        client.id, 
+        propertyAddress, 
+        propertyCity, 
+        propertyState, 
+        propertyZip, 
+        propertyType
+      );
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
@@ -108,7 +136,9 @@ export const useScenarios = () => {
         .insert({
           user_id: user.id,
           name,
-          form_data: formData
+          form_data: formData,
+          client_id: client.id,
+          property_id: property.id
         })
         .select()
         .single();
@@ -130,6 +160,8 @@ export const useScenarios = () => {
         variant: "destructive"
       });
       return null;
+    } finally {
+      setLoading(false);
     }
   };
 
