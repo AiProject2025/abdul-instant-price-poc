@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Edit, FileText, Eye } from "lucide-react";
+import { Edit, FileText, Eye, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ComparisonGridPreviewProps {
@@ -24,6 +24,7 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
 
   const formatRate = (rate: number) => {
     return `${rate.toFixed(3)}%`;
@@ -164,7 +165,9 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+      <div className="min-h-screen flex items-start justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full my-8">
       <style>{`
         .best-option {
           background-color: #d4ffd4 !important;
@@ -463,6 +466,8 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
           </div>
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   );
 };
