@@ -376,7 +376,32 @@ const Quote = () => {
     try {
       let quoteData;
       
-      if (editedData) {
+      if (editedData && editedData.selectedScenarios) {
+        // Handle multiple selected scenarios - generate comparison grid
+        console.log("Generating comparison grid for selected scenarios:", editedData.selectedScenarios);
+        
+        // For now, let's generate a simple quote with the first scenario
+        // TODO: Create a proper comparison grid generator
+        const firstScenario = editedData.selectedScenarios[0];
+        quoteData = {
+          borrowerName: firstScenario.borrowerName,
+          propertyAddress: firstScenario.propertyAddress,
+          loanAmount: firstScenario.loanAmount || 0,
+          interestRate: firstScenario.interestRate || 0,
+          monthlyPayment: firstScenario.monthlyPayment || 0,
+          loanTerm: firstScenario.loanTerm || 360,
+          ltv: firstScenario.ltv || 0,
+          dscr: firstScenario.dscr || 1.0,
+          propertyType: firstScenario.propertyType || '',
+          loanPurpose: firstScenario.loanPurpose || '',
+          refinanceType: firstScenario.refinanceType || '',
+          points: firstScenario.points || 0,
+          noteBuyer: firstScenario.noteBuyer || '',
+          loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
+          phoneNumber: '410-705-2277',
+          date: new Date().toLocaleDateString()
+        };
+      } else if (editedData) {
         // Use edited data if provided
         quoteData = editedData;
       } else if (selectedResult) {
