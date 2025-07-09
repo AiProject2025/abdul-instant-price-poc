@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,6 +87,32 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
   
   const { saveScenario, saveScenarioResults } = useScenarios();
   const { toast } = useToast();
+
+  // Auto-generate scenario name based on edit data
+  const generateScenarioName = () => {
+    const ltv = editData.ltv || "N/A";
+    const noteBuyer = editData.noteBuyer || "N/A";
+    const loanAmount = editData.loanAmount || 0;
+    const rate = editData.interestRate ? editData.interestRate.toFixed(3) : "N/A";
+    const points = editData.points || 0;
+    const interestOnly = editData.interestOnly === "Yes" ? "IO" : "";
+    
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(loanAmount);
+    
+    return `${noteBuyer} ${ltv}%LTV ${formattedAmount} ${rate}% ${points}pts ${interestOnly}`.trim();
+  };
+
+  // Auto-populate scenario name when data changes
+  useEffect(() => {
+    if (isOpen && editData.loanAmount && !scenarioName) {
+      setScenarioName(generateScenarioName());
+    }
+  }, [isOpen, editData.loanAmount, editData.ltv, editData.noteBuyer, editData.interestRate, editData.points, editData.interestOnly]);
 
   const handleInputChange = (field: string, value: any) => {
     setEditData(prev => ({
@@ -177,7 +203,7 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
           
           <div className="flex items-center gap-2">
             <Input
-              placeholder="Scenario name..."
+              placeholder="Scenario name will auto-populate..."
               value={scenarioName}
               onChange={(e) => setScenarioName(e.target.value)}
               className="w-40"
