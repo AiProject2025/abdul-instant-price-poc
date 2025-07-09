@@ -411,7 +411,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={selectedScenarios.has(scenario.id)}
-                    onCheckedChange={(checked) => handleScenarioSelect(scenario.id, checked as boolean)}
+                    onCheckedChange={(checked) => handleScenarioSelect(scenario.id, !!checked)}
                   />
                   <CardTitle className="flex items-center gap-2">
                     {scenario.name}
