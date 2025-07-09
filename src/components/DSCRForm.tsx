@@ -79,8 +79,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     
     // Loan Details
     desiredLTV: '',
-    desiredClosingDate: '',
-    interestReserves: '',
+    desiredClosingDate: (() => {
+      const date = new Date();
+      date.setDate(date.getDate() + 30);
+      return date.toISOString().split('T')[0];
+    })(),
+    interestReserves: 'Yes',
     
     // Property Rents (Monthly)
     unit1Rent: '',
@@ -93,7 +97,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     unit8Rent: '',
     unit9Rent: '',
     unit10Rent: '',
-    totalSquareFeet: '',
+    totalSquareFeet: '2000', // Default to single family
     
     // Annual Property Expenses
     annualTaxes: '',
@@ -169,6 +173,16 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
         // Auto-sync numberOfLeasedUnits when numberOfUnits changes
         if (field === 'numberOfUnits') {
           newState.numberOfLeasedUnits = value;
+          
+          // Auto-set square footage based on number of units
+          const units = parseInt(value) || 1;
+          if (units === 1) {
+            newState.totalSquareFeet = '2000'; // Single family
+          } else if (units >= 2 && units <= 4) {
+            newState.totalSquareFeet = '2800'; // 2-4 units
+          } else if (units >= 5 && units <= 10) {
+            newState.totalSquareFeet = '8000'; // 5-10 units (Multi Family)
+          }
         }
         
         return newState;
