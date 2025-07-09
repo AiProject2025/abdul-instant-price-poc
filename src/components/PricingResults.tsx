@@ -448,6 +448,17 @@ DSCR Loan System`;
   
   return (
     <div className="space-y-6">
+      {/* Comparison Grid Preview Modal */}
+      {showComparisonPreview && (
+        <ComparisonGridPreview
+          selectedScenarios={Array.from(selectedScenarios).map(id => 
+            filteredScenarios.find(s => s.id === id)!
+          ).filter(Boolean)}
+          onClose={() => setShowComparisonPreview(false)}
+          onGenerateDocument={handleGenerateSelectedQuotes}
+        />
+      )}
+
       {/* Show flags first if they exist */}
       {flags && flags.length > 0 && (
         <FlagsDisplay flags={flags} />
@@ -1104,40 +1115,6 @@ DSCR Loan System`;
         />
       )}
 
-      {/* Comparison Grid Preview */}
-      {showComparisonPreview && (
-        <ComparisonGridPreview
-          selectedScenarios={Array.from(selectedScenarios).map(scenarioId => {
-            const scenario = filteredScenarios.find(s => s.id === scenarioId);
-            if (!scenario) return null;
-
-            let noteBuyer = scenario.form_data.noteBuyer;
-            if (!noteBuyer) {
-              const buyerMatch = scenario.name.match(/^([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?:\s+\d|%|$)/);
-              noteBuyer = buyerMatch ? buyerMatch[1] : '';
-            }
-
-            return {
-              borrowerName: scenario.form_data.borrowerName || `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim() || 'Borrower',
-              propertyAddress: scenario.form_data.propertyAddress || `${scenario.form_data.streetAddress || ''}, ${scenario.form_data.city || ''}, ${scenario.form_data.propertyState || ''}`.trim(),
-              loanAmount: scenario.form_data.loanAmount || 0,
-              interestRate: scenario.form_data.interestRate || 0,
-              monthlyPayment: scenario.form_data.monthlyPayment || 0,
-              loanTerm: 360,
-              ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV || 0,
-              dscr: scenario.form_data.dscr || 0,
-              propertyType: scenario.form_data.propertyType || '',
-              loanPurpose: scenario.form_data.loanPurpose || '',
-              refinanceType: scenario.form_data.refinanceType || '',
-              points: scenario.form_data.points || 0,
-              noteBuyer: noteBuyer,
-              scenarioName: scenario.name
-            };
-          }).filter(Boolean)}
-          onGenerateDocument={handleGenerateSelectedQuotes}
-          onClose={() => setShowComparisonPreview(false)}
-        />
-      )}
     </div>
   );
 };
