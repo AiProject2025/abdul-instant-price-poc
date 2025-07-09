@@ -29,6 +29,9 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   const [draggedScenario, setDraggedScenario] = useState<Scenario | null>(null);
   const { toast } = useToast();
 
+  // Debug - log when component renders
+  console.log('ScenarioGrid rendered with drag & drop functionality');
+
   const handleToggleExpand = async (scenarioId: string) => {
     if (expandedScenario === scenarioId) {
       setExpandedScenario(null);
