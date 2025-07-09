@@ -646,6 +646,7 @@ const Quote = () => {
               onBackToForm={handleBackToQuestionnaire}
               onGenerateLoanQuote={handleGenerateLoanQuote}
               onReQuoteScenario={handleScenarioReQuote}
+              onReQuoteWithUpdatedData={handleQuestionnaireSubmit}
               lastSubmittedFormData={lastSubmittedFormData}
             />
           )}

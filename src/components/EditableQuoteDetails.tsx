@@ -53,10 +53,11 @@ interface EditableQuoteDetailsProps {
   };
   onSave: (data: any) => void;
   onReQuote?: (data: any) => void;
+  onReQuoteWithUpdatedData?: (data: any) => void;
   currentPricingResults?: any[];
 }
 
-const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote, currentPricingResults }: EditableQuoteDetailsProps) => {
+const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote, onReQuoteWithUpdatedData, currentPricingResults }: EditableQuoteDetailsProps) => {
   const [editData, setEditData] = useState({
     ...initialData,
     // Set defaults for new fields
@@ -199,14 +200,32 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
 
         {/* Action Buttons at Top */}
         <div className="flex flex-wrap gap-2 p-4 bg-muted/50 rounded-lg">
-          {onReQuote && (
+          {onReQuoteWithUpdatedData && (
             <Button 
-              onClick={handleReQuote} 
+              onClick={async () => {
+                if (!scenarioName.trim()) {
+                  toast({
+                    title: "Error",
+                    description: "Please enter a scenario name",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                
+                // Save scenario first, then trigger re-pricing for ALL buyers
+                const scenarioId = await saveScenario(scenarioName, editData);
+                if (scenarioId) {
+                  window.dispatchEvent(new CustomEvent('scenarioSaved'));
+                  onReQuoteWithUpdatedData(editData);
+                  onClose();
+                  setScenarioName(generateScenarioName());
+                }
+              }}
               disabled={isRequoting}
               className="flex items-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${isRequoting ? 'animate-spin' : ''}`} />
-              {isRequoting ? 'Re-quoting...' : 'Re-Quote with Updated Numbers'}
+              Re-Quote with Updated Numbers
             </Button>
           )}
           

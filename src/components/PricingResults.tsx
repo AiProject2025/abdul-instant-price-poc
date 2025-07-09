@@ -38,10 +38,11 @@ interface PricingResultsProps {
   onBackToForm: () => void;
   onSelectScenario?: (scenario: Scenario) => void;
   onReQuoteScenario?: (scenario: any) => void;
+  onReQuoteWithUpdatedData?: (updatedData: any) => void;
   lastSubmittedFormData?: any;
 }
 
-const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, onReQuoteScenario, lastSubmittedFormData }: PricingResultsProps) => {
+const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQuote, onBackToForm, onReQuoteScenario, onReQuoteWithUpdatedData, lastSubmittedFormData }: PricingResultsProps) => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -964,6 +965,7 @@ DSCR Loan System`;
           }}
           onSave={handleSaveEditedQuote}
           onReQuote={handleReQuoteWithData}
+          onReQuoteWithUpdatedData={onReQuoteWithUpdatedData}
           currentPricingResults={results}
         />
       )}
