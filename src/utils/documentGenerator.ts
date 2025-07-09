@@ -235,7 +235,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: `$${data.loanAmount.toLocaleString()}`, size: 16, bold: true })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.loanAmount || 0).toLocaleString()}`, size: 16, bold: true })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 })
               ]
@@ -395,7 +395,7 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
-                  children: [new Paragraph({ children: [new TextRun({ text: `$${data.monthlyPayment.toLocaleString()}`, size: 16, bold: true })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: `$${(data.monthlyPayment || 0).toLocaleString()}`, size: 16, bold: true })] })],
                   margins: { top: 50, bottom: 50, left: 100, right: 100 }
                 }),
                 new TableCell({ 
