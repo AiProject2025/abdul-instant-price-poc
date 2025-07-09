@@ -13,6 +13,7 @@ import { useScenarios, Scenario, ScenarioResult } from "@/hooks/useScenarios";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PricingResultsProps {
   results: {
@@ -49,6 +50,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   const [editData, setEditData] = useState<any>({});
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
   const [scenarioViewMode, setScenarioViewMode] = useState<"list" | "grid">("grid");
+  const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(new Set());
   
   const { scenarios, scenarioResults, saveScenario, saveScenarioResults, deleteScenario, fetchScenarioResults, refetchScenarios } = useScenarios();
   const { toast } = useToast();
@@ -124,6 +126,65 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     if (onReQuoteScenario) {
       onReQuoteScenario(scenario);
     }
+  };
+
+  const handleScenarioCheck = (scenarioId: string, checked: boolean) => {
+    const newSelected = new Set(selectedScenarios);
+    if (checked) {
+      newSelected.add(scenarioId);
+    } else {
+      newSelected.delete(scenarioId);
+    }
+    setSelectedScenarios(newSelected);
+  };
+
+  const handleGenerateSelectedQuotes = async () => {
+    if (selectedScenarios.size === 0) {
+      toast({
+        title: "No scenarios selected",
+        description: "Please select at least one scenario to generate quotes",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Get the selected scenario data and generate a document with all of them
+    const selectedScenarioData = Array.from(selectedScenarios).map(scenarioId => {
+      const scenario = filteredScenarios.find(s => s.id === scenarioId);
+      if (!scenario) return null;
+
+      // Extract note buyer from scenario name
+      let noteBuyer = scenario.form_data.noteBuyer;
+      if (!noteBuyer) {
+        const buyerMatch = scenario.name.match(/^([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?:\s+\d|%|$)/);
+        noteBuyer = buyerMatch ? buyerMatch[1] : '';
+      }
+
+      return {
+        borrowerName: scenario.form_data.borrowerName || `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim() || 'Borrower',
+        propertyAddress: scenario.form_data.propertyAddress || `${scenario.form_data.streetAddress || ''}, ${scenario.form_data.city || ''}, ${scenario.form_data.propertyState || ''}`.trim(),
+        loanAmount: scenario.form_data.loanAmount || 0,
+        interestRate: scenario.form_data.interestRate || 0,
+        monthlyPayment: scenario.form_data.monthlyPayment || 0,
+        loanTerm: 360,
+        ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV || 0,
+        dscr: scenario.form_data.dscr || 0,
+        propertyType: scenario.form_data.propertyType || '',
+        loanPurpose: scenario.form_data.loanPurpose || '',
+        refinanceType: scenario.form_data.refinanceType || '',
+        points: scenario.form_data.points || 0,
+        noteBuyer: noteBuyer,
+        scenarioName: scenario.name
+      };
+    }).filter(Boolean);
+
+    // Generate a multi-scenario quote document
+    onGenerateLoanQuote(null, { selectedScenarios: selectedScenarioData });
+    
+    toast({
+      title: "Generating client presentation",
+      description: `Creating document with ${selectedScenarios.size} selected scenarios`
+    });
   };
 
   // Filter scenarios for current property address and exclude deleted ones
@@ -422,39 +483,45 @@ DSCR Loan System`;
                         <h3 className="text-lg font-semibold text-blue-800 mb-3">{noteBuyer}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {buyerScenarios.map((scenario) => (
-                            <Card key={scenario.id} className="border-blue-200 bg-white hover:shadow-md transition-shadow">
-                              <CardContent className="p-4">
-                                <div className="flex justify-between items-start mb-2">
-                                  <div className="text-sm font-medium text-blue-800 truncate pr-2">{scenario.name}</div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                        <MoreVertical className="h-3 w-3" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent>
-                                      <DropdownMenuItem 
-                                        onClick={() => handleSelectScenario(scenario)}
-                                      >
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Load for Editing
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
-                                        onClick={() => handleReQuote(scenario)}
-                                      >
-                                        <RotateCcw className="mr-2 h-4 w-4" />
-                                        Re-Quote (Fresh Pricing)
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
-                                        onClick={() => handleDeleteScenario(scenario.id)}
-                                        className="text-red-600"
-                                      >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                             <Card key={scenario.id} className="border-blue-200 bg-white hover:shadow-md transition-shadow">
+                               <CardContent className="p-4">
+                                 <div className="flex justify-between items-start mb-2">
+                                   <div className="flex items-center gap-2">
+                                     <Checkbox
+                                       checked={selectedScenarios.has(scenario.id)}
+                                       onCheckedChange={(checked) => handleScenarioCheck(scenario.id, !!checked)}
+                                     />
+                                     <div className="text-sm font-medium text-blue-800 truncate pr-2">{scenario.name}</div>
+                                   </div>
+                                   <DropdownMenu>
+                                     <DropdownMenuTrigger asChild>
+                                       <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                         <MoreVertical className="h-3 w-3" />
+                                       </Button>
+                                     </DropdownMenuTrigger>
+                                     <DropdownMenuContent>
+                                       <DropdownMenuItem 
+                                         onClick={() => handleSelectScenario(scenario)}
+                                       >
+                                         <Edit className="mr-2 h-4 w-4" />
+                                         Load for Editing
+                                       </DropdownMenuItem>
+                                       <DropdownMenuItem 
+                                         onClick={() => handleReQuote(scenario)}
+                                       >
+                                         <RotateCcw className="mr-2 h-4 w-4" />
+                                         Re-Quote (Fresh Pricing)
+                                       </DropdownMenuItem>
+                                       <DropdownMenuItem 
+                                         onClick={() => handleDeleteScenario(scenario.id)}
+                                         className="text-red-600"
+                                       >
+                                         <Trash2 className="mr-2 h-4 w-4" />
+                                         Delete
+                                       </DropdownMenuItem>
+                                     </DropdownMenuContent>
+                                   </DropdownMenu>
+                                 </div>
                                 <div className="space-y-1 text-xs text-gray-600">
                                   <div>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
                                   <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
@@ -545,8 +612,24 @@ DSCR Loan System`;
                                     ))}
                                   </TableBody>
                                 </Table>
-                              </div>
-                            </div>
+                 </div>
+                   {selectedScenarios.size > 0 && (
+                     <div className="mt-4 p-4 bg-blue-100 border-t border-blue-200">
+                       <div className="flex justify-between items-center">
+                         <span className="text-sm font-medium text-blue-800">
+                           {selectedScenarios.size} scenario{selectedScenarios.size > 1 ? 's' : ''} selected
+                         </span>
+                         <Button 
+                           onClick={handleGenerateSelectedQuotes}
+                           className="bg-blue-600 hover:bg-blue-700 text-white"
+                         >
+                           <FileText className="mr-2 h-4 w-4" />
+                           Generate Client Presentation
+                         </Button>
+                       </div>
+                     </div>
+                   )}
+                 </div>
                           )}
                         </CardContent>
                       </Card>
