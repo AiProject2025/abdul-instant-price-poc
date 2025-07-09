@@ -108,6 +108,13 @@ export const useScenarios = () => {
       const propertyZip = formData.zipCode;
       const propertyType = formData.propertyType;
       
+      // Ensure note buyer is preserved in form data for future reference
+      const enhancedFormData = {
+        ...formData,
+        // If noteBuyer is missing, try to extract from the scenario name
+        noteBuyer: formData.noteBuyer || extractNoteBuyerFromName(name)
+      };
+      
       // Create or find client
       const client = await findOrCreateClient(clientName, clientEmail, clientPhone);
       
@@ -136,7 +143,7 @@ export const useScenarios = () => {
         .insert({
           user_id: user.id,
           name,
-          form_data: formData,
+          form_data: enhancedFormData,
           client_id: client.id,
           property_id: property.id
         })
@@ -163,6 +170,12 @@ export const useScenarios = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to extract note buyer from scenario name
+  const extractNoteBuyerFromName = (name: string) => {
+    const buyerMatch = name.match(/^([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?:\s+\d|%|$)/);
+    return buyerMatch ? buyerMatch[1] : '';
   };
 
   const saveScenarioResults = async (scenarioId: string, results: any[]) => {

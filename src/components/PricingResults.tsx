@@ -156,6 +156,14 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   };
 
   const handleSelectScenario = (scenario: Scenario) => {
+    // Extract note buyer from scenario name if not in form_data (the name was generated with correct buyer)
+    let noteBuyer = scenario.form_data.noteBuyer;
+    if (!noteBuyer) {
+      // Extract buyer name from scenario name (first word before space or %)
+      const buyerMatch = scenario.name.match(/^([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?:\s+\d|%|$)/);
+      noteBuyer = buyerMatch ? buyerMatch[1] : '';
+    }
+
     // Open edit dialog with scenario data
     const scenarioData = {
       borrowerName: scenario.form_data.borrowerName || `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim() || 'Borrower',
@@ -170,7 +178,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
       loanPurpose: scenario.form_data.loanPurpose || '',
       refinanceType: scenario.form_data.refinanceType || '',
       points: scenario.form_data.points || 0,
-      noteBuyer: scenario.form_data.noteBuyer || ''
+      noteBuyer: noteBuyer
     };
 
     setSelectedResult(scenarioData);
