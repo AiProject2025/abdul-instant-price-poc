@@ -333,7 +333,14 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Saved Scenarios</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold">Saved Scenarios</h2>
+          {selectedScenarios.size > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {selectedScenarios.size} selected
+            </Badge>
+          )}
+        </div>
         <div className="flex gap-2">
           <div className="flex border rounded-lg">
             <Button
