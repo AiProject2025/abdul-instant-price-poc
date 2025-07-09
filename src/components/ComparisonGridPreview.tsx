@@ -13,6 +13,17 @@ interface ComparisonGridPreviewProps {
 }
 
 const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose }: ComparisonGridPreviewProps) => {
+  console.log('🔍 ComparisonGridPreview received scenarios:', selectedScenarios);
+  selectedScenarios.forEach((scenario, index) => {
+    console.log(`Scenario ${index}:`, {
+      name: scenario.name,
+      hasResults: !!scenario.results,
+      resultsLength: scenario.results?.length || 0,
+      results: scenario.results,
+      formData: scenario.form_data
+    });
+  });
+  
   const [editableScenarios, setEditableScenarios] = useState(selectedScenarios);
   const [editingCell, setEditingCell] = useState<{ scenarioIndex: number; field: string } | null>(null);
 
