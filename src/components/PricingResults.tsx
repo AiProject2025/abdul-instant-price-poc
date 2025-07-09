@@ -8,6 +8,7 @@ import FlagsDisplay from "@/components/FlagsDisplay";
 import EditableQuoteDetails from "@/components/EditableQuoteDetails";
 import AuditLogDialog from "@/components/AuditLogDialog";
 import DeletedScenariosDialog from "@/components/DeletedScenariosDialog";
+import ComparisonGridPreview from "@/components/ComparisonGridPreview";
 import { useState, useEffect } from "react";
 import { useScenarios, Scenario, ScenarioResult } from "@/hooks/useScenarios";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
   const [scenarioViewMode, setScenarioViewMode] = useState<"list" | "grid">("grid");
   const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(new Set());
+  const [showComparisonPreview, setShowComparisonPreview] = useState(false);
   
   const { scenarios, scenarioResults, saveScenario, saveScenarioResults, deleteScenario, fetchScenarioResults, refetchScenarios } = useScenarios();
   const { toast } = useToast();
@@ -136,6 +138,19 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
       newSelected.delete(scenarioId);
     }
     setSelectedScenarios(newSelected);
+  };
+
+  const handleShowComparisonPreview = () => {
+    if (selectedScenarios.size === 0) {
+      toast({
+        title: "No scenarios selected",
+        description: "Please select at least one scenario to preview comparison grid",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setShowComparisonPreview(true);
   };
 
   const handleGenerateSelectedQuotes = async () => {
@@ -644,13 +659,23 @@ DSCR Loan System`;
                        <span className="text-sm font-medium text-blue-800">
                          {selectedScenarios.size} scenario{selectedScenarios.size > 1 ? 's' : ''} selected
                        </span>
-                        <Button 
-                          onClick={handleGenerateSelectedQuotes}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          Generate Comparison Grid (Word)
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={handleShowComparisonPreview}
+                            variant="outline"
+                            className="bg-white border-blue-600 text-blue-600 hover:bg-blue-50"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Preview Comparison Grid
+                          </Button>
+                          <Button 
+                            onClick={handleGenerateSelectedQuotes}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            Generate Word Document
+                          </Button>
+                        </div>
                      </div>
                    </div>
                  )}
@@ -1072,6 +1097,41 @@ DSCR Loan System`;
           onReQuote={handleReQuoteWithData}
           onReQuoteWithUpdatedData={onReQuoteWithUpdatedData}
           currentPricingResults={results}
+        />
+      )}
+
+      {/* Comparison Grid Preview */}
+      {showComparisonPreview && (
+        <ComparisonGridPreview
+          selectedScenarios={Array.from(selectedScenarios).map(scenarioId => {
+            const scenario = filteredScenarios.find(s => s.id === scenarioId);
+            if (!scenario) return null;
+
+            let noteBuyer = scenario.form_data.noteBuyer;
+            if (!noteBuyer) {
+              const buyerMatch = scenario.name.match(/^([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?:\s+\d|%|$)/);
+              noteBuyer = buyerMatch ? buyerMatch[1] : '';
+            }
+
+            return {
+              borrowerName: scenario.form_data.borrowerName || `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim() || 'Borrower',
+              propertyAddress: scenario.form_data.propertyAddress || `${scenario.form_data.streetAddress || ''}, ${scenario.form_data.city || ''}, ${scenario.form_data.propertyState || ''}`.trim(),
+              loanAmount: scenario.form_data.loanAmount || 0,
+              interestRate: scenario.form_data.interestRate || 0,
+              monthlyPayment: scenario.form_data.monthlyPayment || 0,
+              loanTerm: 360,
+              ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV || 0,
+              dscr: scenario.form_data.dscr || 0,
+              propertyType: scenario.form_data.propertyType || '',
+              loanPurpose: scenario.form_data.loanPurpose || '',
+              refinanceType: scenario.form_data.refinanceType || '',
+              points: scenario.form_data.points || 0,
+              noteBuyer: noteBuyer,
+              scenarioName: scenario.name
+            };
+          }).filter(Boolean)}
+          onGenerateDocument={handleGenerateSelectedQuotes}
+          onClose={() => setShowComparisonPreview(false)}
         />
       )}
     </div>
