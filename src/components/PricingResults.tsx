@@ -148,8 +148,26 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     // You might want to emit an event or use a prop to load the scenario data
   };
 
-  // Group scenarios by note buyer for grid view
-  const groupedScenarios = scenarios.reduce((groups, scenario) => {
+  // Filter scenarios for current property address and exclude deleted ones
+  const currentPropertyAddress = lastSubmittedFormData 
+    ? `${lastSubmittedFormData.streetAddress || ''} ${lastSubmittedFormData.city || ''} ${lastSubmittedFormData.propertyState || ''}`.trim()
+    : '';
+  
+  const filteredScenarios = scenarios.filter(scenario => {
+    // Only show non-deleted scenarios
+    if (scenario.deleted_at) return false;
+    
+    // Only show scenarios for current property address
+    if (currentPropertyAddress && scenario.form_data?.streetAddress) {
+      const scenarioAddress = `${scenario.form_data.streetAddress || ''} ${scenario.form_data.city || ''} ${scenario.form_data.propertyState || ''}`.trim();
+      return scenarioAddress === currentPropertyAddress;
+    }
+    
+    return false;
+  });
+
+  // Group filtered scenarios by note buyer for grid view
+  const groupedScenarios = filteredScenarios.reduce((groups, scenario) => {
     // Extract note buyer from scenario name (first word before space or %)
     let noteBuyer = 'Unknown';
     const scenarioName = scenario.name;
@@ -379,12 +397,19 @@ DSCR Loan System`;
         
         <TabsContent value="results" className="space-y-6">
           {/* Saved Scenarios Section with Grid View and Soft Delete */}
-          {scenarios.length > 0 && (
+          {filteredScenarios.length > 0 && (
             <Card className="bg-blue-50 border-blue-200">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle className="text-blue-800">Saved Scenarios - Click to Re-Price</CardTitle>
+                    <CardTitle className="text-blue-800">
+                      Saved Scenarios - Click to Re-Price
+                      {currentPropertyAddress && (
+                        <span className="text-sm font-normal text-gray-600 block">
+                          for {currentPropertyAddress}
+                        </span>
+                      )}
+                    </CardTitle>
                     <CardDescription>Previously saved scenarios you can reload and re-price</CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -477,7 +502,7 @@ DSCR Loan System`;
                 ) : (
                   /* List View */
                   <div className="space-y-4">
-                    {scenarios.map((scenario) => (
+                    {filteredScenarios.map((scenario) => (
                       <Card key={scenario.id} className="border-blue-200 bg-white">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
