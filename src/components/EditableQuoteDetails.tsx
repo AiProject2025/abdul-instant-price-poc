@@ -81,13 +81,19 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
     annualInsuranceCost: initialData.annualInsuranceCost || 0,
     creditScore: initialData.creditScore || 750,
     annualAssociationFees: initialData.annualAssociationFees || 0,
-    propertyCondition: initialData.propertyCondition || "C4 or better"
+    propertyCondition: initialData.propertyCondition || "C4 or better",
+    // CRITICAL: Make sure noteBuyer is preserved correctly
+    noteBuyer: initialData.noteBuyer || "Unknown"
   });
   const [scenarioName, setScenarioName] = useState("");
   const [isRequoting, setIsRequoting] = useState(false);
   
   const { saveScenario, saveScenarioResults } = useScenarios();
   const { toast } = useToast();
+
+  // CRITICAL DEBUG - Log the initial data and editData
+  console.log('🚨 EditableQuoteDetails initialData:', initialData);
+  console.log('🚨 EditableQuoteDetails editData after state init:', editData);
 
   // Auto-generate scenario name based on edit data
   const generateScenarioName = () => {
@@ -118,11 +124,46 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
   useEffect(() => {
     if (isOpen && editData.loanAmount) {
       const autoName = generateScenarioName();
+      console.log('🔧 Auto-generating scenario name:', autoName);
+      console.log('🔧 Current editData.noteBuyer:', editData.noteBuyer);
       if (autoName && autoName !== scenarioName) {
         setScenarioName(autoName);
       }
     }
   }, [isOpen, editData.loanAmount, editData.ltv, editData.noteBuyer, editData.interestRate, editData.points, editData.interestOnly]);
+
+  // CRITICAL: Update editData when initialData changes (new quote selected)
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🔄 Updating editData with new initialData:', initialData);
+      setEditData({
+        ...initialData,
+        // Ensure all required fields have proper defaults
+        noteBuyer: initialData.noteBuyer || "Unknown",
+        propertiesQuoted: initialData.propertiesQuoted || 1,
+        appraised_value: initialData.appraised_value || Math.round(initialData.loanAmount / (initialData.ltv / 100)),
+        interestOnly: initialData.interestOnly || "No",
+        interestReserve: initialData.interestReserve || 0,
+        escrowForTaxes: initialData.escrowForTaxes || "Required",
+        floodCertification: initialData.floodCertification || "$120 reimbursement",
+        processingFee: initialData.processingFee || "$350 loan processing fee for title company coordination",
+        rateLockFee: initialData.rateLockFee || "Upfront Cost of 0.35% of Proposed Loan Amount",
+        legalFees: initialData.legalFees || "$500 loan doc prep to Dominion Financial Services LLC",
+        payoffAmount: initialData.payoffAmount || 0,
+        datePurchased: initialData.datePurchased || "",
+        purchasePrice: initialData.purchasePrice || 0,
+        rentalStatus: initialData.rentalStatus || "Leased",
+        rehabCosts: initialData.rehabCosts || 0,
+        totalMonthlyRent: initialData.totalMonthlyRent || 0,
+        annualTaxAmount: initialData.annualTaxAmount || 0,
+        totalMarketRent: initialData.totalMarketRent || 0,
+        annualInsuranceCost: initialData.annualInsuranceCost || 0,
+        creditScore: initialData.creditScore || 750,
+        annualAssociationFees: initialData.annualAssociationFees || 0,
+        propertyCondition: initialData.propertyCondition || "C4 or better"
+      });
+    }
+  }, [isOpen, initialData.noteBuyer]);
 
   const handleInputChange = (field: string, value: any) => {
     setEditData(prev => ({
