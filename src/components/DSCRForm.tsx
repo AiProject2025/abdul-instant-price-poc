@@ -55,7 +55,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     purchaseContractCloseDate: '',
     numberOfUnits: '',
     numberOfLeasedUnits: '',
-    hasVacantUnits: '',
+    hasVacantUnits: 'No',
     numberOfVacantUnits: '',
     nonconformingUnits: '',
     totalNetOperationIncome: '',
