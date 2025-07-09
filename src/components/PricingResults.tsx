@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, DollarSign, Calculator, FileText, Home, Clock, Percent, Lock, Unlock, Grid, List, Edit, AlertTriangle, Save, Eye, Trash2, MoreVertical, RotateCcw, Activity } from "lucide-react";
+import { TrendingUp, DollarSign, Calculator, FileText, Home, Clock, Percent, Lock, Unlock, Grid, List, Edit, AlertTriangle, Save, Eye, Trash2, MoreVertical, RotateCcw, Activity, ChevronDown, ChevronUp, Minimize2, Maximize2 } from "lucide-react";
 import FlagsDisplay from "@/components/FlagsDisplay";
 import EditableQuoteDetails from "@/components/EditableQuoteDetails";
 import AuditLogDialog from "@/components/AuditLogDialog";
@@ -53,6 +53,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   const [scenarioViewMode, setScenarioViewMode] = useState<"list" | "grid">("grid");
   const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(new Set());
   const [showComparisonPreview, setShowComparisonPreview] = useState(false);
+  const [savedScenariosCollapsed, setSavedScenariosCollapsed] = useState(false);
   
   const { scenarios, scenarioResults, saveScenario, saveScenarioResults, deleteScenario, fetchScenarioResults, refetchScenarios } = useScenarios();
   const { toast } = useToast();
@@ -483,39 +484,54 @@ DSCR Loan System`;
             <Card className="bg-blue-50 border-blue-200">
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-blue-800">
-                      Saved Scenarios - Click to Re-Price
-                      {currentPropertyAddress && (
-                        <span className="text-sm font-normal text-gray-600 block">
-                          for {currentPropertyAddress}
-                        </span>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSavedScenariosCollapsed(!savedScenariosCollapsed)}
+                      className="p-1 h-6 w-6"
+                    >
+                      {savedScenariosCollapsed ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                    </Button>
+                    <div>
+                      <CardTitle className="text-blue-800">
+                        Saved Scenarios - Click to Re-Price
+                        {currentPropertyAddress && (
+                          <span className="text-sm font-normal text-gray-600 block">
+                            for {currentPropertyAddress}
+                          </span>
+                        )}
+                      </CardTitle>
+                      {!savedScenariosCollapsed && (
+                        <CardDescription>Previously saved scenarios you can reload and re-price</CardDescription>
                       )}
-                    </CardTitle>
-                    <CardDescription>Previously saved scenarios you can reload and re-price</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <AuditLogDialog />
-                    <DeletedScenariosDialog />
-                    <div className="flex gap-1">
-                      <Button
-                        variant={scenarioViewMode === 'list' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setScenarioViewMode('list')}
-                      >
-                        <List className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant={scenarioViewMode === 'grid' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setScenarioViewMode('grid')}
-                      >
-                        <Grid className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
+                  {!savedScenariosCollapsed && (
+                    <div className="flex gap-2">
+                      <AuditLogDialog />
+                      <DeletedScenariosDialog />
+                      <div className="flex gap-1">
+                        <Button
+                          variant={scenarioViewMode === 'list' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setScenarioViewMode('list')}
+                        >
+                          <List className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant={scenarioViewMode === 'grid' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setScenarioViewMode('grid')}
+                        >
+                          <Grid className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
+              {!savedScenariosCollapsed && (
               <CardContent>
                 {scenarioViewMode === 'grid' ? (
                   /* Grid View - Grouped by Note Buyer */
@@ -694,7 +710,8 @@ DSCR Loan System`;
                      </div>
                    </div>
                  )}
-               </CardContent>
+                </CardContent>
+              )}
             </Card>
           )}
 
