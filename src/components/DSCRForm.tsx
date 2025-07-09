@@ -34,7 +34,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     loanPurpose: '',
     
     // Cross Collateral Information
-    crossCollateralLoan: '',
+    crossCollateralLoan: 'No',
     numberOfProperties: '',
     
     // Subject Property Address
