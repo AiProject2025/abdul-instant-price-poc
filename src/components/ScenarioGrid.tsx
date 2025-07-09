@@ -56,6 +56,12 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
     return `${rate.toFixed(3)}%`;
   };
 
+  const extractNoteBuyerFromName = (name: string) => {
+    // Extract note buyer from scenario name (e.g., "Property Scenario - Note Buyer A" -> "Note Buyer A")
+    const parts = name.split(' - ');
+    return parts.length > 1 ? parts[parts.length - 1] : name;
+  };
+
   const handleScenarioSelect = (scenarioId: string, checked: boolean) => {
     const newSelected = new Set(selectedScenarios);
     if (checked) {
@@ -133,12 +139,55 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   };
 
   const generateMultiScenarioDocument = async (scenariosWithResults: any[]) => {
-    const { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow, HeadingLevel, AlignmentType, WidthType, TableRowHeight, LevelFormat, BorderStyle } = await import('docx');
+    const { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow, HeadingLevel, AlignmentType, WidthType, BorderStyle } = await import('docx');
     const { saveAs } = await import('file-saver');
 
     // Extract property information from first scenario
     const firstScenario = scenariosWithResults[0];
     const propertyInfo = firstScenario?.form_data || {};
+
+    // Helper function to create table rows
+    const createDataRow = (label: string, values: string[], isSection = false) => {
+      return new TableRow({
+        children: [
+          new TableCell({ 
+            children: [new Paragraph({ 
+              children: [new TextRun({ 
+                text: label, 
+                bold: isSection, 
+                color: isSection ? "333333" : "000000" 
+              })],
+              alignment: isSection ? AlignmentType.LEFT : AlignmentType.LEFT 
+            })],
+            shading: { fill: isSection ? "F0F0F0" : "E8F4FD" },
+            width: { size: 20, type: WidthType.PERCENTAGE },
+          }),
+          ...values.map(value => 
+            new TableCell({ 
+              children: [new Paragraph({ 
+                children: [new TextRun({ text: value })],
+                alignment: AlignmentType.CENTER 
+              })],
+              width: { size: 80 / values.length, type: WidthType.PERCENTAGE },
+            })
+          )
+        ]
+      });
+    };
+
+    // Process scenario data for comparison
+    const processedScenarios = scenariosWithResults.map(scenario => {
+      const results = scenario.results || [];
+      const bestResult = results.length > 0 ? results.reduce((best, current) => 
+        current.rate < best.rate ? current : best
+      ) : null;
+      
+      return {
+        ...scenario,
+        bestResult,
+        formData: scenario.form_data || {}
+      };
+    });
 
     const doc = new Document({
       sections: [{
@@ -148,7 +197,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Multiple Note Buyer Options Comparison",
+                text: "Note Buyer Comparison Grid",
                 bold: true,
                 size: 32,
                 color: "003366",
@@ -175,6 +224,14 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
           // Main Comparison Table
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              bottom: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              left: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              right: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+              insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+            },
             rows: [
               // Header row
               new TableRow({
@@ -187,7 +244,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                     shading: { fill: "003366" },
                     width: { size: 20, type: WidthType.PERCENTAGE },
                   }),
-                  ...scenariosWithResults.map((scenario, index) => 
+                  ...processedScenarios.map((scenario, index) => 
                     new TableCell({ 
                       children: [
                         new Paragraph({ 
@@ -195,7 +252,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                           alignment: AlignmentType.CENTER 
                         }),
                         new Paragraph({ 
-                          children: [new TextRun({ text: scenario.name, size: 18, color: "FFFFFF" })],
+                          children: [new TextRun({ text: extractNoteBuyerFromName(scenario.name), size: 18, color: "FFFFFF" })],
                           alignment: AlignmentType.CENTER 
                         })
                       ],
@@ -614,7 +671,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                   className="flex items-center gap-2"
                 >
                   <FileText className="w-4 h-4" />
-                  {isGeneratingPresentation ? 'Generating...' : 'Generate Client Presentation'}
+                  {isGeneratingPresentation ? 'Generating Grid...' : 'Generate Comparison Grid (Word)'}
                 </Button>
                 <Button
                   variant="outline"
