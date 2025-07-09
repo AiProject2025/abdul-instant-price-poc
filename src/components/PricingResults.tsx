@@ -644,13 +644,13 @@ DSCR Loan System`;
                        <span className="text-sm font-medium text-blue-800">
                          {selectedScenarios.size} scenario{selectedScenarios.size > 1 ? 's' : ''} selected
                        </span>
-                       <Button 
-                         onClick={handleGenerateSelectedQuotes}
-                         className="bg-blue-600 hover:bg-blue-700 text-white"
-                       >
-                         <FileText className="mr-2 h-4 w-4" />
-                         Generate Client Presentation
-                       </Button>
+                        <Button 
+                          onClick={handleGenerateSelectedQuotes}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          Generate Comparison Grid (Word)
+                        </Button>
                      </div>
                    </div>
                  )}
