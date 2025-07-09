@@ -155,9 +155,65 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
   };
 
   const handleSelectScenario = (scenario: Scenario) => {
-    if (onSelectScenario) {
-      onSelectScenario(scenario);
-    }
+    // Load scenario data for editing without triggering new API call
+    if (!lastSubmittedFormData) return;
+
+    const scenarioData = {
+      borrowerName: scenario.form_data.borrowerName || `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim(),
+      propertyAddress: scenario.form_data.propertyAddress || `${scenario.form_data.streetAddress || ''}, ${scenario.form_data.city || ''}, ${scenario.form_data.propertyState || ''}`,
+      loanAmount: scenario.form_data.loanAmount || 0,
+      interestRate: scenario.form_data.interestRate || 0,
+      monthlyPayment: scenario.form_data.monthlyPayment || 0,
+      loanTerm: 360,
+      ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV || 0,
+      dscr: scenario.form_data.dscr || 0,
+      propertyType: scenario.form_data.propertyType || '',
+      loanPurpose: scenario.form_data.loanPurpose || '',
+      refinanceType: scenario.form_data.refinanceType || '',
+      points: scenario.form_data.points || 0,
+      noteBuyer: scenario.form_data.noteBuyer || '',
+      loanOfficer: 'Gregory Clarke',
+      phoneNumber: '410-705-2277',
+      date: new Date().toLocaleDateString(),
+      // Map all the property details from scenario form data
+      payoffAmount: scenario.form_data.mortgagePayoff || scenario.form_data.payoffAmount || 0,
+      purchasePrice: scenario.form_data.purchasePrice || 0,
+      datePurchased: scenario.form_data.datePurchased || '',
+      rehabCosts: scenario.form_data.rehabCostSpent || scenario.form_data.rehabCosts || 0,
+      rentalStatus: scenario.form_data.rentalStatus || (scenario.form_data.leaseInPlace === 'Yes' ? 'Leased' : 'Vacant'),
+      annualTaxAmount: scenario.form_data.annualTaxes || scenario.form_data.annualTaxAmount || 0,
+      totalMonthlyRent: scenario.form_data.unit1Rent || scenario.form_data.totalMonthlyRent || 0,
+      annualInsuranceCost: scenario.form_data.annualInsurance || scenario.form_data.annualInsuranceCost || 0,
+      totalMarketRent: scenario.form_data.totalMarketRent || scenario.form_data.unit1Rent || 0,
+      annualAssociationFees: scenario.form_data.annualAssociationFees || 0,
+      creditScore: scenario.form_data.creditScore || 750,
+      propertyCondition: scenario.form_data.propertyCondition || 'C4 or better',
+      // Additional quote details
+      propertiesQuoted: 1,
+      appraised_value: scenario.form_data.marketValue || scenario.form_data.appraised_value || 0,
+      interestOnly: scenario.form_data.interestOnly || "No",
+      interestReserve: scenario.form_data.interestReserve || 0,
+      escrowForTaxes: scenario.form_data.escrowForTaxes || "Required",
+      floodCertification: scenario.form_data.floodCertification || "$120 reimbursement",
+      processingFee: scenario.form_data.processingFee || "$350 loan processing fee for title company coordination",
+      rateLockFee: scenario.form_data.rateLockFee || "Upfront Cost of 0.35% of Proposed Loan Amount",
+      legalFees: scenario.form_data.legalFees || "$500 loan doc prep to Dominion Financial Services LLC"
+    };
+
+    // Open the edit dialog with the loaded scenario data
+    setSelectedResult({
+      loanAmount: scenarioData.loanAmount,
+      rate: scenarioData.interestRate,
+      monthlyPayment: scenarioData.monthlyPayment,
+      ltv: scenarioData.ltv,
+      dscr: scenarioData.dscr,
+      propertyType: scenarioData.propertyType,
+      loanPurpose: scenarioData.loanPurpose,
+      refinanceType: scenarioData.refinanceType,
+      points: scenarioData.points,
+      noteBuyer: scenarioData.noteBuyer
+    });
+    setIsEditDialogOpen(true);
   };
 
   const handleReQuote = async (scenario: Scenario) => {
@@ -509,8 +565,14 @@ DSCR Loan System`;
                                       <DropdownMenuItem 
                                         onClick={() => handleSelectScenario(scenario)}
                                       >
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        Load Scenario
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Load for Editing
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleReQuote(scenario)}
+                                      >
+                                        <RotateCcw className="mr-2 h-4 w-4" />
+                                        Re-Quote (Fresh Pricing)
                                       </DropdownMenuItem>
                                       <DropdownMenuItem 
                                         onClick={() => handleDeleteScenario(scenario.id)}
