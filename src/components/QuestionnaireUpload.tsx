@@ -55,7 +55,7 @@ const QuestionnaireUpload = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* File Upload Option */}
         <Card className="relative">
           <CardHeader className="text-center">
@@ -77,6 +77,28 @@ const QuestionnaireUpload = ({
                   Supports PDF, DOC, DOCX, TXT files
                 </p>
               </label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Upload Data Tape Option */}
+        <Card className="relative opacity-75">
+          <CardHeader className="text-center">
+            <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <CardTitle className="text-gray-600">Upload Data Tape <span className="text-sm font-normal">(Coming Soon)</span></CardTitle>
+            <CardDescription>
+              Upload your data tape for batch processing multiple properties
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center bg-gray-50">
+              <FileText className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-400 mb-2">
+                Data tape upload functionality coming soon
+              </p>
+              <p className="text-xs text-gray-300">
+                Will support CSV, XLS, XLSX files
+              </p>
             </div>
           </CardContent>
         </Card>
