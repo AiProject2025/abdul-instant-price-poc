@@ -38,10 +38,11 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
     if (editableScenarios.length === 0) return { address: '', propertyType: '', value: 0 };
     
     const first = editableScenarios[0];
+    const formData = first.form_data || first;
     return {
-      address: first.propertyAddress || '',
-      propertyType: first.propertyType || '',
-      value: first.loanAmount ? Math.round(first.loanAmount / (first.ltv / 100)) : 0
+      address: formData.propertyAddress || '',
+      propertyType: formData.propertyType || '',
+      value: formData.propertyValue || (formData.loanAmount ? Math.round(formData.loanAmount / ((formData.ltv || 75) / 100)) : 0)
     };
   };
 
@@ -66,13 +67,19 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
 
   const getBestValue = (field: string) => {
     const values = editableScenarios.map(scenario => {
+      const formData = scenario.form_data || scenario;
+      const results = scenario.results || [];
+      const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
+        current.rate < best.rate ? current : best
+      ) : null;
+      
       switch (field) {
-        case 'ltv': return scenario.ltv || 0;
-        case 'loanAmount': return scenario.loanAmount || 0;
-        case 'interestRate': return scenario.interestRate || 0;
-        case 'points': return scenario.points || 0;
-        case 'monthlyPayment': return scenario.monthlyPayment || 0;
-        case 'dscr': return scenario.dscr || 0;
+        case 'ltv': return formData.ltv || 75;
+        case 'loanAmount': return formData.loanAmount || 0;
+        case 'interestRate': return bestResult?.rate || 0;
+        case 'points': return 0; // Default points
+        case 'monthlyPayment': return 0; // Will be calculated
+        case 'dscr': return formData.dscr || 0;
         default: return 0;
       }
     });
@@ -92,16 +99,45 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
   };
 
   const getCellClass = (scenario: any, field: string) => {
-    const value = scenario[field] || 0;
+    const formData = scenario.form_data || scenario;
+    const results = scenario.results || [];
+    const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
+      current.rate < best.rate ? current : best
+    ) : null;
+    
+    let value = 0;
+    switch (field) {
+      case 'ltv': 
+        value = formData.ltv || 75;
+        break;
+      case 'loanAmount': 
+        value = formData.loanAmount || 0;
+        break;
+      case 'interestRate': 
+        value = bestResult?.rate || 0;
+        break;
+      case 'points': 
+        value = 0;
+        break;
+      case 'monthlyPayment': 
+        value = 0;
+        break;
+      case 'dscr': 
+        value = formData.dscr || 0;
+        break;
+      default: 
+        value = 0;
+    }
+    
     const bestValue = getBestValue(field);
     
-    if (value === bestValue) {
+    if (value === bestValue && value > 0) {
       return 'best-option';
     }
     
     // Good option criteria (close to best)
     const tolerance = 0.1; // 10% tolerance
-    const isGood = Math.abs((value - bestValue) / bestValue) <= tolerance;
+    const isGood = bestValue > 0 && Math.abs((value - bestValue) / bestValue) <= tolerance;
     
     if (isGood && field !== 'interestRate' && field !== 'points' && field !== 'monthlyPayment') {
       return 'good-option';
@@ -117,16 +153,41 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
   };
 
   const calculateCashFlow = (scenario: any) => {
-    const monthlyRent = 4500; // Default rental income
+    const formData = scenario.form_data || scenario;
+    const monthlyRent = formData.monthlyRent || 4500;
     const taxes = 200; // Monthly taxes
     const insurance = 150; // Monthly insurance
-    const totalPiti = (scenario.monthlyPayment || 0) + taxes + insurance;
+    const monthlyPayment = calculateMonthlyPayment(scenario);
+    const totalPiti = monthlyPayment + taxes + insurance;
     return monthlyRent - totalPiti;
   };
 
   const calculateDownPayment = (scenario: any) => {
-    const propertyValue = scenario.loanAmount ? Math.round(scenario.loanAmount / (scenario.ltv / 100)) : 0;
-    return propertyValue - (scenario.loanAmount || 0);
+    const formData = scenario.form_data || scenario;
+    const propertyValue = formData.propertyValue || (formData.loanAmount ? Math.round(formData.loanAmount / ((formData.ltv || 75) / 100)) : 0);
+    return propertyValue - (formData.loanAmount || 0);
+  };
+
+  const calculateMonthlyPayment = (scenario: any) => {
+    const formData = scenario.form_data || scenario;
+    const results = scenario.results || [];
+    const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
+      current.rate < best.rate ? current : best
+    ) : null;
+    
+    if (bestResult) {
+      const principal = formData.loanAmount || 0;
+      const monthlyRate = (bestResult.rate / 100) / 12;
+      const numPayments = 360; // 30 years
+      
+      if (monthlyRate === 0) return principal / numPayments;
+      
+      const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                            (Math.pow(1 + monthlyRate, numPayments) - 1);
+      return monthlyPayment;
+    }
+    
+    return 0;
   };
 
   const EditableCell = ({ value, scenarioIndex, field, className = "" }: { 
@@ -230,12 +291,15 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
                   <TableHead className="bg-dominion-blue text-white sticky left-0 z-10">
                     Loan Parameters
                   </TableHead>
-                  {editableScenarios.map((scenario, index) => (
-                    <TableHead key={index} className="bg-dominion-blue text-white text-center min-w-[150px]">
-                      <div className="font-bold">{scenario.noteBuyer || `Product ${String.fromCharCode(65 + index)}`}</div>
-                      <div className="text-xs font-normal">30-Year Fixed</div>
-                    </TableHead>
-                  ))}
+                  {editableScenarios.map((scenario, index) => {
+                    const noteBuyer = scenario.name ? scenario.name.split(' - ').pop() : `Product ${String.fromCharCode(65 + index)}`;
+                    return (
+                      <TableHead key={index} className="bg-dominion-blue text-white text-center min-w-[150px]">
+                        <div className="font-bold">{noteBuyer}</div>
+                        <div className="text-xs font-normal">30-Year Fixed</div>
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               </TableHeader>
               
@@ -249,28 +313,34 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
                 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">Maximum LTV</TableCell>
-                  {editableScenarios.map((scenario, index) => (
-                    <TableCell key={index} className={getCellClass(scenario, 'ltv')}>
-                      <EditableCell 
-                        value={`${scenario.ltv || 0}%`} 
-                        scenarioIndex={index} 
-                        field="ltv"
-                      />
-                    </TableCell>
-                  ))}
+                  {editableScenarios.map((scenario, index) => {
+                    const formData = scenario.form_data || scenario;
+                    return (
+                      <TableCell key={index} className={getCellClass(scenario, 'ltv')}>
+                        <EditableCell 
+                          value={`${formData.ltv || 75}%`} 
+                          scenarioIndex={index} 
+                          field="ltv"
+                        />
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">Loan Amount (at Max LTV)</TableCell>
-                  {editableScenarios.map((scenario, index) => (
-                    <TableCell key={index} className={getCellClass(scenario, 'loanAmount')}>
-                      <EditableCell 
-                        value={formatCurrency(scenario.loanAmount || 0)} 
-                        scenarioIndex={index} 
-                        field="loanAmount"
-                      />
-                    </TableCell>
-                  ))}
+                  {editableScenarios.map((scenario, index) => {
+                    const formData = scenario.form_data || scenario;
+                    return (
+                      <TableCell key={index} className={getCellClass(scenario, 'loanAmount')}>
+                        <EditableCell 
+                          value={formatCurrency(formData.loanAmount || 0)} 
+                          scenarioIndex={index} 
+                          field="loanAmount"
+                        />
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
 
                 <TableRow>
@@ -296,15 +366,21 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">Interest Rate</TableCell>
-                  {editableScenarios.map((scenario, index) => (
-                    <TableCell key={index} className={getCellClass(scenario, 'interestRate')}>
-                      <EditableCell 
-                        value={formatRate(scenario.interestRate || 0)} 
-                        scenarioIndex={index} 
-                        field="interestRate"
-                      />
-                    </TableCell>
-                  ))}
+                  {editableScenarios.map((scenario, index) => {
+                    const results = scenario.results || [];
+                    const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
+                      current.rate < best.rate ? current : best
+                    ) : null;
+                    return (
+                      <TableCell key={index} className={getCellClass(scenario, 'interestRate')}>
+                        <EditableCell 
+                          value={formatRate(bestResult?.rate || 0)} 
+                          scenarioIndex={index} 
+                          field="interestRate"
+                        />
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
 
                 <TableRow>
@@ -312,7 +388,7 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
                   {editableScenarios.map((scenario, index) => (
                     <TableCell key={index} className={getCellClass(scenario, 'points')}>
                       <EditableCell 
-                        value={formatPoints(scenario.points || 0)} 
+                        value={formatPoints(0)} 
                         scenarioIndex={index} 
                         field="points"
                       />
@@ -323,7 +399,8 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">Origination Fee ($)</TableCell>
                   {editableScenarios.map((scenario, index) => {
-                    const fee = (scenario.loanAmount || 0) * (scenario.points || 0) / 100;
+                    const formData = scenario.form_data || scenario;
+                    const fee = (formData.loanAmount || 0) * (0) / 100; // No points for now
                     return (
                       <TableCell key={index} className="text-center">
                         {formatCurrency(fee)}
@@ -341,15 +418,18 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">Principal & Interest</TableCell>
-                  {editableScenarios.map((scenario, index) => (
-                    <TableCell key={index} className={getCellClass(scenario, 'monthlyPayment')}>
-                      <EditableCell 
-                        value={formatCurrency(scenario.monthlyPayment || 0)} 
-                        scenarioIndex={index} 
-                        field="monthlyPayment"
-                      />
-                    </TableCell>
-                  ))}
+                  {editableScenarios.map((scenario, index) => {
+                    const monthlyPayment = calculateMonthlyPayment(scenario);
+                    return (
+                      <TableCell key={index} className={getCellClass(scenario, 'monthlyPayment')}>
+                        <EditableCell 
+                          value={formatCurrency(monthlyPayment)} 
+                          scenarioIndex={index} 
+                          field="monthlyPayment"
+                        />
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
 
                 <TableRow>
@@ -369,7 +449,8 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">Total PITI</TableCell>
                   {editableScenarios.map((scenario, index) => {
-                    const totalPiti = (scenario.monthlyPayment || 0) + 200 + 150;
+                    const monthlyPayment = calculateMonthlyPayment(scenario);
+                    const totalPiti = monthlyPayment + 200 + 150;
                     return (
                       <TableCell key={index} className="text-center">
                         {formatCurrency(totalPiti)}
@@ -387,9 +468,14 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">Monthly Rental Income</TableCell>
-                  {editableScenarios.map((scenario, index) => (
-                    <TableCell key={index} className="text-center">$4,500</TableCell>
-                  ))}
+                  {editableScenarios.map((scenario, index) => {
+                    const formData = scenario.form_data || scenario;
+                    return (
+                      <TableCell key={index} className="text-center">
+                        {formatCurrency(formData.monthlyRent || 4500)}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
 
                 <TableRow>
@@ -406,15 +492,18 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
 
                 <TableRow>
                   <TableCell className="bg-blue-50 font-bold sticky left-0 z-5">DSCR</TableCell>
-                  {editableScenarios.map((scenario, index) => (
-                    <TableCell key={index} className={getCellClass(scenario, 'dscr')}>
-                      <EditableCell 
-                        value={(scenario.dscr || 0).toFixed(2)} 
-                        scenarioIndex={index} 
-                        field="dscr"
-                      />
-                    </TableCell>
-                  ))}
+                  {editableScenarios.map((scenario, index) => {
+                    const formData = scenario.form_data || scenario;
+                    return (
+                      <TableCell key={index} className={getCellClass(scenario, 'dscr')}>
+                        <EditableCell 
+                          value={(formData.dscr || 0).toFixed(2)} 
+                          scenarioIndex={index} 
+                          field="dscr"
+                        />
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
 
                 {/* CASH TO CLOSE */}
