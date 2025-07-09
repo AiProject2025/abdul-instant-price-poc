@@ -248,6 +248,14 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     return `${Math.round(points * 10) / 10}pts`;
   };
 
+  const formatScenarioName = (name: string) => {
+    // Clean up long decimal points in scenario names
+    return name.replace(/(\d+\.\d{10,})pts/g, (match, decimal) => {
+      const rounded = Math.round(parseFloat(decimal) * 10) / 10;
+      return `${rounded}pts`;
+    });
+  };
+
   const handleLockRate = (index: number) => {
     console.log(`Locking rate for ${results[index].noteBuyer} - ${results[index].product}`);
     // Add lock rate logic here
@@ -495,7 +503,7 @@ DSCR Loan System`;
                                        checked={selectedScenarios.has(scenario.id)}
                                        onCheckedChange={(checked) => handleScenarioCheck(scenario.id, !!checked)}
                                      />
-                                     <div className="text-sm font-medium text-blue-800 truncate pr-2">{scenario.name}</div>
+                                     <div className="text-sm font-medium text-blue-800 truncate pr-2">{formatScenarioName(scenario.name)}</div>
                                    </div>
                                    <DropdownMenu>
                                      <DropdownMenuTrigger asChild>
