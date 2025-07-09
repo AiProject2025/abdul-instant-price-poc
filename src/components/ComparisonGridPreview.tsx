@@ -552,17 +552,26 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
             <h3 className="font-bold text-lg mb-3">Quick Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {editableScenarios.map((scenario, index) => {
+                const formData = scenario.form_data || scenario;
+                const results = scenario.results || [];
+                const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
+                  current.rate < best.rate ? current : best
+                ) : null;
+                
                 const cashFlow = calculateCashFlow(scenario);
                 const downPayment = calculateDownPayment(scenario);
+                const rate = bestResult?.rate || 0;
+                const ltv = formData.ltv || 75;
+                const noteBuyer = scenario.name ? scenario.name.split(' - ').pop() : `Product ${String.fromCharCode(65 + index)}`;
                 
                 return (
                   <div key={index} className="bg-white p-3 rounded border">
                     <h4 className="font-semibold text-dominion-blue">
-                      {scenario.noteBuyer || `Product ${String.fromCharCode(65 + index)}`}
+                      {noteBuyer}
                     </h4>
                     <div className="text-sm space-y-1">
-                      <div>Rate: {formatRate(scenario.interestRate || 0)}</div>
-                      <div>LTV: {scenario.ltv || 0}%</div>
+                      <div>Rate: {formatRate(rate)}</div>
+                      <div>LTV: {ltv}%</div>
                       <div className={getCashFlowClass(cashFlow)}>
                         Cash Flow: {formatCurrency(cashFlow)}
                       </div>
