@@ -8,6 +8,19 @@ export interface Scenario {
   form_data: any;
   created_at: string;
   updated_at: string;
+  deleted_at?: string;
+  deleted_by_name?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  scenario_id: string;
+  action: string;
+  user_id: string;
+  user_name: string;
+  scenario_name: string;
+  performed_at: string;
+  additional_data: any;
 }
 
 export interface ScenarioResult {
@@ -23,6 +36,8 @@ export interface ScenarioResult {
 
 export const useScenarios = () => {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [deletedScenarios, setDeletedScenarios] = useState<Scenario[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [scenarioResults, setScenarioResults] = useState<Record<string, ScenarioResult[]>>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -151,12 +166,33 @@ export const useScenarios = () => {
     }
   };
 
+  const getUserName = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 'Unknown User';
+      
+      // Try to get the user's profile with full_name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+      
+      return profile?.full_name || user.email || 'Unknown User';
+    } catch (error) {
+      console.error('Error getting user name:', error);
+      return 'Unknown User';
+    }
+  };
+
   const deleteScenario = async (scenarioId: string) => {
     try {
-      const { error } = await supabase
-        .from('scenarios')
-        .delete()
-        .eq('id', scenarioId);
+      const userName = await getUserName();
+      
+      const { error } = await supabase.rpc('soft_delete_scenario', {
+        scenario_id_param: scenarioId,
+        user_name_param: userName
+      });
 
       if (error) throw error;
 
@@ -182,18 +218,90 @@ export const useScenarios = () => {
     }
   };
 
+  const fetchDeletedScenarios = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('scenarios')
+        .select('*')
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false });
+
+      if (error) throw error;
+      setDeletedScenarios(data || []);
+    } catch (error) {
+      console.error('Error fetching deleted scenarios:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch deleted scenarios",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const fetchAuditLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('scenario_audit_log')
+        .select('*')
+        .order('performed_at', { ascending: false });
+
+      if (error) throw error;
+      setAuditLogs(data || []);
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch audit logs",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const restoreScenario = async (scenarioId: string) => {
+    try {
+      const userName = await getUserName();
+      
+      const { error } = await supabase.rpc('restore_scenario', {
+        scenario_id_param: scenarioId,
+        user_name_param: userName
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Scenario restored successfully"
+      });
+
+      await fetchScenarios();
+      await fetchDeletedScenarios();
+    } catch (error) {
+      console.error('Error restoring scenario:', error);
+      toast({
+        title: "Error",
+        description: "Failed to restore scenario",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     fetchScenarios();
   }, []);
 
   return {
     scenarios,
+    deletedScenarios,
+    auditLogs,
     scenarioResults,
     loading,
     saveScenario,
     saveScenarioResults,
     deleteScenario,
+    restoreScenario,
     fetchScenarioResults,
+    fetchDeletedScenarios,
+    fetchAuditLogs,
     refetchScenarios: fetchScenarios
   };
 };

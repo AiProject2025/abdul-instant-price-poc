@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      scenario_audit_log: {
+        Row: {
+          action: string
+          additional_data: Json | null
+          id: string
+          performed_at: string
+          scenario_id: string
+          scenario_name: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          action: string
+          additional_data?: Json | null
+          id?: string
+          performed_at?: string
+          scenario_id: string
+          scenario_name: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          action?: string
+          additional_data?: Json | null
+          id?: string
+          performed_at?: string
+          scenario_id?: string
+          scenario_name?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       scenario_results: {
         Row: {
           additional_data: Json | null
@@ -85,6 +118,8 @@ export type Database = {
       scenarios: {
         Row: {
           created_at: string
+          deleted_at: string | null
+          deleted_by_name: string | null
           form_data: Json
           id: string
           name: string
@@ -93,6 +128,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by_name?: string | null
           form_data: Json
           id?: string
           name: string
@@ -101,6 +138,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
+          deleted_by_name?: string | null
           form_data?: Json
           id?: string
           name?: string
@@ -114,7 +153,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      restore_scenario: {
+        Args: { scenario_id_param: string; user_name_param: string }
+        Returns: undefined
+      }
+      soft_delete_scenario: {
+        Args: { scenario_id_param: string; user_name_param: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

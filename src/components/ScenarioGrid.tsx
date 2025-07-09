@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Eye } from 'lucide-react';
 import { useScenarios, Scenario, ScenarioResult } from '@/hooks/useScenarios';
+import DeletedScenariosDialog from '@/components/DeletedScenariosDialog';
+import AuditLogDialog from '@/components/AuditLogDialog';
 import {
   Table,
   TableBody,
@@ -69,7 +71,13 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Saved Scenarios</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Saved Scenarios</h2>
+        <div className="flex gap-2">
+          <DeletedScenariosDialog />
+          <AuditLogDialog />
+        </div>
+      </div>
       {scenarios.map((scenario) => (
         <Card key={scenario.id}>
           <CardHeader>
