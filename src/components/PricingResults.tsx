@@ -535,7 +535,7 @@ DSCR Loan System`;
       <Card className="bg-dominion-blue text-white">
         <CardContent className="p-6">
           <div className="text-center">
-            <h3 className="text-xl font-bold mb-2">Need Help Choosing?</h3>
+            <h3 className="text-xl font-bold mb-2">Manager Approval Request</h3>
             <p className="mb-4 opacity-90">
               Our loan experts can help you compare these note buyer options and find the best fit for your investment goals.
             </p>
