@@ -503,7 +503,7 @@ DSCR Loan System`;
                                        checked={selectedScenarios.has(scenario.id)}
                                        onCheckedChange={(checked) => handleScenarioCheck(scenario.id, !!checked)}
                                      />
-                                     <div className="text-sm font-medium text-blue-800 truncate pr-2">{formatScenarioName(scenario.name)}</div>
+                                     <div className="text-sm font-medium text-blue-800 truncate flex-1 min-w-0">{formatScenarioName(scenario.name)}</div>
                                    </div>
                                    <DropdownMenu>
                                      <DropdownMenuTrigger asChild>
