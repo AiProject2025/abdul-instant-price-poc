@@ -590,6 +590,11 @@ const Quote = () => {
               <QuestionnaireUpload
                 onFileUpload={handleFileUpload}
                 onManualEntry={handleManualEntry}
+                onClientSelect={(client) => {
+                  console.log('Client selected:', client);
+                  // Pre-populate form with client data
+                  setCurrentStep('questionnaire');
+                }}
                 isLoading={isProcessing}
               />
               

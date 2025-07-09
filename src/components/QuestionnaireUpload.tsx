@@ -2,14 +2,25 @@ import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2 } from "lucide-react";
+import ClientSearch from "./ClientSearch";
+
+interface ClientInfo {
+  name: string;
+  address: string;
+  lastQuoteDate?: string;
+  totalQuotes?: number;
+}
+
 interface QuestionnaireUploadProps {
   onFileUpload: (file: File) => void;
   onManualEntry: () => void;
+  onClientSelect?: (client: ClientInfo) => void;
   isLoading: boolean;
 }
 const QuestionnaireUpload = ({
   onFileUpload,
   onManualEntry,
+  onClientSelect,
   isLoading
 }: QuestionnaireUploadProps) => {
   const [dragActive, setDragActive] = useState(false);
@@ -44,12 +55,36 @@ const QuestionnaireUpload = ({
         </CardContent>
       </Card>;
   }
+  const handleClientSelect = (client: ClientInfo) => {
+    if (onClientSelect) {
+      onClientSelect(client);
+    }
+  };
+
+  const handleCreateNew = () => {
+    // Continue with normal flow
+  };
+
   return <div className="space-y-8">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-dominion-blue mb-4">
-          Upload Your DSCR Questionnaire
+          DSCR Loan Quote System
         </h1>
         <p className="text-lg text-dominion-gray max-w-2xl mx-auto">
+          Search for existing clients or create a new quote by uploading a questionnaire or entering information manually.
+        </p>
+      </div>
+
+      <ClientSearch 
+        onClientSelect={handleClientSelect}
+        onCreateNew={handleCreateNew}
+      />
+
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold text-dominion-blue mb-4">
+          Create New Quote
+        </h2>
+        <p className="text-dominion-gray max-w-2xl mx-auto">
           Upload your completed DSCR questionnaire and let our AI extract the data automatically, 
           or enter the information manually using our form.
         </p>
