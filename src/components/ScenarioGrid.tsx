@@ -831,10 +831,10 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                 <Badge variant="secondary">{noteBuyerScenarios.length} scenarios</Badge>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 {noteBuyerScenarios.map((scenario) => (
                   <Card key={scenario.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-2 px-3 pt-3">
+                    <CardHeader className="pb-2 px-4 pt-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-2 flex-1 min-w-0">
                           <Checkbox
@@ -874,7 +874,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                       </div>
                     </CardHeader>
                     
-                    <CardContent className="pt-0 px-3 pb-3">
+                    <CardContent className="pt-0 px-4 pb-4">
                       <div className="space-y-1.5 text-xs">
                         <div className="space-y-1">
                           <div>
@@ -883,7 +883,7 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
                               {formatCurrency(scenario.form_data.loanAmount || 0)}
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-1">
+                          <div className="grid grid-cols-4 gap-4">
                             <div>
                               <span className="font-medium text-gray-600">LTV:</span>
                               <div className="text-muted-foreground">
