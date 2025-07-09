@@ -456,23 +456,46 @@ DSCR Loan System`;
             const scenario = filteredScenarios.find(s => s.id === id);
             if (!scenario) return null;
             
-            // Merge current pricing results with the saved scenario
-            const currentResults = results.map(result => ({
-              id: `${scenario.id}-${result.noteBuyer}`,
+            // Find the specific result for this scenario's note buyer
+            const scenarioNoteBuyer = scenario.name ? scenario.name.split(' - ').pop() : '';
+            console.log('🔍 Looking for note buyer:', scenarioNoteBuyer, 'in results:', results);
+            
+            const matchingResult = results.find(result => 
+              result.noteBuyer === scenarioNoteBuyer || 
+              result.noteBuyer.toLowerCase().includes(scenarioNoteBuyer.toLowerCase()) ||
+              scenarioNoteBuyer.toLowerCase().includes(result.noteBuyer.toLowerCase())
+            );
+            
+            console.log('🎯 Found matching result:', matchingResult);
+            
+            if (!matchingResult) {
+              console.log('❌ No matching result found for:', scenarioNoteBuyer);
+              return {
+                ...scenario,
+                results: []
+              };
+            }
+            
+            // Create result array with the actual pricing data
+            const currentResults = [{
+              id: `${scenario.id}-${matchingResult.noteBuyer}`,
               scenario_id: scenario.id,
-              buyer_name: result.noteBuyer,
-              rate: result.rate,
-              price: result.rate, // Using rate as price for now
-              loan_amount: result.loanAmount,
+              buyer_name: matchingResult.noteBuyer,
+              rate: matchingResult.rate,
+              price: matchingResult.rate,
+              loan_amount: matchingResult.loanAmount,
               additional_data: {
-                monthlyPayment: result.monthlyPayment,
-                points: result.points,
-                ltv: result.ltv,
-                dscr: result.dscr,
-                propertyType: result.propertyType
+                monthlyPayment: matchingResult.monthlyPayment,
+                points: matchingResult.points || 0,
+                ltv: matchingResult.ltv,
+                dscr: matchingResult.dscr,
+                propertyType: matchingResult.propertyType,
+                totalInterest: matchingResult.totalInterest
               },
               created_at: new Date().toISOString()
-            }));
+            }];
+            
+            console.log('✅ Created results for scenario:', scenario.name, currentResults);
             
             return {
               ...scenario,
