@@ -84,6 +84,18 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
 
   const handleSaveEditedQuote = (editedData: any) => {
     onGenerateLoanQuote(selectedResult, editedData);
+    setSelectedResult(null);
+    setIsEditDialogOpen(false);
+  };
+
+  const handleReQuote = async (editedData: any) => {
+    // Close the edit dialog and trigger a new quote with the updated data
+    setIsEditDialogOpen(false);
+    setSelectedResult(null);
+    
+    // Here you would call the pricing API again with the updated data
+    // For now, we'll just call the onGenerateLoanQuote function
+    onGenerateLoanQuote(selectedResult, editedData);
   };
 
   const handleEmailJosh = () => {
@@ -591,6 +603,7 @@ DSCR Loan System`;
             date: new Date().toLocaleDateString()
           }}
           onSave={handleSaveEditedQuote}
+          onReQuote={handleReQuote}
         />
       )}
     </div>

@@ -41,6 +41,74 @@ export type Database = {
         }
         Relationships: []
       }
+      scenario_results: {
+        Row: {
+          additional_data: Json | null
+          buyer_name: string
+          created_at: string
+          id: string
+          loan_amount: number
+          price: number
+          rate: number
+          scenario_id: string
+        }
+        Insert: {
+          additional_data?: Json | null
+          buyer_name: string
+          created_at?: string
+          id?: string
+          loan_amount: number
+          price: number
+          rate: number
+          scenario_id: string
+        }
+        Update: {
+          additional_data?: Json | null
+          buyer_name?: string
+          created_at?: string
+          id?: string
+          loan_amount?: number
+          price?: number
+          rate?: number
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_results_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scenarios: {
+        Row: {
+          created_at: string
+          form_data: Json
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          form_data: Json
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          form_data?: Json
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

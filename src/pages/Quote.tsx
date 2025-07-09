@@ -7,12 +7,14 @@ import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
 import { Button } from "@/components/ui/button";
 import QuoteTracker from "@/components/QuoteTracker";
+import ScenarioGrid from "@/components/ScenarioGrid";
 import { saveQuote } from "@/services/quoteTracker";
 import { generateLoanQuote } from "@/utils/documentGenerator";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, History } from "lucide-react";
+import { useScenarios } from "@/hooks/useScenarios";
 
 const Quote = () => {
-  const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results">("upload");
+  const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results" | "scenarios">("upload");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [extractedData, setExtractedData] = useState<any>(null);
   const [formData, setFormData] = useState<any>(null);
@@ -21,6 +23,8 @@ const Quote = () => {
   const [ineligibleBuyers, setIneligibleBuyers] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [flags, setFlags] = useState<string[]>([]);
+
+  const { saveScenarioResults } = useScenarios();
 
   const transformApiResponseToResults = (apiResponse: any) => {
     // Handle the new response structure where quotes are under the 'quotes' key
@@ -448,6 +452,15 @@ const Quote = () => {
     }
   };
 
+  const handleScenarioSelect = (scenario: any) => {
+    console.log("Selected scenario:", scenario);
+    
+    // Restore the form data from the selected scenario
+    setFormData(scenario.form_data);
+    setLastSubmittedFormData(scenario.form_data);
+    setCurrentStep("questionnaire");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -514,8 +527,36 @@ const Quote = () => {
                 isLoading={isProcessing}
               />
               
+              {/* Scenarios Button */}
+              <div className="text-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep("scenarios")}
+                  className="flex items-center gap-2"
+                >
+                  <History className="h-4 w-4" />
+                  View Saved Scenarios
+                </Button>
+              </div>
+              
               {/* Quote Tracker on Upload Screen */}
               <QuoteTracker onQuoteSelect={handleQuoteSelect} />
+            </div>
+          )}
+
+          {currentStep === "scenarios" && (
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep("upload")}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Upload
+                </Button>
+              </div>
+              <ScenarioGrid onSelectScenario={handleScenarioSelect} />
             </div>
           )}
 

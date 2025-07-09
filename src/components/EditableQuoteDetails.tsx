@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RefreshCw, Save } from "lucide-react";
+import { useScenarios } from "@/hooks/useScenarios";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditableQuoteDetailsProps {
   isOpen: boolean;
@@ -49,9 +52,10 @@ interface EditableQuoteDetailsProps {
     propertyCondition?: string;
   };
   onSave: (data: any) => void;
+  onReQuote?: (data: any) => void;
 }
 
-const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave }: EditableQuoteDetailsProps) => {
+const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote }: EditableQuoteDetailsProps) => {
   const [editData, setEditData] = useState({
     ...initialData,
     // Set defaults for new fields
@@ -77,6 +81,11 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave }: Editable
     annualAssociationFees: initialData.annualAssociationFees || 0,
     propertyCondition: initialData.propertyCondition || "C4 or better"
   });
+  const [scenarioName, setScenarioName] = useState("");
+  const [isRequoting, setIsRequoting] = useState(false);
+  
+  const { saveScenario } = useScenarios();
+  const { toast } = useToast();
 
   const handleInputChange = (field: string, value: any) => {
     setEditData(prev => ({
@@ -88,6 +97,44 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave }: Editable
   const handleSave = () => {
     onSave(editData);
     onClose();
+  };
+
+  const handleReQuote = async () => {
+    if (!onReQuote) return;
+    
+    setIsRequoting(true);
+    try {
+      await onReQuote(editData);
+    } catch (error) {
+      console.error('Error re-quoting:', error);
+      toast({
+        title: "Error",
+        description: "Failed to re-quote with updated data",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRequoting(false);
+    }
+  };
+
+  const handleSaveScenario = async () => {
+    if (!scenarioName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a scenario name",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const scenarioId = await saveScenario(scenarioName, editData);
+    if (scenarioId) {
+      setScenarioName("");
+      toast({
+        title: "Success",
+        description: "Scenario saved successfully"
+      });
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -105,6 +152,37 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave }: Editable
         <DialogHeader>
           <DialogTitle>Edit Quote Details</DialogTitle>
         </DialogHeader>
+
+        {/* Action Buttons at Top */}
+        <div className="flex flex-wrap gap-2 p-4 bg-muted/50 rounded-lg">
+          {onReQuote && (
+            <Button 
+              onClick={handleReQuote} 
+              disabled={isRequoting}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRequoting ? 'animate-spin' : ''}`} />
+              {isRequoting ? 'Re-quoting...' : 'Re-Quote with Updated Numbers'}
+            </Button>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Scenario name..."
+              value={scenarioName}
+              onChange={(e) => setScenarioName(e.target.value)}
+              className="w-40"
+            />
+            <Button 
+              onClick={handleSaveScenario}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Save Scenario
+            </Button>
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
           <div className="space-y-2">
