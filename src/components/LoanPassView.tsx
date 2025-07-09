@@ -132,6 +132,7 @@ const LoanPassView = ({ onBack, onSubmit, isLoading, initialData }: LoanPassView
 
   // Calculate NOI if needed
   const shouldShowMonthlyNOI = formData.numberOfUnits && parseInt(formData.numberOfUnits) >= 5;
+  const isMultiFamily = formData.propertyType === "Multi-Family";
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -481,16 +482,37 @@ const LoanPassView = ({ onBack, onSubmit, isLoading, initialData }: LoanPassView
               />
             </div>
             
-            {shouldShowMonthlyNOI && (
+            {(shouldShowMonthlyNOI || isMultiFamily) && (
               <div>
                 <Label htmlFor="monthlyNOI">Monthly NOI</Label>
-                <Input
-                  id="monthlyNOI"
-                  type="number"
-                  step="0.01"
-                  value={formData.monthlyNOI}
-                  onChange={(e) => handleInputChange('monthlyNOI', e.target.value)}
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="monthlyNOI"
+                    type="number"
+                    step="0.01"
+                    value={formData.monthlyNOI}
+                    onChange={(e) => handleInputChange('monthlyNOI', e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+            )}
+            
+            {isMultiFamily && (
+              <div>
+                <Label htmlFor="monthlyTaxes">Monthly Taxes</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="monthlyTaxes"
+                    type="number"
+                    step="0.01"
+                    value={formData.monthlyTaxes}
+                    onChange={(e) => handleInputChange('monthlyTaxes', e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
               </div>
             )}
             
@@ -878,21 +900,6 @@ const LoanPassView = ({ onBack, onSubmit, isLoading, initialData }: LoanPassView
                   step="0.01"
                   value={formData.inPlaceLease}
                   onChange={(e) => handleInputChange('inPlaceLease', e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="monthlyTaxes">Monthly Taxes</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
-                <Input
-                  id="monthlyTaxes"
-                  type="number"
-                  step="0.01"
-                  value={formData.monthlyTaxes}
-                  onChange={(e) => handleInputChange('monthlyTaxes', e.target.value)}
                   className="pl-8"
                 />
               </div>
