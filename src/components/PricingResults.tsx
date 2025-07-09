@@ -537,8 +537,14 @@ DSCR Loan System`;
           <div className="text-center">
             <h3 className="text-xl font-bold mb-2">Manager Approval Request</h3>
             <p className="mb-4 opacity-90">
-              Our loan experts can help you compare these note buyer options and find the best fit for your investment goals.
+              Any Single Note Buyer deals or Price Exceptions must be approved by Management. Submit your Request Below. Further more any features or issues with the UI select Request Feature.
             </p>
+            <a 
+              href="mailto:Wade@thedominiongroup.com"
+              className="inline-flex items-center justify-center px-6 py-2 bg-white text-dominion-blue font-semibold rounded-md hover:bg-gray-100 transition-colors"
+            >
+              Email Wade
+            </a>
             <div className="flex gap-3 justify-center">
               <Button 
                 variant="outline" 
