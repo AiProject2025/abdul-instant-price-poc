@@ -49,8 +49,11 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
 
   // Auto-populate scenario name when form data changes
   useEffect(() => {
-    if (lastSubmittedFormData && results.length > 0 && !newScenarioName) {
-      setNewScenarioName(generateScenarioName());
+    if (lastSubmittedFormData && results.length > 0) {
+      const autoName = generateScenarioName();
+      if (autoName && autoName !== newScenarioName) {
+        setNewScenarioName(autoName);
+      }
     }
   }, [lastSubmittedFormData, results]);
   
@@ -101,7 +104,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     if (scenarioId && results.length > 0) {
       // Save the current pricing results with this scenario
       await saveScenarioResults(scenarioId, results);
-      setNewScenarioName("");
+      setNewScenarioName(generateScenarioName()); // Auto-generate new name for next scenario
       toast({
         title: "Success",
         description: "Scenario and pricing results saved successfully"

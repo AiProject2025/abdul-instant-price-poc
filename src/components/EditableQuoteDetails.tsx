@@ -107,10 +107,13 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
     return `${noteBuyer} ${ltv}%LTV ${formattedAmount} ${rate}% ${points}pts ${interestOnly}`.trim();
   };
 
-  // Auto-populate scenario name when data changes
+  // Auto-populate scenario name when data changes or dialog opens
   useEffect(() => {
-    if (isOpen && editData.loanAmount && !scenarioName) {
-      setScenarioName(generateScenarioName());
+    if (isOpen && editData.loanAmount) {
+      const autoName = generateScenarioName();
+      if (autoName && autoName !== scenarioName) {
+        setScenarioName(autoName);
+      }
     }
   }, [isOpen, editData.loanAmount, editData.ltv, editData.noteBuyer, editData.interestRate, editData.points, editData.interestOnly]);
 
@@ -158,13 +161,13 @@ const EditableQuoteDetails = ({ isOpen, onClose, initialData, onSave, onReQuote,
     if (scenarioId && currentPricingResults && currentPricingResults.length > 0) {
       // Also save the current pricing results with this scenario
       await saveScenarioResults(scenarioId, currentPricingResults);
-      setScenarioName("");
+      setScenarioName(generateScenarioName()); // Reset to new auto-generated name for next save
       toast({
         title: "Success",
         description: "Scenario and pricing results saved successfully"
       });
     } else if (scenarioId) {
-      setScenarioName("");
+      setScenarioName(generateScenarioName()); // Reset to new auto-generated name for next save
       toast({
         title: "Success", 
         description: "Scenario saved successfully"
