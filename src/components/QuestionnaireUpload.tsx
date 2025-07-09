@@ -61,10 +61,6 @@ const QuestionnaireUpload = ({
     }
   };
 
-  const handleCreateNew = () => {
-    // Continue with normal flow
-  };
-
   return <div className="space-y-8">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-dominion-blue mb-4">
@@ -77,7 +73,6 @@ const QuestionnaireUpload = ({
 
       <ClientSearch 
         onClientSelect={handleClientSelect}
-        onCreateNew={handleCreateNew}
       />
 
       <div className="text-center">

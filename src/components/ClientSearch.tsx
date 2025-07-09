@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, MapPin, Plus } from "lucide-react";
+import { Search, User, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ClientSearchProps {
   onClientSelect: (client: ClientInfo) => void;
-  onCreateNew: () => void;
 }
 
 interface ClientInfo {
@@ -17,7 +16,7 @@ interface ClientInfo {
   totalQuotes?: number;
 }
 
-const ClientSearch = ({ onClientSelect, onCreateNew }: ClientSearchProps) => {
+const ClientSearch = ({ onClientSelect }: ClientSearchProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ClientInfo[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -139,21 +138,6 @@ const ClientSearch = ({ onClientSelect, onCreateNew }: ClientSearchProps) => {
             No clients found matching "{searchTerm}"
           </div>
         )}
-
-        <div className="flex items-center gap-3 pt-4 border-t">
-          <div className="flex-1 h-px bg-gray-200"></div>
-          <span className="text-sm text-gray-500">or</span>
-          <div className="flex-1 h-px bg-gray-200"></div>
-        </div>
-
-        <Button 
-          onClick={onCreateNew}
-          variant="outline"
-          className="w-full"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create New Client Quote
-        </Button>
       </CardContent>
     </Card>
   );
