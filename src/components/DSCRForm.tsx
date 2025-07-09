@@ -82,7 +82,9 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     desiredClosingDate: (() => {
       const date = new Date();
       date.setDate(date.getDate() + 30);
-      return date.toISOString().split('T')[0];
+      const formattedDate = date.toISOString().split('T')[0];
+      console.log('Setting default closing date to:', formattedDate);
+      return formattedDate;
     })(),
     interestReserves: 'Yes',
     
@@ -172,16 +174,21 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
         
         // Auto-sync numberOfLeasedUnits when numberOfUnits changes
         if (field === 'numberOfUnits') {
+          console.log('Number of units changed to:', value);
           newState.numberOfLeasedUnits = value;
+          console.log('Setting number of leased units to:', value);
           
           // Auto-set square footage based on number of units
           const units = parseInt(value) || 1;
           if (units === 1) {
             newState.totalSquareFeet = '2000'; // Single family
+            console.log('Setting square footage to 2000 for single family');
           } else if (units >= 2 && units <= 4) {
             newState.totalSquareFeet = '2800'; // 2-4 units
+            console.log('Setting square footage to 2800 for 2-4 units');
           } else if (units >= 5 && units <= 10) {
             newState.totalSquareFeet = '8000'; // 5-10 units (Multi Family)
+            console.log('Setting square footage to 8000 for 5-10 units');
           }
         }
         

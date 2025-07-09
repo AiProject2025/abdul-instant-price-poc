@@ -60,15 +60,20 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
   const counties = fullStateName ? statesAndCounties[fullStateName] || [] : [];
 
   const handleStateChange = (value: string) => {
+    console.log('State changed to:', value);
     onStateChange(value); // This will be the abbreviation (e.g., "TX")
     
     // Auto-populate with first county when state changes
     const newFullStateName = getStateNameFromAbbreviation(value);
+    console.log('Full state name:', newFullStateName);
     const newCounties = newFullStateName ? statesAndCounties[newFullStateName] || [] : [];
+    console.log('Counties for', newFullStateName, ':', newCounties);
     
     if (newCounties.length > 0) {
+      console.log('Setting first county to:', newCounties[0]);
       onCountyChange(newCounties[0]); // Select the first county
     } else {
+      console.log('No counties found, clearing county');
       onCountyChange(''); // Clear if no counties available
     }
   };
