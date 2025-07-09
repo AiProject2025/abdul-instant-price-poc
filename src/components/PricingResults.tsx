@@ -493,10 +493,10 @@ DSCR Loan System`;
                     {Object.entries(groupedScenarios).map(([noteBuyer, buyerScenarios]) => (
                       <div key={noteBuyer}>
                         <h3 className="text-lg font-semibold text-blue-800 mb-3">{noteBuyer}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {buyerScenarios.map((scenario) => (
                              <Card key={scenario.id} className="border-blue-200 bg-white hover:shadow-md transition-shadow">
-                               <CardContent className="p-4">
+                               <CardContent className="p-6">
                                  <div className="flex justify-between items-start mb-2">
                                    <div className="flex items-center gap-2">
                                      <Checkbox
