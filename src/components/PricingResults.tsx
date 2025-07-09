@@ -534,11 +534,11 @@ DSCR Loan System`;
                                      </DropdownMenuContent>
                                    </DropdownMenu>
                                  </div>
-                                 <div className="space-y-1 text-xs text-gray-600">
-                                   <div>Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
-                                   <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
-                                   <div>Created: {new Date(scenario.created_at).toLocaleDateString()}</div>
-                                 </div>
+                                  <div className="space-y-1 text-xs text-gray-600">
+                                    <div className="w-full">Amount: {formatCurrency(scenario.form_data.loanAmount || 0)}</div>
+                                    <div>LTV: {scenario.form_data.ltv || scenario.form_data.desiredLTV || 0}%</div>
+                                    <div>Created: {new Date(scenario.created_at).toLocaleDateString()}</div>
+                                  </div>
                                 <Button 
                                   size="sm" 
                                   className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white"
