@@ -717,7 +717,7 @@ DSCR Loan System`;
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-dominion-gray">Points:</span>
-                        <span className="font-semibold">{result.points}%</span>
+                        <span className="font-semibold">{formatPoints(result.points)}</span>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -832,7 +832,7 @@ DSCR Loan System`;
                       <div className="flex items-center space-x-2">
                         <Calculator className="h-4 w-4 text-dominion-blue" />
                         <div>
-                          <div className="text-sm font-medium">{result.points}%</div>
+                          <div className="text-sm font-medium">{formatPoints(result.points)}</div>
                           <div className="text-xs text-dominion-gray">Points</div>
                         </div>
                       </div>
