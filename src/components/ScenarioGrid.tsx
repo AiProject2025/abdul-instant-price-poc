@@ -71,6 +71,8 @@ const ScenarioGrid = ({ onSelectScenario }: ScenarioGridProps) => {
   };
 
   const generateClientPresentation = async () => {
+    console.log('🔥 Generate Client Presentation button clicked!');
+    console.log('Selected scenarios count:', selectedScenarios.size);
     if (selectedScenarios.size === 0) {
       toast({
         title: "No scenarios selected",
