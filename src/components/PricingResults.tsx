@@ -537,7 +537,7 @@ DSCR Loan System`;
           <div className="text-center">
             <h3 className="text-xl font-bold mb-2">Manager Approval Request</h3>
             <p className="mb-4 opacity-90">
-              Any Single Note Buyer deals or Price Exceptions must be approved by Management. Submit your Request Below. Further more any features or issues with the UI select Request Feature.
+              Any Single Note Buyer deals or Price Exceptions must be approved by Management. Submit your Request Below. Any Features you want added or issues with the interface select Submit Feedback.
             </p>
             <div className="flex flex-col gap-3 items-center">
               <a 
