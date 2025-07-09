@@ -626,3 +626,201 @@ export const generateLoanQuote = async (data: LoanQuoteData) => {
   const blob = await Packer.toBlob(doc);
   saveAs(blob, `Loan_Quote_${data.borrowerName.replace(/\s+/g, '_')}_${data.date.replace(/\//g, '-')}.docx`);
 };
+
+export const generateComparisonGrid = async (selectedScenarios: any[], formData: any) => {
+  const propertyAddress = `${formData.streetAddress || ''}, ${formData.city || ''}, ${formData.propertyState || ''} ${formData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, '');
+  const propertyType = formData.propertyType || '';
+  const marketValue = formData.marketValue || 0;
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatRate = (rate: number) => {
+    return `${rate.toFixed(3)}%`;
+  };
+
+  // Create header row with scenario names
+  const headerCells = [
+    new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text: "Loan Parameters", size: 20, bold: true, color: "FFFFFF" })] })],
+      shading: { fill: "003366" },
+      margins: { top: 100, bottom: 100, left: 200, right: 200 }
+    })
+  ];
+
+  selectedScenarios.forEach(scenario => {
+    headerCells.push(
+      new TableCell({
+        children: [
+          new Paragraph({ 
+            children: [new TextRun({ text: scenario.noteBuyer || "Unknown", size: 16, bold: true, color: "FFFFFF" })],
+            alignment: AlignmentType.CENTER
+          }),
+          new Paragraph({ 
+            children: [new TextRun({ text: "30-Year Fixed", size: 12, color: "FFFFFF" })],
+            alignment: AlignmentType.CENTER
+          })
+        ],
+        shading: { fill: "003366" },
+        margins: { top: 100, bottom: 100, left: 200, right: 200 }
+      })
+    );
+  });
+
+  // Helper function to create section header row
+  const createSectionHeader = (title: string, colSpan: number) => {
+    return new TableRow({
+      children: [
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text: title, size: 18, bold: true })] })],
+          columnSpan: colSpan,
+          shading: { fill: "F0F0F0" },
+          margins: { top: 100, bottom: 100, left: 200, right: 200 }
+        })
+      ]
+    });
+  };
+
+  // Helper function to create data row
+  const createDataRow = (label: string, values: string[]) => {
+    const cells = [
+      new TableCell({
+        children: [new Paragraph({ children: [new TextRun({ text: label, size: 16, bold: true })] })],
+        shading: { fill: "E8F4FD" },
+        margins: { top: 100, bottom: 100, left: 200, right: 200 }
+      })
+    ];
+
+    values.forEach(value => {
+      cells.push(
+        new TableCell({
+          children: [new Paragraph({ 
+            children: [new TextRun({ text: value, size: 16 })],
+            alignment: AlignmentType.CENTER
+          })],
+          margins: { top: 100, bottom: 100, left: 200, right: 200 }
+        })
+      );
+    });
+
+    return new TableRow({ children: cells });
+  };
+
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: [
+        // Title
+        new Paragraph({
+          children: [new TextRun({ text: "Note Buyer Comparison Grid", size: 32, bold: true, color: "003366" })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }),
+
+        // Property Header
+        new Paragraph({
+          children: [
+            new TextRun({ text: `Property: `, size: 20, bold: true }),
+            new TextRun({ text: propertyAddress, size: 20 }),
+            new TextRun({ text: ` | `, size: 20 }),
+            new TextRun({ text: propertyType, size: 20, bold: true }),
+            new TextRun({ text: ` | Value: `, size: 20 }),
+            new TextRun({ text: formatCurrency(marketValue), size: 20, bold: true })
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 }
+        }),
+
+        // Comparison Table
+        new Table({
+          rows: [
+            // Header Row
+            new TableRow({ children: headerCells }),
+
+            // Loan Structure Section
+            createSectionHeader("Loan Structure", selectedScenarios.length + 1),
+            createDataRow("Maximum LTV", selectedScenarios.map(s => `${s.ltv || 75}%`)),
+            createDataRow("Loan Amount", selectedScenarios.map(s => formatCurrency(s.loanAmount || 0))),
+            createDataRow("Loan Type", selectedScenarios.map(s => "30-Year Fixed")),
+            createDataRow("Amortization", selectedScenarios.map(s => "360 months")),
+
+            // Pricing & Rates Section
+            createSectionHeader("Pricing & Rates", selectedScenarios.length + 1),
+            createDataRow("Interest Rate", selectedScenarios.map(s => formatRate(s.interestRate || 0))),
+            createDataRow("Origination Points", selectedScenarios.map(s => `${(s.points || 0).toFixed(2)}%`)),
+            createDataRow("Origination Fee ($)", selectedScenarios.map(s => formatCurrency((s.loanAmount || 0) * (s.points || 0) / 100))),
+
+            // Monthly Payments Section
+            createSectionHeader("Monthly Payments", selectedScenarios.length + 1),
+            createDataRow("Principal & Interest", selectedScenarios.map(s => formatCurrency(s.monthlyPayment || 0))),
+            createDataRow("Taxes (Monthly)", selectedScenarios.map(s => formatCurrency((formData.annualTaxes || 2400) / 12))),
+            createDataRow("Insurance (Monthly)", selectedScenarios.map(s => formatCurrency((formData.annualInsurance || 1800) / 12))),
+            createDataRow("Total PITI", selectedScenarios.map(s => formatCurrency((s.monthlyPayment || 0) + (formData.annualTaxes || 2400) / 12 + (formData.annualInsurance || 1800) / 12))),
+
+            // Cash Flow Analysis Section
+            createSectionHeader("Cash Flow Analysis", selectedScenarios.length + 1),
+            createDataRow("Monthly Rental Income", selectedScenarios.map(s => formatCurrency(formData.unit1Rent || 4500))),
+            createDataRow("Net Cash Flow", selectedScenarios.map(s => {
+              const totalPiti = (s.monthlyPayment || 0) + (formData.annualTaxes || 2400) / 12 + (formData.annualInsurance || 1800) / 12;
+              const cashFlow = (formData.unit1Rent || 4500) - totalPiti;
+              return formatCurrency(cashFlow);
+            })),
+            createDataRow("DSCR", selectedScenarios.map(s => (s.dscr || 1.0).toFixed(3))),
+
+            // Cash to Close Section
+            createSectionHeader("Cash to Close", selectedScenarios.length + 1),
+            createDataRow("Down Payment", selectedScenarios.map(s => {
+              const downPayment = (marketValue || 0) - (s.loanAmount || 0);
+              return formatCurrency(downPayment);
+            })),
+            createDataRow("Estimated Closing Costs", selectedScenarios.map(s => formatCurrency(5000))), // Placeholder
+            createDataRow("Total Cash Required", selectedScenarios.map(s => {
+              const downPayment = (marketValue || 0) - (s.loanAmount || 0);
+              return formatCurrency(downPayment + 5000);
+            }))
+          ],
+          width: { size: 100, type: WidthType.PERCENTAGE }
+        }),
+
+        // Summary Section
+        new Paragraph({
+          children: [new TextRun({ text: "Product Analysis & Recommendations", size: 24, bold: true, color: "003366" })],
+          spacing: { before: 600, after: 300 }
+        }),
+
+        new Paragraph({
+          children: [new TextRun({ text: "Best Option Analysis:", size: 18, bold: true })],
+          spacing: { after: 200 }
+        }),
+
+        ...selectedScenarios.map((scenario, index) => 
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${scenario.noteBuyer || `Option ${index + 1}`}: `, size: 16, bold: true }),
+              new TextRun({ text: `${formatRate(scenario.interestRate || 0)} rate, `, size: 16 }),
+              new TextRun({ text: `${formatCurrency(scenario.monthlyPayment || 0)} monthly payment, `, size: 16 }),
+              new TextRun({ text: `DSCR: ${(scenario.dscr || 1.0).toFixed(3)}`, size: 16 })
+            ],
+            spacing: { after: 100 }
+          })
+        ),
+
+        // Footer
+        new Paragraph({
+          children: [new TextRun({ text: "www.DominionFinancialServices.com NMLS# 898795", size: 16 })],
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 400 }
+        })
+      ]
+    }]
+  });
+
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, `Note_Buyer_Comparison_Grid_${new Date().toLocaleDateString().replace(/\//g, '-')}.docx`);
+};

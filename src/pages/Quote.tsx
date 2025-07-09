@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import QuoteTracker from "@/components/QuoteTracker";
 import ScenarioGrid from "@/components/ScenarioGrid";
 import { saveQuote } from "@/services/quoteTracker";
-import { generateLoanQuote } from "@/utils/documentGenerator";
+import { generateLoanQuote, generateComparisonGrid } from "@/utils/documentGenerator";
 import { ArrowLeft, History } from "lucide-react";
 import { useScenarios, Scenario } from "@/hooks/useScenarios";
 import { useToast } from "@/hooks/use-toast";
@@ -377,30 +377,10 @@ const Quote = () => {
       let quoteData;
       
       if (editedData && editedData.selectedScenarios) {
-        // Handle multiple selected scenarios - generate comparison grid
+        // Generate comparison grid for multiple scenarios
         console.log("Generating comparison grid for selected scenarios:", editedData.selectedScenarios);
-        
-        // For now, let's generate a simple quote with the first scenario
-        // TODO: Create a proper comparison grid generator
-        const firstScenario = editedData.selectedScenarios[0];
-        quoteData = {
-          borrowerName: firstScenario.borrowerName,
-          propertyAddress: firstScenario.propertyAddress,
-          loanAmount: firstScenario.loanAmount || 0,
-          interestRate: firstScenario.interestRate || 0,
-          monthlyPayment: firstScenario.monthlyPayment || 0,
-          loanTerm: firstScenario.loanTerm || 360,
-          ltv: firstScenario.ltv || 0,
-          dscr: firstScenario.dscr || 1.0,
-          propertyType: firstScenario.propertyType || '',
-          loanPurpose: firstScenario.loanPurpose || '',
-          refinanceType: firstScenario.refinanceType || '',
-          points: firstScenario.points || 0,
-          noteBuyer: firstScenario.noteBuyer || '',
-          loanOfficer: lastSubmittedFormData.loanOfficerName || 'Gregory Clarke',
-          phoneNumber: '410-705-2277',
-          date: new Date().toLocaleDateString()
-        };
+        await generateComparisonGrid(editedData.selectedScenarios, lastSubmittedFormData);
+        return;
       } else if (editedData) {
         // Use edited data if provided
         quoteData = editedData;
