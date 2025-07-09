@@ -70,6 +70,7 @@ const LoanPassView = ({ onBack, onSubmit, isLoading, initialData }: LoanPassView
     // CONDITIONAL FIELDS
     condoApprovalType: initialData?.condoApprovalType || "",
     monthlyNOI: initialData?.monthlyNOI || "",
+    ruralPropertyLocation: initialData?.ruralPropertyLocation || "",
     hasPurchaseContract: initialData?.hasPurchaseContract || "No",
     purchaseContractCloseDate: initialData?.purchaseContractCloseDate || null,
     datePurchased: initialData?.datePurchased || null,
@@ -597,6 +598,23 @@ const LoanPassView = ({ onBack, onSubmit, isLoading, initialData }: LoanPassView
                 </SelectContent>
               </Select>
             </div>
+            
+            {formData.ruralProperty === "Yes" && (
+              <div>
+                <Label>Where is the property listed as Rural?</Label>
+                <Select value={formData.ruralPropertyLocation} onValueChange={(value) => handleInputChange('ruralPropertyLocation', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USDA">USDA</SelectItem>
+                    <SelectItem value="County">County</SelectItem>
+                    <SelectItem value="State">State</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             
             <div>
               <Label>Declining Markets</Label>
