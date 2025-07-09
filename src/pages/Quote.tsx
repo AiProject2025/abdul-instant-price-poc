@@ -457,6 +457,7 @@ const Quote = () => {
   const handleScenarioSelect = async (scenario: any) => {
     try {
       console.log("Loading scenario for editing:", scenario);
+      console.log("Current step before change:", currentStep);
       
       // Restore the form data from the selected scenario
       setFormData(scenario.form_data);
@@ -464,10 +465,16 @@ const Quote = () => {
       
       // Navigate back to the questionnaire for editing
       setCurrentStep("questionnaire");
+      console.log("Step changed to questionnaire");
+      
+      // Force a small delay to ensure state update
+      setTimeout(() => {
+        console.log("Current step after change:", currentStep);
+      }, 100);
       
       toast({
         title: "Success",
-        description: "Scenario loaded for editing"
+        description: "Scenario loaded for editing - navigate to questionnaire"
       });
     } catch (error) {
       console.error('Error loading scenario:', error);
