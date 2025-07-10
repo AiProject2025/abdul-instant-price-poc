@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface ComparisonGridPreviewProps {
   selectedScenarios: any[];
-  onGenerateDocument: () => void;
+  onGenerateDocument: (editedScenarios?: any[]) => void;
   onClose: () => void;
 }
 
@@ -315,7 +315,7 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
                 <Eye className="w-4 h-4 mr-2" />
                 Back to Results
               </Button>
-              <Button onClick={onGenerateDocument} className="bg-dominion-blue hover:bg-dominion-blue/90">
+              <Button onClick={() => onGenerateDocument(editableScenarios)} className="bg-dominion-blue hover:bg-dominion-blue/90">
                 <FileText className="w-4 h-4 mr-2" />
                 Generate Word Document
               </Button>

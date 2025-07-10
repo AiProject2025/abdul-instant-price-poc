@@ -158,7 +158,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     setShowComparisonPreview(true);
   };
 
-  const handleGenerateSelectedQuotes = async () => {
+  const handleGenerateSelectedQuotes = async (editedScenarios?: any[]) => {
     if (selectedScenarios.size === 0) {
       toast({
         title: "No scenarios selected",
@@ -168,31 +168,41 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
       return;
     }
 
+    // Use edited scenarios if provided, otherwise use original scenarios
+    const scenariosToUse = editedScenarios || Array.from(selectedScenarios).map(scenarioId => {
+      return filteredScenarios.find(s => s.id === scenarioId);
+    }).filter(Boolean);
+
     // Get the selected scenario data and generate a document with all of them
-    const selectedScenarioData = Array.from(selectedScenarios).map(scenarioId => {
-      const scenario = filteredScenarios.find(s => s.id === scenarioId);
+    const selectedScenarioData = scenariosToUse.map(scenario => {
       if (!scenario) return null;
 
       // Extract note buyer from scenario name
-      let noteBuyer = scenario.form_data.noteBuyer;
+      let noteBuyer = scenario.form_data?.noteBuyer;
       if (!noteBuyer) {
         const buyerMatch = scenario.name.match(/^([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?:\s+\d|%|$)/);
         noteBuyer = buyerMatch ? buyerMatch[1] : '';
       }
 
+      // For edited scenarios, get the best result considering edited data
+      const results = scenario.results || [];
+      const bestResult = results.length > 0 ? results.reduce((best: any, current: any) => 
+        current.rate < best.rate ? current : best
+      ) : null;
+
       return {
-        borrowerName: scenario.form_data.borrowerName || `${scenario.form_data.firstName || ''} ${scenario.form_data.lastName || ''}`.trim() || 'Borrower',
-        propertyAddress: scenario.form_data.propertyAddress || `${scenario.form_data.streetAddress || ''}, ${scenario.form_data.city || ''}, ${scenario.form_data.propertyState || ''}`.trim(),
-        loanAmount: scenario.form_data.loanAmount || 0,
-        interestRate: scenario.form_data.interestRate || 0,
-        monthlyPayment: scenario.form_data.monthlyPayment || 0,
+        borrowerName: scenario.form_data?.borrowerName || `${scenario.form_data?.firstName || ''} ${scenario.form_data?.lastName || ''}`.trim() || 'Borrower',
+        propertyAddress: scenario.form_data?.propertyAddress || `${scenario.form_data?.streetAddress || ''}, ${scenario.form_data?.city || ''}, ${scenario.form_data?.propertyState || ''}`.trim(),
+        loanAmount: scenario.form_data?.loanAmount || 0,
+        interestRate: bestResult?.rate || scenario.form_data?.interestRate || 0,
+        monthlyPayment: bestResult?.additional_data?.monthlyPayment || scenario.form_data?.monthlyPayment || 0,
         loanTerm: 360,
-        ltv: scenario.form_data.ltv || scenario.form_data.desiredLTV || 0,
-        dscr: scenario.form_data.dscr || 0,
-        propertyType: scenario.form_data.propertyType || '',
-        loanPurpose: scenario.form_data.loanPurpose || '',
-        refinanceType: scenario.form_data.refinanceType || '',
-        points: scenario.form_data.points || 0,
+        ltv: scenario.form_data?.ltv || scenario.form_data?.desiredLTV || 0,
+        dscr: scenario.form_data?.dscr || 0,
+        propertyType: scenario.form_data?.propertyType || '',
+        loanPurpose: scenario.form_data?.loanPurpose || '',
+        refinanceType: scenario.form_data?.refinanceType || '',
+        points: bestResult?.additional_data?.points || scenario.form_data?.points || 0,
         noteBuyer: noteBuyer,
         scenarioName: scenario.name
       };
@@ -203,7 +213,7 @@ const PricingResults = ({ results, flags, ineligibleBuyers = [], onGenerateLoanQ
     
     toast({
       title: "Generating client presentation",
-      description: `Creating document with ${selectedScenarios.size} selected scenarios`
+      description: `Creating document with ${scenariosToUse.length} selected scenarios`
     });
   };
 
@@ -747,7 +757,7 @@ DSCR Loan System`;
                             Preview Comparison Grid
                           </Button>
                           <Button 
-                            onClick={handleGenerateSelectedQuotes}
+                            onClick={() => handleGenerateSelectedQuotes()}
                             className="bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <FileText className="mr-2 h-4 w-4" />
