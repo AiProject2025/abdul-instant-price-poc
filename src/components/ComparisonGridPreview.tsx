@@ -65,13 +65,40 @@ const ComparisonGridPreview = ({ selectedScenarios, onGenerateDocument, onClose 
     
     // Parse numeric values
     if (['loanAmount', 'interestRate', 'monthlyPayment', 'ltv', 'dscr', 'points'].includes(field)) {
-      parsedValue = parseFloat(value) || 0;
+      parsedValue = parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
     }
     
-    updatedScenarios[scenarioIndex] = {
-      ...updatedScenarios[scenarioIndex],
-      [field]: parsedValue
-    };
+    const scenario = updatedScenarios[scenarioIndex];
+    
+    // Update form_data fields
+    if (['loanAmount', 'ltv', 'dscr', 'monthlyPayment'].includes(field)) {
+      updatedScenarios[scenarioIndex] = {
+        ...scenario,
+        form_data: {
+          ...scenario.form_data,
+          [field]: parsedValue
+        }
+      };
+    } 
+    // Update results for rate and points
+    else if (['interestRate', 'points'].includes(field)) {
+      const results = scenario.results || [];
+      if (results.length > 0) {
+        const updatedResults = results.map((result: any) => ({
+          ...result,
+          rate: field === 'interestRate' ? parsedValue : result.rate,
+          additional_data: {
+            ...result.additional_data,
+            points: field === 'points' ? parsedValue : result.additional_data?.points || 0
+          }
+        }));
+        
+        updatedScenarios[scenarioIndex] = {
+          ...scenario,
+          results: updatedResults
+        };
+      }
+    }
     
     setEditableScenarios(updatedScenarios);
   };
