@@ -122,6 +122,21 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
         console.log('Auto-populating numberOfLeasedUnits from initialData:', updatedData.numberOfUnits);
       }
       
+      // Auto-set square footage based on number of units in initial data
+      if (updatedData.numberOfUnits && !updatedData.totalSquareFeet) {
+        const units = parseInt(updatedData.numberOfUnits) || 1;
+        if (units === 1) {
+          updatedData.totalSquareFeet = '2000';
+          console.log('Setting initial square footage to 2000 for single family');
+        } else if (units >= 2 && units <= 4) {
+          updatedData.totalSquareFeet = '2800';
+          console.log('Setting initial square footage to 2800 for 2-4 units');
+        } else if (units >= 5 && units <= 10) {
+          updatedData.totalSquareFeet = '8000';
+          console.log('Setting initial square footage to 8000 for 5-10 units');
+        }
+      }
+      
       setFormState(prev => ({
         ...prev,
         ...updatedData
