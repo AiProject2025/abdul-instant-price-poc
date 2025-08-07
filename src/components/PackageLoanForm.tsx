@@ -392,6 +392,33 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  // Check for persisted data on component mount
+  useEffect(() => {
+    const storedData = localStorage.getItem('dominionDataTape');
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.loanPurpose) {
+          setLoanPurpose(parsedData.loanPurpose);
+        }
+        if (parsedData.creditScore) {
+          setCreditScore(parsedData.creditScore.toString());
+        }
+        setNumberOfProperties(parsedData.numberOfProperties.toString());
+        setProperties(parsedData.properties);
+        setShowPropertyGrid(true);
+        
+        toast({
+          title: "Data Restored",
+          description: `Restored ${parsedData.numberOfProperties} properties from previous upload`,
+        });
+      } catch (error) {
+        console.error('Error restoring data tape:', error);
+        localStorage.removeItem('dominionDataTape');
+      }
+    }
+  }, [toast]);
+
   const initializeEmptyProperties = () => {
     const count = parseInt(numberOfProperties);
     console.log("Initializing properties, count:", count, "numberOfProperties:", numberOfProperties);
@@ -847,11 +874,21 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     try {
       const parsedData = await parseDataTapeFile(file);
       
-      // Auto-populate form fields
-      setLoanPurpose(parsedData.loanPurpose);
-      setCreditScore(parsedData.creditScore.toString());
+      // Auto-populate form fields with proper mapping
+      if (parsedData.loanPurpose) {
+        setLoanPurpose(parsedData.loanPurpose);
+      }
+      if (parsedData.creditScore) {
+        setCreditScore(parsedData.creditScore.toString());
+      }
       setNumberOfProperties(parsedData.numberOfProperties.toString());
       setProperties(parsedData.properties);
+      
+      // Store parsed data in localStorage for persistence between routes
+      localStorage.setItem('dominionDataTape', JSON.stringify(parsedData));
+      
+      // Store parsed data in localStorage for persistence between routes
+      localStorage.setItem('dominionDataTape', JSON.stringify(parsedData));
       setShowPropertyGrid(true);
       
       toast({
@@ -937,41 +974,80 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
 
   return (
     <div className="max-w-full mx-auto space-y-6">
-      {/* Data Tape Upload Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Data Tape Upload</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Upload an Excel or CSV file containing your property data tape to automatically populate the form.
-            </p>
-            <div className="flex items-center gap-4">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
+      {/* Data Tape Upload Section - Only show if no data is loaded */}
+      {properties.length === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Data Tape Upload</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Upload an Excel or CSV file containing your property data tape to automatically populate the form.
+              </p>
+              <div className="flex items-center gap-4">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isProcessingFile}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {isProcessingFile ? "Processing..." : "Upload Data Tape"}
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Supports .xlsx, .xls, and .csv files
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Show data loaded status when data is already available */}
+      {properties.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Data Loaded</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {properties.length} properties loaded from data tape
+              </p>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isProcessingFile}
+                size="sm"
+                onClick={() => {
+                  localStorage.removeItem('dominionDataTape');
+                  setProperties([]);
+                  setLoanPurpose("");
+                  setCreditScore("");
+                  setNumberOfProperties("");
+                  setShowPropertyGrid(false);
+                  toast({
+                    title: "Data Cleared",
+                    description: "Upload a new data tape file to start over",
+                  });
+                }}
                 className="flex items-center gap-2"
               >
-                <Upload className="h-4 w-4" />
-                {isProcessingFile ? "Processing..." : "Upload Data Tape"}
+                <X className="h-4 w-4" />
+                Clear & Upload New
               </Button>
-              <span className="text-sm text-muted-foreground">
-                Supports .xlsx, .xls, and .csv files
-              </span>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Loan Purpose Selection */}
       <Card>

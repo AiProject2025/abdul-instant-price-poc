@@ -41,8 +41,8 @@ const columnMappings: Record<string, string[]> = {
   structureType: ['Structure Type', 'Property Type', 'Type'],
   condo: ['Condo'],
   legalNonConforming: ['Legal Non-Conforming?', 'Legal Non-Conforming', 'Non-Conforming'],
-  borrowersCreditScore: ['Borrower\'s Credit Score', 'Credit Score', 'FICO Score'],
-  purposeOfLoan: ['Purpose of the Loan', 'Loan Purpose', 'Purpose'],
+  borrowersCreditScore: ['Borrower\'s Credit Score', 'Credit Score', 'FICO Score', 'FICO'],
+  purposeOfLoan: ['Purpose of the Loan', 'Loan Purpose', 'Purpose', 'Purpose of Loan'],
   purchaseDate: ['Purchase Date'],
   purchasePrice: ['Purchase Price'],
   rehabCosts: ['Rehab Costs'],
@@ -90,10 +90,28 @@ function cleanStringValue(value: any): string {
   return value.toString().trim();
 }
 
-function parseBooleanValue(value: any): boolean {
-  if (value === null || value === undefined || value === '') return false;
+function mapYesNoValue(value: any): string {
+  if (value === null || value === undefined || value === '') return '';
   const str = value.toString().toLowerCase().trim();
-  return str === 'yes' || str === 'true' || str === '1';
+  if (str === 'yes' || str === 'true' || str === '1') return 'Yes';
+  if (str === 'no' || str === 'false' || str === '0') return 'No';
+  return '';
+}
+
+function mapCondoValue(value: any): string {
+  if (value === null || value === undefined || value === '') return '';
+  const str = value.toString().toLowerCase().trim();
+  if (str === 'yes' || str === 'true' || str === '1' || str === 'warrantable') return 'Warrantable';
+  if (str === 'no' || str === 'false' || str === '0' || str === 'non-warrantable') return 'Non-Warrantable';
+  return '';
+}
+
+function mapLoanPurposeValue(value: any): string {
+  if (value === null || value === undefined || value === '') return '';
+  const str = value.toString().toLowerCase().trim();
+  if (str.includes('purchase')) return 'purchase';
+  if (str.includes('refinance') || str.includes('refi')) return 'refinance';
+  return str; // Return as-is if no clear mapping
 }
 
 export function parseDataTapeFile(file: File): Promise<ParsedDataTape> {
@@ -145,10 +163,10 @@ export function parseDataTapeFile(file: File): Promise<ParsedDataTape> {
             fullPropertyAddress: cleanStringValue(row[fieldIndices.fullPropertyAddress]),
             countyName: cleanStringValue(row[fieldIndices.countyName]),
             structureType: cleanStringValue(row[fieldIndices.structureType]),
-            condo: parseBooleanValue(row[fieldIndices.condo]),
-            legalNonConforming: parseBooleanValue(row[fieldIndices.legalNonConforming]),
+            condo: mapCondoValue(row[fieldIndices.condo]),
+            legalNonConforming: mapYesNoValue(row[fieldIndices.legalNonConforming]),
             borrowersCreditScore: cleanNumericValue(row[fieldIndices.borrowersCreditScore]),
-            purposeOfLoan: cleanStringValue(row[fieldIndices.purposeOfLoan]),
+            purposeOfLoan: mapLoanPurposeValue(row[fieldIndices.purposeOfLoan]),
             purchaseDate: cleanStringValue(row[fieldIndices.purchaseDate]),
             purchasePrice: cleanNumericValue(row[fieldIndices.purchasePrice]),
             rehabCosts: cleanNumericValue(row[fieldIndices.rehabCosts]) || 0,
