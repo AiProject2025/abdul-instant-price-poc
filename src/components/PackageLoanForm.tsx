@@ -825,10 +825,20 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
 
       {/* Package Results */}
       {showPackageSplitter && packageSplits.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recommended Package Splits</CardTitle>
-          </CardHeader>
+         <Card>
+           <CardHeader>
+             <CardTitle className="flex items-center justify-between">
+               <span>Recommended Package Splits</span>
+               <div className="flex space-x-2">
+                 <Button onClick={runPackageAnalysis} variant="outline" size="sm">
+                   Reanalyze Package
+                 </Button>
+                 <Button onClick={() => setShowPackageSplitter(false)} variant="outline" size="sm">
+                   <X className="w-4 h-4" />
+                 </Button>
+               </div>
+             </CardTitle>
+           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {packageSplits.map((split, index) => (
