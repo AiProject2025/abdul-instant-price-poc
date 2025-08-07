@@ -1073,13 +1073,28 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                 <div className="text-center">
                   <div className="space-y-1">
                     <div className="text-lg font-bold text-purple-600">
-                      ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                      ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
                     </div>
-                    <div className="text-xs space-y-0.5">
-                      <div>Taxes: ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}</div>
-                      <div>Hazard: ${properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}</div>
-                      <div>Flood: ${properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}</div>
-                      <div>HOA: ${properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}</div>
+                    <div className="text-sm font-semibold text-purple-500">
+                      ${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                    </div>
+                    <div className="text-xs space-y-0.5 border-t pt-1">
+                      <div className="flex justify-between">
+                        <span>Taxes:</span>
+                        <span>${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Hazard:</span>
+                        <span>${properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Flood:</span>
+                        <span>${properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>HOA:</span>
+                        <span>${properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo)</span>
+                      </div>
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground">Annual Expenses</div>
@@ -1118,26 +1133,31 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                         <div className="space-y-1">
                           <div className="flex justify-between">
                             <span>Total Expenses:</span>
-                            <span className="font-semibold text-purple-600">
-                              ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
-                            </span>
+                            <div className="text-right">
+                              <div className="font-semibold text-purple-600">
+                                ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
+                              </div>
+                              <div className="text-xs text-purple-500">
+                                ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-xs space-y-0.5 ml-2">
+                          <div className="text-xs space-y-0.5 ml-2 border-t pt-1">
                             <div className="flex justify-between">
                               <span>• Taxes:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo)</span>
                             </div>
                             <div className="flex justify-between">
                               <span>• Hazard:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
                             </div>
                             <div className="flex justify-between">
                               <span>• Flood:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
                             </div>
                             <div className="flex justify-between">
                               <span>• HOA:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo)</span>
                             </div>
                           </div>
                         </div>
@@ -1243,13 +1263,16 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                        <div className="text-center">
                          <div className="space-y-1">
                            <div className="text-lg font-bold text-purple-600">
-                             ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                             ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
                            </div>
-                           <div className="text-xs space-y-0.5">
-                             <div>Taxes: ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}</div>
-                             <div>Hazard: ${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}</div>
-                             <div>Flood: ${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}</div>
-                             <div>HOA: ${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}</div>
+                           <div className="text-sm font-semibold text-purple-500">
+                             ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                           </div>
+                           <div className="text-xs space-y-0.5 border-t pt-1">
+                             <div>Taxes: ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo)</div>
+                             <div>Hazard: ${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo)</div>
+                             <div>Flood: ${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo)</div>
+                             <div>HOA: ${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo)</div>
                            </div>
                          </div>
                          <div className="text-xs text-muted-foreground">Annual Expenses</div>
