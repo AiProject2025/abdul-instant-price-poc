@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Plus, Trash2, Eye, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { parseDataTapeFile } from "@/utils/dataTapeParser";
 
 interface Property {
   id: string;
@@ -387,6 +388,8 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   const [showPackageSplitter, setShowPackageSplitter] = useState(false);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [displayedProperties, setDisplayedProperties] = useState<Property[]>([]);
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const initializeEmptyProperties = () => {
@@ -822,14 +825,99 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     }
   };
 
-  const handleSubmit = () => {
-    if (!loanPurpose) {
-      alert("Please select loan purpose");
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    
+    if (!validExtensions.includes(fileExtension)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload an Excel (.xlsx, .xls) or CSV (.csv) file.",
+        variant: "destructive"
+      });
       return;
     }
 
+    setIsProcessingFile(true);
+
+    try {
+      const parsedData = await parseDataTapeFile(file);
+      
+      // Auto-populate form fields
+      setLoanPurpose(parsedData.loanPurpose);
+      setCreditScore(parsedData.creditScore.toString());
+      setNumberOfProperties(parsedData.numberOfProperties.toString());
+      setProperties(parsedData.properties);
+      setShowPropertyGrid(true);
+      
+      toast({
+        title: "Data Tape Processed Successfully",
+        description: `Imported ${parsedData.numberOfProperties} properties from ${file.name}`,
+      });
+      
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
+    } catch (error) {
+      toast({
+        title: "Processing Error",
+        description: error instanceof Error ? error.message : "Failed to process data tape file.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingFile(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    // Validate required fields
+    const missingFields: string[] = [];
+    
+    if (!loanPurpose) {
+      missingFields.push("Loan Purpose");
+    }
+    
+    if (!creditScore) {
+      missingFields.push("Credit Score");
+    }
+
     if (properties.length === 0) {
-      alert("Please add at least one property");
+      missingFields.push("At least one property");
+    }
+
+    // Check for empty property fields
+    const incompleteProperties: string[] = [];
+    properties.forEach((property, index) => {
+      const emptyFields: string[] = [];
+      
+      if (!property.fullPropertyAddress) emptyFields.push("Address");
+      if (!property.countyName) emptyFields.push("County");
+      if (!property.structureType) emptyFields.push("Structure Type");
+      if (!property.condo) emptyFields.push("Condo");
+      if (!property.currentMarketValue) emptyFields.push("Current Market Value");
+      
+      if (emptyFields.length > 0) {
+        incompleteProperties.push(`Property ${index + 1}: ${emptyFields.join(", ")}`);
+      }
+    });
+
+    if (missingFields.length > 0 || incompleteProperties.length > 0) {
+      const allMissing = [...missingFields];
+      if (incompleteProperties.length > 0) {
+        allMissing.push(...incompleteProperties);
+      }
+      
+      toast({
+        title: "Missing Required Fields",
+        description: `Please fill in: ${allMissing.join("; ")}`,
+        variant: "destructive"
+      });
       return;
     }
 
@@ -849,6 +937,42 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
 
   return (
     <div className="max-w-full mx-auto space-y-6">
+      {/* Data Tape Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Data Tape Upload</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Upload an Excel or CSV file containing your property data tape to automatically populate the form.
+            </p>
+            <div className="flex items-center gap-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isProcessingFile}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {isProcessingFile ? "Processing..." : "Upload Data Tape"}
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Supports .xlsx, .xls, and .csv files
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Loan Purpose Selection */}
       <Card>
         <CardHeader>
