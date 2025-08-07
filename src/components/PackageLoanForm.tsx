@@ -1071,8 +1071,16 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                   <div className="text-sm text-muted-foreground">Mortgage Balance</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">
-                    ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                  <div className="space-y-1">
+                    <div className="text-lg font-bold text-purple-600">
+                      ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                    </div>
+                    <div className="text-xs space-y-0.5">
+                      <div>Taxes: ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}</div>
+                      <div>Hazard: ${properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}</div>
+                      <div>Flood: ${properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}</div>
+                      <div>HOA: ${properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}</div>
+                    </div>
                   </div>
                   <div className="text-sm text-muted-foreground">Annual Expenses</div>
                 </div>
@@ -1107,11 +1115,31 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                             ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
                           </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Expenses:</span>
-                          <span className="font-semibold text-purple-600">
-                            ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
-                          </span>
+                        <div className="space-y-1">
+                          <div className="flex justify-between">
+                            <span>Total Expenses:</span>
+                            <span className="font-semibold text-purple-600">
+                              ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="text-xs space-y-0.5 ml-2">
+                            <div className="flex justify-between">
+                              <span>• Taxes:</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>• Hazard:</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>• Flood:</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>• HOA:</span>
+                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1212,12 +1240,20 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                        </div>
                        <div className="text-xs text-muted-foreground">Mortgage Balance</div>
                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-purple-600">
-                          ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Annual Expenses</div>
-                      </div>
+                       <div className="text-center">
+                         <div className="space-y-1">
+                           <div className="text-lg font-bold text-purple-600">
+                             ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                           </div>
+                           <div className="text-xs space-y-0.5">
+                             <div>Taxes: ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}</div>
+                             <div>Hazard: ${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}</div>
+                             <div>Flood: ${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}</div>
+                             <div>HOA: ${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}</div>
+                           </div>
+                         </div>
+                         <div className="text-xs text-muted-foreground">Annual Expenses</div>
+                       </div>
                    </div>
                    
                    <div className="space-y-2 mb-3">
