@@ -926,30 +926,75 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
             <CardTitle>Portfolio Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{properties.length}</div>
-                <div className="text-sm text-muted-foreground">Properties</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  ${properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+            {/* Overall Portfolio Stats */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Overall Portfolio</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{properties.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Properties</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Total Value</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  ${properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    ${properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Value</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Mortgage Balance</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    ${properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Mortgage Balance</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Annual Taxes</div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Annual Expenses</div>
+                </div>
               </div>
             </div>
+
+            {/* Package Breakdown (if packages exist) */}
+            {packageSplits.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Package Breakdown</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {packageSplits.map((split, index) => (
+                    <div key={split.id} className={`p-4 rounded-lg border-2 ${split.color}`}>
+                      <div className="text-center mb-3">
+                        <h4 className="font-semibold text-sm">Package {index + 1}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{split.name}</p>
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        <div className="flex justify-between">
+                          <span>Properties:</span>
+                          <span className="font-semibold">{split.properties.length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Total Value:</span>
+                          <span className="font-semibold text-green-600">
+                            ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Mortgage:</span>
+                          <span className="font-semibold text-blue-600">
+                            ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Expenses:</span>
+                          <span className="font-semibold text-purple-600">
+                            ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -1043,12 +1088,12 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                        </div>
                        <div className="text-xs text-muted-foreground">Mortgage Balance</div>
                      </div>
-                     <div className="text-center">
-                       <div className="text-lg font-bold text-purple-600">
-                         ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}
-                       </div>
-                       <div className="text-xs text-muted-foreground">Annual Expenses</div>
-                     </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-purple-600">
+                          ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Annual Expenses</div>
+                      </div>
                    </div>
                    
                    <div className="space-y-2 mb-3">
