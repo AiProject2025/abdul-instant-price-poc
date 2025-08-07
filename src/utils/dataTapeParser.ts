@@ -62,11 +62,27 @@ const columnMappings: Record<string, string[]> = {
   notes: ['Notes']
 };
 
+function normalizeHeaderName(s: any): string {
+  if (s === null || s === undefined) return '';
+  return s
+    .toString()
+    .replace(/\u00A0/g, ' ') // replace non-breaking spaces
+    .toLowerCase()
+    .replace(/\s+/g, ' ') // collapse multiple spaces
+    .replace(/[^a-z0-9 ]+/g, ' ') // normalize punctuation
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function findColumnIndex(headers: string[], fieldMappings: string[]): number {
+  const normalizedHeaders = headers.map(h => normalizeHeaderName(h));
   for (const mapping of fieldMappings) {
-    const index = headers.findIndex(header => 
-      header?.toString().toLowerCase().trim() === mapping.toLowerCase().trim()
-    );
+    const nm = normalizeHeaderName(mapping);
+    // exact match first
+    let index = normalizedHeaders.findIndex(h => h === nm);
+    if (index !== -1) return index;
+    // fallback: contains match either way (helps with small header variations)
+    index = normalizedHeaders.findIndex(h => h.includes(nm) || nm.includes(h));
     if (index !== -1) return index;
   }
   return -1;
@@ -90,37 +106,55 @@ function cleanStringValue(value: any): string {
   return value.toString().trim();
 }
 
+function excelSerialToISODate(serial: number): string {
+  if (typeof serial !== 'number' || !isFinite(serial)) return '';
+  const ms = Math.round((serial - 25569) * 86400 * 1000); // Excel epoch offset
+  const date = new Date(ms);
+  if (isNaN(date.getTime())) return '';
+  // Normalize to UTC date-only string
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+    .toISOString()
+    .split('T')[0];
+}
+
 function formatDateForInput(value: any): string {
   if (value === null || value === undefined || value === '') return '';
-  
-  const dateStr = value.toString().trim();
-  
-  // Try to parse various date formats
-  try {
-    // Handle formats like "1/1/14", "5/15/13", "12/31/19"
-    if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{2,4}$/)) {
-      const [month, day, year] = dateStr.split('/');
-      // Convert 2-digit year to 4-digit (assuming 20xx for years 00-30, 19xx for 31-99)
-      const fullYear = year.length === 2 ? 
-        (parseInt(year) <= 30 ? `20${year}` : `19${year}`) : 
-        year;
-      
-      // Pad month and day with leading zeros
-      const paddedMonth = month.padStart(2, '0');
-      const paddedDay = day.padStart(2, '0');
-      
-      return `${fullYear}-${paddedMonth}-${paddedDay}`;
-    }
-    
-    // Handle other date formats
-    const date = new Date(dateStr);
-    if (!isNaN(date.getTime())) {
-      return date.toISOString().split('T')[0];
-    }
-  } catch (e) {
-    // If parsing fails, return empty string
+
+  // Handle Date objects directly
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return value.toISOString().split('T')[0];
   }
-  
+
+  // Handle Excel serial numbers
+  if (typeof value === 'number') {
+    return excelSerialToISODate(value);
+  }
+
+  const raw = value.toString().trim();
+
+  // If it's a numeric string, try as Excel serial
+  if (/^-?\d+(?:\.\d+)?$/.test(raw)) {
+    const num = parseFloat(raw);
+    const iso = excelSerialToISODate(num);
+    if (iso) return iso;
+  }
+
+  // Handle formats like "1/1/14", "5/15/13", "12/31/2019"
+  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (slashMatch) {
+    const [, m, d, y] = slashMatch;
+    const yy = y.length === 2 ? (parseInt(y) <= 30 ? `20${y}` : `19${y}`) : y;
+    const mm = m.padStart(2, '0');
+    const dd = d.padStart(2, '0');
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  // Fallback: let Date try to parse
+  const d2 = new Date(raw);
+  if (!isNaN(d2.getTime())) {
+    return d2.toISOString().split('T')[0];
+  }
+
   return '';
 }
 
