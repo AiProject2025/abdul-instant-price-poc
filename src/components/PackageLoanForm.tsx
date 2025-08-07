@@ -520,6 +520,32 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     });
   };
 
+  const validatePackageEligibility = (properties: Property[]): { isValid: boolean; issues: string[] } => {
+    const issues: string[] = [];
+    
+    // Check for properties with over 5 units
+    const highUnitProperties = properties.filter(p => (p.numberOfUnits || 0) > 5);
+    if (highUnitProperties.length > 0) {
+      issues.push(`${highUnitProperties.length} properties have more than 5 units and cannot be packaged`);
+    }
+
+    // Check for mixed warrantability in condos
+    const condos = properties.filter(p => p.structureType === "Condo");
+    if (condos.length > 1) {
+      const warrantable = condos.filter(p => p.condo !== "Non-Warrantable");
+      const nonWarrantable = condos.filter(p => p.condo === "Non-Warrantable");
+      
+      if (warrantable.length > 0 && nonWarrantable.length > 0) {
+        issues.push("Cannot mix warrantable and non-warrantable condos in the same package");
+      }
+    }
+
+    return {
+      isValid: issues.length === 0,
+      issues
+    };
+  };
+
   const analyzeProperties = (): PackageSplit[] => {
     if (properties.length === 0) return [];
     
@@ -527,20 +553,36 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     const usedPropertyIds = new Set<string>();
 
     const rules = [
+      // Rule 1: Properties with over 5 units cannot be packaged
+      {
+        name: "High Unit Count Properties (5+ Units)",
+        filter: (p: Property) => (p.numberOfUnits || 0) > 5,
+        reason: "Properties with more than 5 units cannot be included in package loans",
+        color: "bg-red-100 border-red-300",
+        priority: 1
+      },
+      // Rule 2: Rural properties need separate packaging
       {
         name: "Rural Properties",
         filter: (p: Property) => p.isRural === "yes",
         reason: "Rural properties require separate packaging due to note buyer restrictions",
-        color: "bg-orange-100 border-orange-300"
+        color: "bg-orange-100 border-orange-300",
+        priority: 2
       },
+      // Rule 3: Short-term rentals need specialized programs
       {
         name: "Short-Term Rentals",
-        filter: (p: Property) => p.strategyForProperty.toLowerCase().includes('airbnb') || p.strategyForProperty.toLowerCase().includes('short'),
+        filter: (p: Property) => 
+          p.strategyForProperty.toLowerCase().includes('airbnb') || 
+          p.strategyForProperty.toLowerCase().includes('short') ||
+          p.strategyForProperty.toLowerCase().includes('str'),
         reason: "Short-term rental properties need specialized loan programs",
-        color: "bg-blue-100 border-blue-300"
+        color: "bg-blue-100 border-blue-300",
+        priority: 3
       }
     ];
 
+    // Apply rules in priority order
     rules.forEach((rule, index) => {
       const matchingProperties = properties.filter(p => 
         !usedPropertyIds.has(p.id) && rule.filter(p)
@@ -559,24 +601,75 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       }
     });
 
+    // Handle remaining properties with condo warrantability rules
     const remainingProperties = properties.filter(p => !usedPropertyIds.has(p.id));
+    
     if (remainingProperties.length > 0) {
-      splits.push({
-        id: 'split-standard',
-        name: 'Standard Package',
-        properties: remainingProperties,
-        reason: 'Standard investment properties that can be packaged together',
-        color: 'bg-gray-100 border-gray-300'
-      });
+      // Separate warrantable and non-warrantable condos
+      const warrantableCondos = remainingProperties.filter(p => 
+        p.structureType === "Condo" && p.condo !== "Non-Warrantable"
+      );
+      
+      const nonWarrantableCondos = remainingProperties.filter(p => 
+        p.structureType === "Condo" && p.condo === "Non-Warrantable"
+      );
+      
+      const nonCondoProperties = remainingProperties.filter(p => 
+        p.structureType !== "Condo"
+      );
+
+      // If there are non-warrantable condos, they need their own package
+      if (nonWarrantableCondos.length > 0) {
+        splits.push({
+          id: 'split-non-warrantable-condos',
+          name: 'Non-Warrantable Condos Package',
+          properties: nonWarrantableCondos,
+          reason: 'Non-warrantable condos must be packaged separately unless all properties in the package are non-warrantable condos',
+          color: 'bg-yellow-100 border-yellow-300'
+        });
+      }
+
+      // Standard package for warrantable condos and non-condo properties
+      const standardPackageProperties = [...warrantableCondos, ...nonCondoProperties];
+      
+      if (standardPackageProperties.length > 0) {
+        splits.push({
+          id: 'split-standard',
+          name: 'Standard Package',
+          properties: standardPackageProperties,
+          reason: 'Standard investment properties that can be packaged together',
+          color: 'bg-gray-100 border-gray-300'
+        });
+      }
     }
 
     return splits;
   };
 
   const runPackageAnalysis = () => {
+    // First validate the properties
+    const validation = validatePackageEligibility(properties);
+    
+    if (!validation.isValid) {
+      toast({
+        title: "Package Analysis Issues",
+        description: validation.issues.join(". "),
+        variant: "destructive"
+      });
+    }
+    
+    // Run the analysis regardless to show how properties would be split
     const analysis = analyzeProperties();
     setPackageSplits(analysis);
     setShowPackageSplitter(true);
+    
+    // Show success message if valid
+    if (validation.isValid) {
+      toast({
+        title: "Package Analysis Complete",
+        description: `Properties split into ${analysis.length} compatible packages`,
+      });
+    }
   };
 
   const handleSubmit = () => {
