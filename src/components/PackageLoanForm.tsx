@@ -18,6 +18,7 @@ interface Property {
   squareFootage?: number;
   sqfType?: string;
   condo: string;
+  legalNonConforming: string;
   isRural?: string;
   borrowersCreditScore: string;
   purposeOfLoan: string;
@@ -72,14 +73,17 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
 
   return (
     <tr className="hover:bg-muted/50 border-b border-border">
-      <td className="sticky left-0 bg-background shadow-r p-2 max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap font-medium z-10">
+      {/* Sticky Address Column */}
+      <td className="sticky left-0 bg-background border-r border-border p-2 max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap font-medium z-10 shadow-md">
         <Input
           value={property.fullPropertyAddress}
           onChange={(e) => updateProperty('fullPropertyAddress', e.target.value)}
           placeholder="Enter property address"
-          className="min-w-[200px] h-8 text-sm"
+          className="min-w-[220px] h-8 text-sm"
         />
       </td>
+      
+      {/* County Name */}
       <td className="p-2">
         <Input
           value={property.countyName}
@@ -88,6 +92,8 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           className="min-w-[120px] h-8 text-sm"
         />
       </td>
+      
+      {/* Structure Type */}
       <td className="p-2">
         <Select value={property.structureType} onValueChange={(value) => updateProperty('structureType', value)}>
           <SelectTrigger className="min-w-[120px] h-8 text-sm">
@@ -101,6 +107,69 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           </SelectContent>
         </Select>
       </td>
+      
+      {/* Condo */}
+      <td className="p-2">
+        <Select value={property.condo} onValueChange={(value) => updateProperty('condo', value)}>
+          <SelectTrigger className="min-w-[80px] h-8 text-sm">
+            <SelectValue placeholder="Condo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Yes">Yes</SelectItem>
+            <SelectItem value="No">No</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Legal Non-Conforming */}
+      <td className="p-2">
+        <Select value={property.legalNonConforming} onValueChange={(value) => updateProperty('legalNonConforming', value)}>
+          <SelectTrigger className="min-w-[80px] h-8 text-sm">
+            <SelectValue placeholder="Legal" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Yes">Yes</SelectItem>
+            <SelectItem value="No">No</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Borrower's Credit Score */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.borrowersCreditScore}
+          onChange={(e) => updateProperty('borrowersCreditScore', e.target.value)}
+          placeholder="Credit"
+          className="min-w-[80px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Purpose of Loan */}
+      <td className="p-2">
+        <Select value={property.purposeOfLoan} onValueChange={(value) => updateProperty('purposeOfLoan', value)}>
+          <SelectTrigger className="min-w-[100px] h-8 text-sm">
+            <SelectValue placeholder="Purpose" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Purchase">Purchase</SelectItem>
+            <SelectItem value="Refinance">Refinance</SelectItem>
+            <SelectItem value="Cash-Out">Cash-Out</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Purchase Date */}
+      <td className="p-2">
+        <Input
+          type="date"
+          value={property.purchaseDate}
+          onChange={(e) => updateProperty('purchaseDate', e.target.value)}
+          className="min-w-[120px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Purchase Price */}
       <td className="p-2">
         <Input
           type="number"
@@ -110,6 +179,19 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           className="min-w-[120px] h-8 text-sm"
         />
       </td>
+      
+      {/* Rehab Costs */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.rehabCosts || ''}
+          onChange={(e) => updateProperty('rehabCosts', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Current Market Value */}
       <td className="p-2">
         <Input
           type="number"
@@ -119,14 +201,31 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           className="min-w-[120px] h-8 text-sm"
         />
       </td>
+      
+      {/* Existing Mortgage Balance */}
       <td className="p-2">
         <Input
-          value={property.marketRent}
-          onChange={(e) => updateProperty('marketRent', e.target.value)}
-          placeholder="$0/mo"
+          type="number"
+          value={property.existingMortgageBalance || ''}
+          onChange={(e) => updateProperty('existingMortgageBalance', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[120px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Current Mortgage Rate */}
+      <td className="p-2">
+        <Input
+          type="number"
+          step="0.01"
+          value={property.currentMortgageRate || ''}
+          onChange={(e) => updateProperty('currentMortgageRate', parseFloat(e.target.value) || 0)}
+          placeholder="0.00%"
           className="min-w-[100px] h-8 text-sm"
         />
       </td>
+      
+      {/* Current Occupancy Status */}
       <td className="p-2">
         <Select value={property.currentOccupancyStatus} onValueChange={(value) => updateProperty('currentOccupancyStatus', value)}>
           <SelectTrigger className="min-w-[100px] h-8 text-sm">
@@ -135,10 +234,130 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           <SelectContent>
             <SelectItem value="Leased">Leased</SelectItem>
             <SelectItem value="Vacant">Vacant</SelectItem>
+            <SelectItem value="MTM">MTM</SelectItem>
             <SelectItem value="Owner Occupied">Owner Occupied</SelectItem>
           </SelectContent>
         </Select>
       </td>
+      
+      {/* Market Rent */}
+      <td className="p-2">
+        <Input
+          value={property.marketRent}
+          onChange={(e) => updateProperty('marketRent', e.target.value)}
+          placeholder="$0/mo"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Current Lease Amount */}
+      <td className="p-2">
+        <Input
+          value={property.currentLeaseAmount}
+          onChange={(e) => updateProperty('currentLeaseAmount', e.target.value)}
+          placeholder="$0/mo"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual Property Taxes */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualPropertyTaxes || ''}
+          onChange={(e) => updateProperty('annualPropertyTaxes', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual Hazard Insurance */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualHazardInsurance || ''}
+          onChange={(e) => updateProperty('annualHazardInsurance', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual Flood Insurance */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualFloodInsurance || ''}
+          onChange={(e) => updateProperty('annualFloodInsurance', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual HOA Fees */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualHomeOwnersAssociation || ''}
+          onChange={(e) => updateProperty('annualHomeOwnersAssociation', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Current Condition */}
+      <td className="p-2">
+        <Select value={property.currentCondition} onValueChange={(value) => updateProperty('currentCondition', value)}>
+          <SelectTrigger className="min-w-[100px] h-8 text-sm">
+            <SelectValue placeholder="Condition" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="New">New</SelectItem>
+            <SelectItem value="Excellent">Excellent</SelectItem>
+            <SelectItem value="Good">Good</SelectItem>
+            <SelectItem value="Average">Average</SelectItem>
+            <SelectItem value="Fair">Fair</SelectItem>
+            <SelectItem value="Poor">Poor</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Strategy for Property */}
+      <td className="p-2">
+        <Select value={property.strategyForProperty} onValueChange={(value) => updateProperty('strategyForProperty', value)}>
+          <SelectTrigger className="min-w-[120px] h-8 text-sm">
+            <SelectValue placeholder="Strategy" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Rent and Hold">Rent and Hold</SelectItem>
+            <SelectItem value="Rent and hold">Rent and hold</SelectItem>
+            <SelectItem value="Fix and Flip">Fix and Flip</SelectItem>
+            <SelectItem value="Buy and Hold">Buy and Hold</SelectItem>
+            <SelectItem value="Short-term Rental">Short-term Rental</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Entity Name */}
+      <td className="p-2">
+        <Input
+          value={property.entityName}
+          onChange={(e) => updateProperty('entityName', e.target.value)}
+          placeholder="Entity"
+          className="min-w-[120px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Notes */}
+      <td className="p-2">
+        <Input
+          value={property.notes}
+          onChange={(e) => updateProperty('notes', e.target.value)}
+          placeholder="Notes"
+          className="min-w-[150px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Actions */}
       <td className="p-2 text-center">
         <Button
           variant="outline"
@@ -177,6 +396,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         countyName: "",
         structureType: "",
         condo: "",
+        legalNonConforming: "",
         borrowersCreditScore: "",
         purposeOfLoan: loanPurpose,
         purchaseDate: "",
@@ -209,6 +429,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       countyName: "",
       structureType: "",
       condo: "",
+      legalNonConforming: "",
       borrowersCreditScore: "",
       purposeOfLoan: loanPurpose,
       purchaseDate: "",
@@ -240,6 +461,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         countyName: "Harris County",
         structureType: "Single Family",
         condo: "No",
+        legalNonConforming: "Yes",
         isRural: "no",
         borrowersCreditScore: "740",
         purposeOfLoan: "Purchase",
@@ -267,6 +489,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         countyName: "Dallas County",
         structureType: "Townhome",
         condo: "No",
+        legalNonConforming: "No",
         isRural: "no",
         borrowersCreditScore: "720",
         purposeOfLoan: "Refinance",
@@ -554,13 +777,30 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
               <table className="w-full min-w-[1200px] border-collapse">
                 <thead className="bg-muted sticky top-0 z-10">
                   <tr>
-                    <th className="sticky left-0 bg-muted p-3 text-left font-medium shadow-r z-20">Address</th>
+                    <th className="sticky left-0 bg-muted border-r border-border p-3 text-left font-medium z-20 shadow-md">Address</th>
                     <th className="p-3 text-left font-medium">County</th>
-                    <th className="p-3 text-left font-medium">Type</th>
+                    <th className="p-3 text-left font-medium">Structure Type</th>
+                    <th className="p-3 text-left font-medium">Condo</th>
+                    <th className="p-3 text-left font-medium">Legal Non-Conforming</th>
+                    <th className="p-3 text-left font-medium">Credit Score</th>
+                    <th className="p-3 text-left font-medium">Purpose</th>
+                    <th className="p-3 text-left font-medium">Purchase Date</th>
                     <th className="p-3 text-left font-medium">Purchase Price</th>
+                    <th className="p-3 text-left font-medium">Rehab Costs</th>
                     <th className="p-3 text-left font-medium">Current Value</th>
-                    <th className="p-3 text-left font-medium">Market Rent</th>
+                    <th className="p-3 text-left font-medium">Mortgage Balance</th>
+                    <th className="p-3 text-left font-medium">Mortgage Rate</th>
                     <th className="p-3 text-left font-medium">Occupancy</th>
+                    <th className="p-3 text-left font-medium">Market Rent</th>
+                    <th className="p-3 text-left font-medium">Lease Amount</th>
+                    <th className="p-3 text-left font-medium">Property Taxes</th>
+                    <th className="p-3 text-left font-medium">Hazard Insurance</th>
+                    <th className="p-3 text-left font-medium">Flood Insurance</th>
+                    <th className="p-3 text-left font-medium">HOA Fees</th>
+                    <th className="p-3 text-left font-medium">Condition</th>
+                    <th className="p-3 text-left font-medium">Strategy</th>
+                    <th className="p-3 text-left font-medium">Entity Name</th>
+                    <th className="p-3 text-left font-medium">Notes</th>
                     <th className="p-3 text-center font-medium">Actions</th>
                   </tr>
                 </thead>
