@@ -385,6 +385,8 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   const [showPropertyGrid, setShowPropertyGrid] = useState(false);
   const [packageSplits, setPackageSplits] = useState<PackageSplit[]>([]);
   const [showPackageSplitter, setShowPackageSplitter] = useState(false);
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+  const [displayedProperties, setDisplayedProperties] = useState<Property[]>([]);
   const { toast } = useToast();
 
   const initializeEmptyProperties = () => {
@@ -782,6 +784,44 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     }
   };
 
+  const deletePackage = (packageId: string) => {
+    setPackageSplits(packageSplits.filter(split => split.id !== packageId));
+    if (selectedPackageId === packageId) {
+      setSelectedPackageId(null);
+      setDisplayedProperties([]);
+    }
+    toast({
+      title: "Package Deleted",
+      description: "Package removed from analysis results",
+    });
+  };
+
+  const viewPackage = (packageId: string) => {
+    const selectedPackage = packageSplits.find(split => split.id === packageId);
+    if (selectedPackage) {
+      setSelectedPackageId(packageId);
+      setDisplayedProperties(selectedPackage.properties);
+      toast({
+        title: "Package Selected",
+        description: `Viewing ${selectedPackage.properties.length} properties in data tape`,
+      });
+    }
+  };
+
+  const submitPackage = (packageId: string) => {
+    const selectedPackage = packageSplits.find(split => split.id === packageId);
+    if (selectedPackage) {
+      const packageData = {
+        loanPurpose,
+        properties: selectedPackage.properties,
+        packageType: "package-split",
+        packageName: selectedPackage.name,
+        creditScore
+      };
+      onSubmit(packageData);
+    }
+  };
+
   const handleSubmit = () => {
     if (!loanPurpose) {
       alert("Please select loan purpose");
@@ -950,39 +990,110 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
              </CardTitle>
            </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {packageSplits.map((split, index) => (
-                <div key={split.id} className={`p-4 rounded-lg border-2 ${split.color}`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-semibold text-lg">Package {index + 1}: {split.name}</h3>
-                      <p className="text-sm text-muted-foreground">{split.reason}</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold">{split.properties.length}</div>
-                      <div className="text-xs text-muted-foreground">Properties</div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    {split.properties.map((property) => (
-                      <div key={property.id} className="text-sm bg-white/50 p-2 rounded border">
-                        <div className="font-medium">{property.fullPropertyAddress || "Address not entered"}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+             <div className="space-y-4">
+               {packageSplits.map((split, index) => (
+                 <div key={split.id} className={`p-4 rounded-lg border-2 ${split.color} ${selectedPackageId === split.id ? 'ring-2 ring-primary' : ''}`}>
+                   <div className="flex justify-between items-start mb-3">
+                     <div className="flex items-center space-x-3">
+                       <Checkbox 
+                         checked={selectedPackageId === split.id}
+                         onCheckedChange={() => selectedPackageId === split.id ? setSelectedPackageId(null) : viewPackage(split.id)}
+                       />
+                       <div>
+                         <h3 className="font-semibold text-lg">Package {index + 1}: {split.name}</h3>
+                         <p className="text-sm text-muted-foreground">{split.reason}</p>
+                       </div>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <div className="text-right mr-4">
+                         <div className="text-2xl font-bold">{split.properties.length}</div>
+                         <div className="text-xs text-muted-foreground">Properties</div>
+                       </div>
+                       <Button
+                         onClick={() => viewPackage(split.id)}
+                         variant="outline"
+                         size="sm"
+                         className="bg-white hover:bg-gray-50"
+                       >
+                         <Eye className="w-4 h-4 mr-1" />
+                         View
+                       </Button>
+                       <Button
+                         onClick={() => deletePackage(split.id)}
+                         variant="outline"
+                         size="sm"
+                         className="bg-white hover:bg-red-50 text-red-600 border-red-200 hover:border-red-300"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
+                     </div>
+                   </div>
+                   
+                   {/* Package Summary Statistics */}
+                   <div className="grid grid-cols-3 gap-4 mb-3 p-3 bg-white/70 rounded">
+                     <div className="text-center">
+                       <div className="text-lg font-bold text-green-600">
+                         ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                       </div>
+                       <div className="text-xs text-muted-foreground">Total Value</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg font-bold text-blue-600">
+                         ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                       </div>
+                       <div className="text-xs text-muted-foreground">Mortgage Balance</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg font-bold text-purple-600">
+                         ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}
+                       </div>
+                       <div className="text-xs text-muted-foreground">Annual Expenses</div>
+                     </div>
+                   </div>
+                   
+                   <div className="space-y-2 mb-3">
+                     {split.properties.map((property) => (
+                       <div key={property.id} className="text-sm bg-white/50 p-2 rounded border">
+                         <div className="font-medium">{property.fullPropertyAddress || "Address not entered"}</div>
+                         <div className="text-xs text-muted-foreground">
+                           {property.structureType} • {property.countyName}
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                   
+                   <div className="flex justify-end">
+                     <Button
+                       onClick={() => submitPackage(split.id)}
+                       className="bg-primary hover:bg-primary/90"
+                       disabled={isLoading}
+                     >
+                       Submit for Pricing
+                     </Button>
+                   </div>
+                 </div>
+               ))}
+             </div>
           </CardContent>
         </Card>
       )}
 
       {/* Property Grid */}
-      {showPropertyGrid && properties.length > 0 && (
+      {showPropertyGrid && (selectedPackageId ? displayedProperties.length > 0 : properties.length > 0) && (
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <div className="bg-primary text-primary-foreground p-6 text-center">
-            <h2 className="text-2xl font-semibold mb-2">Property Portfolio Overview</h2>
-            <p className="opacity-90">Manage all {properties.length} properties</p>
+            <h2 className="text-2xl font-semibold mb-2">
+              {selectedPackageId 
+                ? `${packageSplits.find(p => p.id === selectedPackageId)?.name || 'Package'} Properties` 
+                : 'Property Portfolio Overview'
+              }
+            </h2>
+            <p className="opacity-90">
+              {selectedPackageId 
+                ? `Viewing ${displayedProperties.length} properties in selected package`
+                : `Manage all ${properties.length} properties`
+              }
+            </p>
           </div>
           
           <div className="overflow-auto max-h-[600px]">
@@ -1017,34 +1128,55 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                     <th className="p-3 text-center font-medium">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {properties.map((property, index) => (
-                    <PropertyTableRow 
-                      key={property.id} 
-                      property={property} 
-                      index={index} 
-                      onUpdate={handlePropertiesChange} 
-                      properties={properties} 
-                    />
-                  ))}
-                </tbody>
+                 <tbody>
+                   {(selectedPackageId ? displayedProperties : properties).map((property, index) => (
+                     <PropertyTableRow 
+                       key={property.id} 
+                       property={property} 
+                       index={index} 
+                       onUpdate={selectedPackageId ? (updatedProps) => {
+                         // When viewing a package, update both displayedProperties and the main properties array
+                         setDisplayedProperties(updatedProps);
+                         const updatedMainProperties = properties.map(p => {
+                           const updatedProp = updatedProps.find(up => up.id === p.id);
+                           return updatedProp || p;
+                         });
+                         setProperties(updatedMainProperties);
+                       } : handlePropertiesChange} 
+                       properties={selectedPackageId ? displayedProperties : properties} 
+                     />
+                   ))}
+                 </tbody>
               </table>
             </div>
           </div>
           
-          <div className="flex justify-between items-center p-6 border-t bg-gray-50">
-            <div className="flex gap-4">
-              <Button variant="outline" onClick={addEmptyProperty}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Property
-              </Button>
-              <Button variant="secondary" onClick={generateTestData}>
-                Generate Test Data
-              </Button>
-              <div className="text-sm text-muted-foreground flex items-center">
-                Total Properties: <span className="font-semibold ml-1">{properties.length}</span>
-              </div>
-            </div>
+           <div className="flex justify-between items-center p-6 border-t bg-gray-50">
+             <div className="flex gap-4">
+               <Button variant="outline" onClick={addEmptyProperty}>
+                 <Plus className="w-4 h-4 mr-2" />
+                 Add Property
+               </Button>
+               <Button variant="secondary" onClick={generateTestData}>
+                 Generate Test Data
+               </Button>
+               {selectedPackageId && (
+                 <Button 
+                   variant="outline" 
+                   onClick={() => {
+                     setSelectedPackageId(null);
+                     setDisplayedProperties([]);
+                   }}
+                 >
+                   Show All Properties
+                 </Button>
+               )}
+               <div className="text-sm text-muted-foreground flex items-center">
+                 Total Properties: <span className="font-semibold ml-1">
+                   {selectedPackageId ? displayedProperties.length : properties.length}
+                 </span>
+               </div>
+             </div>
             
             <Button onClick={handleSubmit} disabled={isLoading} className="bg-primary hover:bg-primary/90">
               {isLoading ? "Processing..." : "Get Package Loan Quote"}
