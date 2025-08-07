@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ClientSearch from "./ClientSearch";
 import { ClientWithProperties } from "@/hooks/useClients";
 
@@ -9,15 +10,19 @@ interface QuestionnaireUploadProps {
   onFileUpload: (file: File) => void;
   onManualEntry: () => void;
   onClientSelect?: (client: ClientWithProperties) => void;
+  onDataTapeUpload: (file: File) => void;
   isLoading: boolean;
 }
 const QuestionnaireUpload = ({
   onFileUpload,
   onManualEntry,
   onClientSelect,
+  onDataTapeUpload,
   isLoading
 }: QuestionnaireUploadProps) => {
   const [dragActive, setDragActive] = useState(false);
+  const [dataTapeDragActive, setDataTapeDragActive] = useState(false);
+  const navigate = useNavigate();
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -38,6 +43,33 @@ const QuestionnaireUpload = ({
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       onFileUpload(e.target.files[0]);
+    }
+  };
+
+  const handleDataTapeDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDataTapeDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDataTapeDragActive(false);
+    }
+  }, []);
+
+  const handleDataTapeDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDataTapeDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      onDataTapeUpload(e.dataTransfer.files[0]);
+      navigate('/package-loan');
+    }
+  }, [onDataTapeUpload, navigate]);
+
+  const handleDataTapeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      onDataTapeUpload(e.target.files[0]);
+      navigate('/package-loan');
     }
   };
   if (isLoading) {
@@ -106,23 +138,26 @@ const QuestionnaireUpload = ({
         </Card>
 
         {/* Upload Data Tape Option */}
-        <Card className="relative opacity-75">
+        <Card className="relative">
           <CardHeader className="text-center">
-            <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <CardTitle className="text-gray-600">Upload Data Tape <span className="text-sm font-normal">(Coming Soon)</span></CardTitle>
+            <Upload className="h-12 w-12 text-dominion-blue mx-auto mb-4" />
+            <CardTitle className="text-dominion-blue">Upload Data Tape</CardTitle>
             <CardDescription>
               Upload your data tape for batch processing multiple properties
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center bg-gray-50">
-              <FileText className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400 mb-2">
-                Data tape upload functionality coming soon
-              </p>
-              <p className="text-xs text-gray-300">
-                Will support CSV, XLS, XLSX files
-              </p>
+            <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dataTapeDragActive ? "border-dominion-blue bg-blue-50" : "border-gray-300 hover:border-dominion-blue hover:bg-gray-50"}`} onDragEnter={handleDataTapeDrag} onDragLeave={handleDataTapeDrag} onDragOver={handleDataTapeDrag} onDrop={handleDataTapeDrop}>
+              <input type="file" id="data-tape-upload" className="hidden" accept=".csv,.xls,.xlsx" onChange={handleDataTapeInput} />
+              <label htmlFor="data-tape-upload" className="cursor-pointer">
+                <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600 mb-2">
+                  Drop your data tape here or <span className="text-dominion-blue font-medium">browse</span>
+                </p>
+                <p className="text-xs text-gray-400">
+                  Supports CSV, XLS, XLSX files
+                </p>
+              </label>
             </div>
           </CardContent>
         </Card>

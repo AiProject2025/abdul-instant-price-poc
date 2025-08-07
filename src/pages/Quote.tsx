@@ -606,6 +606,9 @@ const Quote = () => {
               <QuestionnaireUpload
                 onFileUpload={handleFileUpload}
                 onManualEntry={handleManualEntry}
+                onDataTapeUpload={(file) => {
+                  console.log('Data tape uploaded:', file);
+                }}
                 onClientSelect={(client) => {
                   console.log('Client selected:', client);
                   // Pre-populate form with client data
