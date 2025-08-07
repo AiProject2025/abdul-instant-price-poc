@@ -53,7 +53,7 @@ const columnMappings: Record<string, string[]> = {
   marketRent: ['Market Rent'],
   currentLeaseAmount: ['Current Lease Amount', 'Lease Amount'],
   annualPropertyTaxes: ['Annual Property Taxes', 'Property Taxes'],
-  annualHazardInsurance: ['Annual Hazard Insurance Premium', 'Hazard Insurance', 'Insurance'],
+  annualHazardInsurance: ['Annual Hazard  Insurance Premium', 'Hazard Insurance', 'Insurance'],
   annualFloodInsurance: ['Annual Flood Insurance Premium', 'Flood Insurance'],
   annualHOAFees: ['Annual Home Owner\'s Association Fees', 'HOA Fees', 'HOA'],
   currentCondition: ['Current Condition', 'Condition'],
