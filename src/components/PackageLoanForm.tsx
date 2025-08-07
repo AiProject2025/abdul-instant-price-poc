@@ -72,7 +72,7 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
 
   return (
     <tr className="hover:bg-muted/50 border-b border-border">
-      <td className="sticky left-0 bg-background shadow-r p-2 max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap font-medium z-1">
+      <td className="sticky left-0 bg-background shadow-r p-2 max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap font-medium z-10">
         <Input
           value={property.fullPropertyAddress}
           onChange={(e) => updateProperty('fullPropertyAddress', e.target.value)}
@@ -549,35 +549,37 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
             <p className="opacity-90">Manage all {properties.length} properties</p>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1200px] border-collapse">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="sticky left-0 bg-muted p-3 text-left font-medium">Address</th>
-                  <th className="p-3 text-left font-medium">County</th>
-                  <th className="p-3 text-left font-medium">Type</th>
-                  <th className="p-3 text-left font-medium">Purchase Price</th>
-                  <th className="p-3 text-left font-medium">Current Value</th>
-                  <th className="p-3 text-left font-medium">Market Rent</th>
-                  <th className="p-3 text-left font-medium">Occupancy</th>
-                  <th className="p-3 text-center font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {properties.map((property, index) => (
-                  <PropertyTableRow 
-                    key={property.id} 
-                    property={property} 
-                    index={index} 
-                    onUpdate={handlePropertiesChange} 
-                    properties={properties} 
-                  />
-                ))}
-              </tbody>
-            </table>
+          <div className="overflow-auto max-h-[600px]">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1200px] border-collapse">
+                <thead className="bg-muted sticky top-0 z-10">
+                  <tr>
+                    <th className="sticky left-0 bg-muted p-3 text-left font-medium shadow-r z-20">Address</th>
+                    <th className="p-3 text-left font-medium">County</th>
+                    <th className="p-3 text-left font-medium">Type</th>
+                    <th className="p-3 text-left font-medium">Purchase Price</th>
+                    <th className="p-3 text-left font-medium">Current Value</th>
+                    <th className="p-3 text-left font-medium">Market Rent</th>
+                    <th className="p-3 text-left font-medium">Occupancy</th>
+                    <th className="p-3 text-center font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {properties.map((property, index) => (
+                    <PropertyTableRow 
+                      key={property.id} 
+                      property={property} 
+                      index={index} 
+                      onUpdate={handlePropertiesChange} 
+                      properties={properties} 
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           
-          <div className="flex justify-between items-center p-6 border-t">
+          <div className="flex justify-between items-center p-6 border-t bg-gray-50">
             <div className="flex gap-4">
               <Button variant="outline" onClick={addEmptyProperty}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -586,6 +588,9 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
               <Button variant="secondary" onClick={generateTestData}>
                 Generate Test Data
               </Button>
+              <div className="text-sm text-muted-foreground flex items-center">
+                Total Properties: <span className="font-semibold ml-1">{properties.length}</span>
+              </div>
             </div>
             
             <Button onClick={handleSubmit} disabled={isLoading} className="bg-primary hover:bg-primary/90">
