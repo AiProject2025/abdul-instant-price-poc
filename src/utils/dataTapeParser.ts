@@ -90,6 +90,40 @@ function cleanStringValue(value: any): string {
   return value.toString().trim();
 }
 
+function formatDateForInput(value: any): string {
+  if (value === null || value === undefined || value === '') return '';
+  
+  const dateStr = value.toString().trim();
+  
+  // Try to parse various date formats
+  try {
+    // Handle formats like "1/1/14", "5/15/13", "12/31/19"
+    if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{2,4}$/)) {
+      const [month, day, year] = dateStr.split('/');
+      // Convert 2-digit year to 4-digit (assuming 20xx for years 00-30, 19xx for 31-99)
+      const fullYear = year.length === 2 ? 
+        (parseInt(year) <= 30 ? `20${year}` : `19${year}`) : 
+        year;
+      
+      // Pad month and day with leading zeros
+      const paddedMonth = month.padStart(2, '0');
+      const paddedDay = day.padStart(2, '0');
+      
+      return `${fullYear}-${paddedMonth}-${paddedDay}`;
+    }
+    
+    // Handle other date formats
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+  } catch (e) {
+    // If parsing fails, return empty string
+  }
+  
+  return '';
+}
+
 function mapYesNoValue(value: any): string {
   if (value === null || value === undefined || value === '') return '';
   const str = value.toString().toLowerCase().trim();
@@ -101,16 +135,17 @@ function mapYesNoValue(value: any): string {
 function mapCondoValue(value: any): string {
   if (value === null || value === undefined || value === '') return '';
   const str = value.toString().toLowerCase().trim();
-  if (str === 'yes' || str === 'true' || str === '1' || str === 'warrantable') return 'Warrantable';
-  if (str === 'no' || str === 'false' || str === '0' || str === 'non-warrantable') return 'Non-Warrantable';
+  if (str === 'yes' || str === 'true' || str === '1' || str === 'warrantable') return 'Yes';
+  if (str === 'no' || str === 'false' || str === '0' || str === 'non-warrantable') return 'No';
   return '';
 }
 
 function mapLoanPurposeValue(value: any): string {
   if (value === null || value === undefined || value === '') return '';
   const str = value.toString().toLowerCase().trim();
-  if (str.includes('purchase')) return 'purchase';
-  if (str.includes('refinance') || str.includes('refi')) return 'refinance';
+  if (str.includes('purchase')) return 'Purchase';
+  if (str.includes('refinance') || str.includes('refi')) return 'Refinance';
+  if (str.includes('cash-out') || str.includes('cashout')) return 'Cash-Out';
   return str; // Return as-is if no clear mapping
 }
 
@@ -155,8 +190,8 @@ export function parseDataTapeFile(file: File): Promise<ParsedDataTape> {
         let commonCreditScore = 0;
         
         rows.forEach((row: any[], index) => {
-          // Skip empty rows
-          if (!row || row.every(cell => !cell)) return;
+          // Skip empty rows and the first row (example data)
+          if (!row || row.every(cell => !cell) || index === 0) return;
           
           const property: any = {
             id: `datatape-${index}`,
@@ -167,7 +202,7 @@ export function parseDataTapeFile(file: File): Promise<ParsedDataTape> {
             legalNonConforming: mapYesNoValue(row[fieldIndices.legalNonConforming]),
             borrowersCreditScore: cleanNumericValue(row[fieldIndices.borrowersCreditScore]),
             purposeOfLoan: mapLoanPurposeValue(row[fieldIndices.purposeOfLoan]),
-            purchaseDate: cleanStringValue(row[fieldIndices.purchaseDate]),
+            purchaseDate: formatDateForInput(row[fieldIndices.purchaseDate]),
             purchasePrice: cleanNumericValue(row[fieldIndices.purchasePrice]),
             rehabCosts: cleanNumericValue(row[fieldIndices.rehabCosts]) || 0,
             currentMarketValue: cleanNumericValue(row[fieldIndices.currentMarketValue]),
