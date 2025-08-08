@@ -31,7 +31,7 @@ const Quote = () => {
   const transformApiResponseToResults = (apiResponse: any) => {
     // Handle the new response structure where quotes are under the 'quotes' key
     const quotesData = apiResponse.quotes || apiResponse;
-    
+
     const results = Object.entries(quotesData)
       .filter(([noteBuyer, data]: [string, any]) => {
         // Only include buyers that have pricing data and empty flags
@@ -40,10 +40,10 @@ const Quote = () => {
       .map(([noteBuyer, data]: [string, any]) => {
         // Debug logging
         console.log('🔍 Processing result for noteBuyer:', noteBuyer, 'data:', data);
-        
+
         // Determine loan purpose
         const loanPurpose = data.loan_purpose === 'refinance' ? 'Refinance' : 'Purchase';
-        
+
         // Determine refinance type if applicable - check the form data since API doesn't return it
         let refinanceType;
         if (data.loan_purpose === 'refinance' && lastSubmittedFormData?.refinanceType) {
@@ -68,7 +68,7 @@ const Quote = () => {
           rateLockDays: data.rate_lock_period_days,
           isLocked: false
         };
-        
+
         console.log('✅ Final result object:', resultObj);
         return resultObj;
       });
@@ -79,7 +79,7 @@ const Quote = () => {
 
   const getIneligibleBuyers = (apiResponse: any) => {
     const quotesData = apiResponse.quotes || {};
-    
+
     return Object.entries(quotesData)
       .filter(([noteBuyer, data]: [string, any]) => {
         // Include buyers that have flags (rejection reasons)
@@ -109,12 +109,12 @@ const Quote = () => {
     const calculateTotalRental = () => {
       const units = parseInt(formData.numberOfUnits) || 0;
       let total = 0;
-      
+
       for (let i = 1; i <= units; i++) {
         const rent = parseFloat(formData[`unit${i}Rent`]) || 0;
         total += rent;
       }
-      
+
       return total.toString();
     };
 
@@ -139,21 +139,21 @@ const Quote = () => {
       yourCompany: formData.yourCompany?.toLowerCase() || '',
       usCitizen: normalizeTextValue(formData.usCitizen),
       borrower_type: normalizeTextValue(formData.closingType),
-      
+
       // Subject Property Address (text fields to lowercase)
       address: formData.streetAddress?.toLowerCase() || '',
       city: formData.city?.toLowerCase() || '',
       state: formData.propertyState?.toLowerCase() || '', // This will already be the abbreviation
       zip_code: formData.zipCode || '',
       county: formData.propertyCounty?.toLowerCase() || '',
-      
+
       // Loan Purpose (normalize dropdown values)
       loan_purpose: normalizeTextValue(formData.loanPurpose),
-      
+
       // Cross Collateral Information
       cross_collateral_loan: normalizeTextValue(formData.crossCollateralLoan),
       number_of_properties: normalizeNumericValue(formData.numberOfProperties),
-      
+
       // Property Details (normalize dropdown values)
       property_type: normalizeTextValue(formData.propertyType),
       property_condition: normalizeTextValue(formData.propertyCondition),
@@ -164,27 +164,27 @@ const Quote = () => {
       number_of_leased_units: normalizeNumericValue(formData.numberOfLeasedUnits),
       has_vacant_units: normalizeTextValue(formData.hasVacantUnits),
       number_of_vacant_units: normalizeNumericValue(formData.numberOfVacantUnits),
-      
+
       // Loan Details
       desired_ltv: normalizeNumericValue(formData.desiredLTV),
       desired_closing_date: formData.desiredClosingDate || '',
       interest_reserves: normalizeTextValue(formData.interestReserves),
-      
+
       // Calculated Rental Income
       market_rent: calculateTotalRental(),
-      
+
       // Property Details
       total_square_feet: normalizeNumericValue(formData.totalSquareFeet),
-      
+
       // Annual Property Expenses (numeric values)
       annual_taxes: normalizeNumericValue(formData.annualTaxes),
       annual_insurance: normalizeNumericValue(formData.annualInsurance),
       annual_association_fees: normalizeNumericValue(formData.annualAssociationFees),
       annual_flood_insurance: normalizeNumericValue(formData.annualFloodInsurance),
-      
+
       // Final Details
       decision_credit_score: normalizeNumericValue(formData.creditScore),
-      
+
       // Rehab Cost
       rehab_cost: calculateRehabCost()
     };
@@ -241,14 +241,14 @@ const Quote = () => {
   const handleFileUpload = async (file: File) => {
     setUploadedFile(file);
     setIsProcessing(true);
-    
+
     try {
       console.log('Uploading file for data extraction:', file.name);
-      
+
       // Create FormData to send the file
       const formData = new FormData();
       formData.append('file', file);
-      
+
       // Call your document extraction API with production URL
       const response = await fetch('https://n8n-prod.onrender.com/webhook/2165eeb2-1590-43d2-8383-efee85dd15d6/instant-pricing/data-extraction', {
         method: 'POST',
@@ -261,7 +261,7 @@ const Quote = () => {
 
       const extractionResult = await response.json();
       console.log('Document extraction result:', extractionResult);
-      
+
       setExtractedData(extractionResult);
       setCurrentStep("questionnaire");
       setIsProcessing(false);
@@ -280,6 +280,85 @@ const Quote = () => {
     setCurrentStep("questionnaire");
   };
 
+  const handleDataTapeUpload = async (file: File) => {
+    setIsProcessing(true);
+
+    try {
+      console.log('Processing data tape file:', file.name);
+
+      // Import the data tape parser
+      const { parseDataTapeFile } = await import('@/utils/dataTapeParser');
+      const parsedData = await parseDataTapeFile(file);
+
+      console.log('Parsed data tape:', parsedData);
+
+      // For single quotes, use the first property from the data tape
+      if (parsedData.properties && parsedData.properties.length > 0) {
+        const firstProperty = parsedData.properties[0];
+
+        // Map the data tape fields to DSCR form fields
+        const mappedFormData = {
+          // Basic info from data tape
+          loanPurpose: parsedData.loanPurpose || firstProperty.purposeOfLoan || '',
+          creditScore: parsedData.creditScore || firstProperty.borrowersCreditScore || '',
+
+          // Property address (parse from fullPropertyAddress)
+          streetAddress: firstProperty.fullPropertyAddress || '',
+          propertyCounty: firstProperty.countyName || '',
+
+          // Property details
+          propertyType: firstProperty.structureType || '',
+          propertyCondition: firstProperty.currentCondition || 'C3',
+
+          // Purchase/refinance details
+          datePurchased: firstProperty.purchaseDate || '',
+          purchasePrice: firstProperty.purchasePrice || '',
+          marketValue: firstProperty.currentMarketValue || '',
+
+          // Existing mortgage
+          mortgagePayoff: firstProperty.existingMortgageBalance || '',
+
+          // Rehab costs
+          rehabCostSpent: firstProperty.rehabCosts || '',
+
+          // Rental income
+          unit1Rent: firstProperty.marketRent || firstProperty.currentLeaseAmount || '',
+
+          // Annual expenses - Map data tape fields to form fields
+          annualTaxes: firstProperty.annualPropertyTaxes || '',
+          annualInsurance: firstProperty.annualHazardInsurance || '', // Map annualHazardInsurance -> annualInsurance
+          annualAssociationFees: firstProperty.annualHOAFees || '', // Map annualHOAFees -> annualAssociationFees
+          annualFloodInsurance: firstProperty.annualFloodInsurance || '',
+
+          // Property status
+          currentOccupancyStatus: firstProperty.currentOccupancyStatus || '',
+
+          // Entity
+          yourCompany: firstProperty.entityName || '',
+
+          // Notes can go in a general field if available
+          // notes: firstProperty.notes || '',
+        };
+
+        console.log('Mapped form data from data tape:', mappedFormData);
+
+        setExtractedData(mappedFormData);
+        setLastSubmittedFormData(mappedFormData);
+        setCurrentStep("questionnaire");
+      } else {
+        throw new Error('No properties found in data tape file');
+      }
+
+    } catch (error) {
+      console.error('Error processing data tape file:', error);
+      // Still allow user to proceed manually if data tape fails
+      setExtractedData(null);
+      setCurrentStep("questionnaire");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleQuestionnaireSubmit = async (data: any) => {
     // If this is just a loading trigger, set loading state and return
     if (data.isLoading) {
@@ -290,14 +369,14 @@ const Quote = () => {
     const currentFormData = data.formData || data;
     setFormData(currentFormData);
     setLastSubmittedFormData(currentFormData);
-    
+
     // Save the quote with flagging
     const savedQuote = saveQuote(currentFormData);
     console.log("Quote saved:", savedQuote);
 
     try {
       setIsProcessing(true);
-      
+
       // Transform form data to API format
       const apiPayload = transformFormDataForAPI(currentFormData);
       console.log('API Payload:', apiPayload);
@@ -321,25 +400,25 @@ const Quote = () => {
       // Transform API response to results format
       const results = transformApiResponseToResults(pricingResponse);
       setPricingResults(results);
-      
+
       // Get ineligible buyers
       const ineligible = getIneligibleBuyers(pricingResponse);
       setIneligibleBuyers(ineligible);
-      
+
       // Store the flags from the API response
       if (pricingResponse.flags) {
         setFlags(pricingResponse.flags);
       } else {
         setFlags([]);
       }
-      
+
     } catch (error) {
       console.error('Error calling pricing API:', error);
       // Fallback to empty results if API fails
       setPricingResults([]);
       setFlags([]);
     }
-    
+
     // Move to results and stop loading
     setCurrentStep("results");
     setIsProcessing(false);
@@ -348,7 +427,7 @@ const Quote = () => {
   const handleLoanPassSubmit = async (data: any) => {
     setFormData(data);
     setIsProcessing(true);
-    
+
     // Simulate API call for loan pass processing
     setTimeout(() => {
       console.log("Loan Pass submitted:", data);
@@ -367,7 +446,7 @@ const Quote = () => {
 
   const handleGenerateLoanQuote = async (selectedResult?: any, editedData?: any) => {
     console.log("Generating loan quote...");
-    
+
     if (!lastSubmittedFormData) {
       console.error("Missing form data");
       return;
@@ -375,7 +454,7 @@ const Quote = () => {
 
     try {
       let quoteData;
-      
+
       if (editedData && editedData.selectedScenarios) {
         // Generate comparison grid for multiple scenarios
         console.log("Generating comparison grid for selected scenarios:", editedData.selectedScenarios);
@@ -410,9 +489,9 @@ const Quote = () => {
           console.error("Missing pricing results");
           return;
         }
-        
+
         const bestResult = pricingResults[0];
-        
+
         quoteData = {
           borrowerName: `${lastSubmittedFormData.firstName || ''} ${lastSubmittedFormData.lastName || ''}`.trim() || 'Borrower',
           propertyAddress: `${lastSubmittedFormData.streetAddress || ''}, ${lastSubmittedFormData.city || ''}, ${lastSubmittedFormData.propertyState || ''} ${lastSubmittedFormData.zipCode || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
@@ -473,14 +552,14 @@ const Quote = () => {
   const handleScenarioReQuote = async (scenario: any) => {
     try {
       console.log("Re-quoting scenario:", scenario);
-      
+
       // Restore the form data from the selected scenario
       setFormData(scenario.form_data);
       setLastSubmittedFormData(scenario.form_data);
-      
+
       // Transform the form data for the API call
       const transformedData = transformFormDataForAPI(scenario.form_data);
-      
+
       // Make a fresh pricing API call
       const response = await fetch('https://n8n-prod.onrender.com/webhook/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/pricing', {
         method: 'POST',
@@ -496,12 +575,12 @@ const Quote = () => {
       if (data.quotes) {
         const transformedResults = transformApiResponseToResults(data);
         const transformedIneligible = getIneligibleBuyers(data);
-        
+
         setPricingResults(transformedResults);
         setIneligibleBuyers(transformedIneligible);
         setFlags(data.flags || []);
         setCurrentStep("results");
-        
+
         toast({
           title: "Success",
           description: "Scenario re-quoted successfully with fresh pricing"
@@ -524,12 +603,12 @@ const Quote = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" 
-                alt="Dominion Financial" 
+              <img
+                src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png"
+                alt="Dominion Financial"
                 className="h-8 mr-3"
               />
-              
+
               {/* Property and Client Info */}
               {lastSubmittedFormData && (
                 <div className="ml-4 text-sm text-gray-600">
@@ -541,7 +620,7 @@ const Quote = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Back Button */}
               {currentStep !== "upload" && (
                 <Button
@@ -554,7 +633,7 @@ const Quote = () => {
                 </Button>
               )}
             </div>
-            
+
             {/* View Selection Buttons */}
             {currentStep !== "upload" && currentStep !== "results" && (
               <div className="flex items-center gap-2">
@@ -574,7 +653,7 @@ const Quote = () => {
                 </Button>
               </div>
             )}
-            
+
             {/* Scenarios Button - Always visible when not on upload */}
             {currentStep !== "upload" && (
               <div className="flex items-center gap-2">
@@ -606,9 +685,7 @@ const Quote = () => {
               <QuestionnaireUpload
                 onFileUpload={handleFileUpload}
                 onManualEntry={handleManualEntry}
-                onDataTapeUpload={(file) => {
-                  console.log('Data tape uploaded:', file);
-                }}
+                onDataTapeUpload={handleDataTapeUpload}
                 onClientSelect={(client) => {
                   console.log('Client selected:', client);
                   // Pre-populate form with client data
@@ -630,7 +707,7 @@ const Quote = () => {
                 }}
                 isLoading={isProcessing}
               />
-              
+
               {/* Quote Tracker on Upload Screen */}
               <QuoteTracker onQuoteSelect={handleQuoteSelect} />
             </div>

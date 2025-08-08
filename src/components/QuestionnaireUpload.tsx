@@ -1,8 +1,9 @@
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { Upload, FileText, Loader2, FileSpreadsheet, Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import ClientSearch from "./ClientSearch";
 import { ClientWithProperties } from "@/hooks/useClients";
 
@@ -22,6 +23,8 @@ const QuestionnaireUpload = ({
 }: QuestionnaireUploadProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [dataTapeDragActive, setDataTapeDragActive] = useState(false);
+  const [showDataTapeDialog, setShowDataTapeDialog] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const navigate = useNavigate();
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -56,20 +59,57 @@ const QuestionnaireUpload = ({
     }
   }, []);
 
+  const processDataTapeForPackage = async (file: File) => {
+    try {
+      // Import the parser and process the file
+      const { parseDataTapeFile } = await import('@/utils/dataTapeParser');
+      const parsedData = await parseDataTapeFile(file);
+
+      // Clear any existing data and store the new parsed data
+      localStorage.removeItem('dominionDataTape');
+      localStorage.setItem('dominionDataTape', JSON.stringify(parsedData));
+
+      // Navigate to package loan page
+      navigate('/package-loan');
+    } catch (error) {
+      console.error('Error processing data tape:', error);
+      alert('Error processing data tape file. Please check the file format and try again.');
+    }
+  };
+
+  const handleDataTapeSelection = (file: File) => {
+    setPendingFile(file);
+    setShowDataTapeDialog(true);
+  };
+
+  const handlePackageLoanChoice = () => {
+    if (pendingFile) {
+      processDataTapeForPackage(pendingFile);
+      setShowDataTapeDialog(false);
+      setPendingFile(null);
+    }
+  };
+
+  const handleSingleQuoteChoice = () => {
+    if (pendingFile) {
+      onDataTapeUpload(pendingFile);
+      setShowDataTapeDialog(false);
+      setPendingFile(null);
+    }
+  };
+
   const handleDataTapeDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDataTapeDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      onDataTapeUpload(e.dataTransfer.files[0]);
-      navigate('/package-loan');
+      handleDataTapeSelection(e.dataTransfer.files[0]);
     }
   }, [onDataTapeUpload, navigate]);
 
   const handleDataTapeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      onDataTapeUpload(e.target.files[0]);
-      navigate('/package-loan');
+      handleDataTapeSelection(e.target.files[0]);
     }
   };
   if (isLoading) {
@@ -97,7 +137,7 @@ const QuestionnaireUpload = ({
         </p>
       </div>
 
-      <ClientSearch 
+      <ClientSearch
         onClientSelect={handleClientSelect}
       />
 
@@ -106,7 +146,7 @@ const QuestionnaireUpload = ({
           Create New Quote
         </h2>
         <p className="text-dominion-gray max-w-2xl mx-auto">
-          Upload your completed DSCR questionnaire and let our AI extract the data automatically, 
+          Upload your completed DSCR questionnaire and let our AI extract the data automatically,
           or enter the information manually using our form.
         </p>
       </div>
@@ -209,6 +249,56 @@ const QuestionnaireUpload = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Beautiful Data Tape Choice Dialog */}
+      <AlertDialog open={showDataTapeDialog} onOpenChange={setShowDataTapeDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-dominion-blue">
+              <FileSpreadsheet className="h-5 w-5" />
+              Data Tape Uploaded Successfully!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Choose how you'd like to use this data tape file:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <Calculator className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <div className="font-semibold text-blue-900">Package Loan</div>
+                <div className="text-sm text-blue-700">Process all properties for comprehensive package loan analysis</div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
+              <FileText className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <div className="font-semibold text-green-900">Single Quote</div>
+                <div className="text-sm text-green-700">Use the first property only for a quick single quote</div>
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel
+              onClick={handleSingleQuoteChoice}
+              className="bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Single Quote
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handlePackageLoanChoice}
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              <Calculator className="h-4 w-4 mr-2" />
+              Package Loan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 export default QuestionnaireUpload;

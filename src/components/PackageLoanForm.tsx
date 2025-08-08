@@ -973,17 +973,20 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   };
 
   return (
-    <div className="max-w-full mx-auto space-y-6">
-      {/* Data Tape Upload Section - Only show if no data is loaded */}
+    <div className="max-w-full mx-auto space-y-8">
+      {/* Clean Data Tape Upload Section */}
       {properties.length === 0 && (
-        <Card>
+        <Card className="border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle>Data Tape Upload</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Upload className="h-5 w-5 text-dominion-blue" />
+              Data Tape Upload
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Upload an Excel or CSV file containing your property data tape to automatically populate the form.
+              <p className="text-gray-600">
+                Upload an Excel or CSV file containing your property data to automatically populate the form.
               </p>
               <div className="flex items-center gap-4">
                 <input
@@ -995,15 +998,14 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                 />
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isProcessingFile}
-                  className="flex items-center gap-2"
+                  className="bg-dominion-blue hover:bg-blue-700 text-white"
                 >
-                  <Upload className="h-4 w-4" />
+                  <Upload className="h-4 w-4 mr-2" />
                   {isProcessingFile ? "Processing..." : "Upload Data Tape"}
                 </Button>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-gray-600">
                   Supports .xlsx, .xls, and .csv files
                 </span>
               </div>
@@ -1012,89 +1014,120 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         </Card>
       )}
 
-      {/* Show data loaded status when data is already available */}
+      {/* Clean Data Loaded Status */}
       {properties.length > 0 && (
-        <Card>
+        <Card className="border-green-200 bg-green-50">
           <CardHeader>
-            <CardTitle>Data Loaded</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-lg text-gray-900">{properties.length} Properties Loaded</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-dominion-blue border-dominion-blue hover:bg-blue-50"
+                >
+                  <Upload className="h-4 w-4 mr-1" />
+                  Upload New
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    localStorage.removeItem('dominionDataTape');
+                    setProperties([]);
+                    setLoanPurpose("");
+                    setCreditScore("");
+                    setNumberOfProperties("");
+                    setShowPropertyGrid(false);
+                    setPackageSplits([]);
+                    setShowPackageSplitter(false);
+                    setSelectedPackageId(null);
+                    toast({
+                      title: "Data Cleared",
+                      description: "Upload a new data tape file to start over",
+                    });
+                  }}
+                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear All
+                </Button>
+              </div>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {properties.length} properties loaded from data tape
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  localStorage.removeItem('dominionDataTape');
-                  setProperties([]);
-                  setLoanPurpose("");
-                  setCreditScore("");
-                  setNumberOfProperties("");
-                  setShowPropertyGrid(false);
-                  toast({
-                    title: "Data Cleared",
-                    description: "Upload a new data tape file to start over",
-                  });
-                }}
-                className="flex items-center gap-2"
-              >
-                <X className="h-4 w-4" />
-                Clear & Upload New
-              </Button>
-            </div>
-          </CardContent>
         </Card>
       )}
 
-      {/* Loan Purpose Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Package Loan Details</CardTitle>
+      {/* Enhanced Package Loan Details */}
+      <Card className="bg-gradient-to-br from-white to-indigo-50/30 border-indigo-200/50 shadow-xl backdrop-blur-sm">
+        <CardHeader className="pb-6">
+          <CardTitle className="flex items-center gap-3 text-xl text-dominion-blue">
+            <div className="p-2 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg">
+              <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            Package Loan Configuration
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <div className="space-y-2">
-              <Label>Loan Purpose</Label>
-              <RadioGroup value={loanPurpose} onValueChange={setLoanPurpose}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="purchase" id="purchase" />
-                  <Label htmlFor="purchase">Purchase</Label>
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Loan Purpose</Label>
+              <RadioGroup value={loanPurpose} onValueChange={setLoanPurpose} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50 ${loanPurpose === 'purchase' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200'}`}>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="purchase" id="purchase" className="w-5 h-5" />
+                    <div className="flex-1">
+                      <Label htmlFor="purchase" className="font-semibold text-base cursor-pointer">Purchase</Label>
+                      <p className="text-sm text-gray-600 mt-1">Financing for property acquisition</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="refinance" id="refinance" />
-                  <Label htmlFor="refinance">Refinance</Label>
+                <div className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-green-300 hover:bg-green-50 ${loanPurpose === 'refinance' ? 'border-green-500 bg-green-50 ring-2 ring-green-200' : 'border-gray-200'}`}>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="refinance" id="refinance" className="w-5 h-5" />
+                    <div className="flex-1">
+                      <Label htmlFor="refinance" className="font-semibold text-base cursor-pointer">Refinance</Label>
+                      <p className="text-sm text-gray-600 mt-1">Replacing existing mortgage</p>
+                    </div>
+                  </div>
                 </div>
               </RadioGroup>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="creditScore">Credit Score</Label>
-              <Input
-                id="creditScore"
-                value={creditScore}
-                onChange={(e) => setCreditScore(e.target.value)}
-                placeholder="Enter credit score"
-                className="w-48"
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="creditScore">Credit Score</Label>
+                <Input
+                  id="creditScore"
+                  value={creditScore}
+                  onChange={(e) => setCreditScore(e.target.value)}
+                  placeholder="Enter credit score"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="numberOfProperties">Number of Properties</Label>
-              <Select value={numberOfProperties} onValueChange={setNumberOfProperties}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select number of properties" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 20 }, (_, i) => i + 2).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num} Properties
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label htmlFor="numberOfProperties">Number of Properties</Label>
+                <Select value={numberOfProperties} onValueChange={setNumberOfProperties}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select number" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 20 }, (_, i) => i + 2).map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -1127,53 +1160,116 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
           </CardHeader>
           <CardContent>
             {/* Overall Portfolio Stats */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">Overall Portfolio</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{properties.length}</div>
-                  <div className="text-sm text-muted-foreground">Total Properties</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    ${properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Total Value</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    ${properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Mortgage Balance</div>
-                </div>
-                <div className="text-center">
-                  <div className="space-y-1">
-                    <div className="text-lg font-bold text-purple-600">
-                      ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
+            <div className="mb-8">
+              <h3 className="text-xl font-bold mb-6 text-gray-800">Portfolio Overview</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Properties Count Card */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-blue-700">{properties.length}</div>
+                      <div className="text-sm font-medium text-blue-600 mt-1">Total Properties</div>
                     </div>
-                    <div className="text-sm font-semibold text-purple-500">
-                      ${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
-                    </div>
-                    <div className="text-xs space-y-0.5 border-t pt-1">
-                      <div className="flex justify-between">
-                        <span>Taxes:</span>
-                        <span>${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo)</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Hazard:</span>
-                        <span>${properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Flood:</span>
-                        <span>${properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>HOA:</span>
-                        <span>${properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr (${Math.round(properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo)</span>
-                      </div>
+                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m8 7V3a2 2 0 012-2h4a2 2 0 012 2v4" />
+                      </svg>
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Annual Expenses</div>
+                </div>
+
+                {/* Total Value Card */}
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-green-700">
+                        ${properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-sm font-medium text-green-600 mt-1">Portfolio Value</div>
+                    </div>
+                    <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mortgage Balance Card */}
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-orange-700">
+                        ${properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-sm font-medium text-orange-600 mt-1">Mortgage Balance</div>
+                    </div>
+                    <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Annual Expenses Section - Enhanced */}
+              <div className="mt-6">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-purple-800">Annual Expenses Breakdown</h4>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-purple-700">
+                        ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
+                      </div>
+                      <div className="text-sm font-medium text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">Property Taxes</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">Hazard Insurance</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">Flood Insurance</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">HOA Fees</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1181,61 +1277,44 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
             {/* Package Breakdown (if packages exist) */}
             {packageSplits.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-3">Package Breakdown</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Package Breakdown</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {packageSplits.map((split, index) => (
-                    <div key={split.id} className={`p-4 rounded-lg border-2 ${split.color}`}>
-                      <div className="text-center mb-3">
-                        <h4 className="font-semibold text-sm">Package {index + 1}</h4>
-                        <p className="text-xs text-muted-foreground truncate">{split.name}</p>
-                      </div>
-                      <div className="space-y-2 text-xs">
-                        <div className="flex justify-between">
-                          <span>Properties:</span>
-                          <span className="font-semibold">{split.properties.length}</span>
+                    <div key={split.id} className="p-4 rounded-lg border border-gray-200 bg-white">
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-sm text-gray-900">Package {index + 1}</h4>
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">
+                            {split.properties.length} properties
+                          </span>
                         </div>
+                        <p className="text-xs text-gray-600">{split.name}</p>
+                      </div>
+                      <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
-                          <span>Total Value:</span>
-                          <span className="font-semibold text-green-600">
+                          <span className="text-gray-600">Total Value:</span>
+                          <span className="font-semibold text-gray-900">
                             ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Mortgage:</span>
-                          <span className="font-semibold text-blue-600">
+                          <span className="text-gray-600">Mortgage:</span>
+                          <span className="font-semibold text-gray-900">
                             ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
                           </span>
                         </div>
                         <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span>Total Expenses:</span>
-                            <div className="text-right">
-                              <div className="font-semibold text-purple-600">
-                                ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
-                              </div>
-                              <div className="text-xs text-purple-500">
-                                ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
-                              </div>
+                        <div className="flex justify-between pt-2 border-t border-gray-100">
+                          <span className="text-gray-600">Annual Expenses:</span>
+                          <div className="text-right">
+                            <div className="font-semibold text-gray-900">
+                              ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
                             </div>
                           </div>
-                          <div className="text-xs space-y-0.5 ml-2 border-t pt-1">
-                            <div className="flex justify-between">
-                              <span>• Taxes:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo)</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>• Hazard:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>• Flood:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo)</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>• HOA:</span>
-                              <span>${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo)</span>
-                            </div>
-                          </div>
+                        </div>
                         </div>
                       </div>
                     </div>
@@ -1247,145 +1326,240 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         </Card>
       )}
 
-      {/* Package Analysis */}
+      {/* Enhanced Smart Package Analysis */}
       {showPropertyGrid && properties.length > 0 && !showPackageSplitter && (
-        <Card>
-          <CardHeader>
+        <Card className="bg-gradient-to-br from-amber-50 to-orange-50/30 border-amber-200/50 shadow-xl backdrop-blur-sm">
+          <CardHeader className="pb-6">
             <CardTitle className="flex items-center justify-between">
-              <span>Smart Package Analysis</span>
-              <Button onClick={runPackageAnalysis} variant="outline">
-                Analyze Package Compatibility
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg">
+                  <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-xl text-amber-800">Smart Package Analysis</div>
+                  <div className="text-sm text-amber-600">AI-Powered Compatibility Detection</div>
+                </div>
+              </div>
+              <Button 
+                onClick={runPackageAnalysis}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-orange-500 hover:to-amber-500 text-white px-6 py-3 shadow-lg hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105"
+              >
+                <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Analyze Compatibility
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Automatically analyze your properties for incompatible combinations that could impact loan approval.
-            </p>
+            <div className="p-6 bg-white/70 rounded-xl border border-amber-100">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+                  <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-amber-800 mb-2">Intelligent Portfolio Analysis</h4>
+                  <p className="text-amber-700 leading-relaxed">
+                    Our advanced algorithm automatically analyzes your properties for incompatible combinations, 
+                    geographic restrictions, and lending guidelines that could impact loan approval. Get optimized 
+                    package recommendations in seconds.
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Package Results */}
-      {showPackageSplitter && packageSplits.length > 0 && (
-         <Card>
-           <CardHeader>
-             <CardTitle className="flex items-center justify-between">
-               <span>Recommended Package Splits</span>
-               <div className="flex space-x-2">
-                 <Button onClick={runPackageAnalysis} variant="outline" size="sm">
-                   Reanalyze Package
-                 </Button>
-                 <Button onClick={() => setShowPackageSplitter(false)} variant="outline" size="sm">
-                   <X className="w-4 h-4" />
-                 </Button>
-               </div>
-             </CardTitle>
-           </CardHeader>
-          <CardContent>
-             <div className="space-y-4">
-               {packageSplits.map((split, index) => (
-                 <div key={split.id} className={`p-4 rounded-lg border-2 ${split.color} ${selectedPackageId === split.id ? 'ring-2 ring-primary' : ''}`}>
-                   <div className="flex justify-between items-start mb-3">
-                     <div className="flex items-center space-x-3">
-                       <Checkbox 
-                         checked={selectedPackageId === split.id}
-                         onCheckedChange={() => selectedPackageId === split.id ? setSelectedPackageId(null) : viewPackage(split.id)}
-                       />
-                       <div>
-                         <h3 className="font-semibold text-lg">Package {index + 1}: {split.name}</h3>
-                         <p className="text-sm text-muted-foreground">{split.reason}</p>
-                       </div>
-                     </div>
-                     <div className="flex items-center space-x-2">
-                       <div className="text-right mr-4">
-                         <div className="text-2xl font-bold">{split.properties.length}</div>
-                         <div className="text-xs text-muted-foreground">Properties</div>
-                       </div>
-                       <Button
-                         onClick={() => viewPackage(split.id)}
-                         variant="outline"
-                         size="sm"
-                         className="bg-white hover:bg-gray-50"
-                       >
-                         <Eye className="w-4 h-4 mr-1" />
-                         View
-                       </Button>
-                       <Button
-                         onClick={() => deletePackage(split.id)}
-                         variant="outline"
-                         size="sm"
-                         className="bg-white hover:bg-red-50 text-red-600 border-red-200 hover:border-red-300"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
-                     </div>
-                   </div>
-                   
-                   {/* Package Summary Statistics */}
-                   <div className="grid grid-cols-3 gap-4 mb-3 p-3 bg-white/70 rounded">
-                     <div className="text-center">
-                       <div className="text-lg font-bold text-green-600">
-                         ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
-                       </div>
-                       <div className="text-xs text-muted-foreground">Total Value</div>
-                     </div>
-                     <div className="text-center">
-                       <div className="text-lg font-bold text-blue-600">
-                         ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
-                       </div>
-                       <div className="text-xs text-muted-foreground">Mortgage Balance</div>
-                     </div>
-                       <div className="text-center">
-                         <div className="space-y-1">
-                           <div className="text-lg font-bold text-purple-600">
-                             ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
-                           </div>
-                           <div className="text-sm font-semibold text-purple-500">
-                             ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
-                           </div>
-                           <div className="text-xs space-y-0.5 border-t pt-1">
-                             <div>Taxes: ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo)</div>
-                             <div>Hazard: ${split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo)</div>
-                             <div>Flood: ${split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo)</div>
-                             <div>HOA: ${split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr (${Math.round(split.properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo)</div>
-                           </div>
-                         </div>
-                         <div className="text-xs text-muted-foreground">Annual Expenses</div>
-                       </div>
-                   </div>
-                   
-                   <div className="space-y-2 mb-3">
-                     {split.properties.map((property) => (
-                       <div key={property.id} className="text-sm bg-white/50 p-2 rounded border">
-                         <div className="font-medium">{property.fullPropertyAddress || "Address not entered"}</div>
-                         <div className="text-xs text-muted-foreground">
-                           {property.structureType} • {property.countyName}
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                   
-                   <div className="flex justify-end">
-                     <Button
-                       onClick={() => submitPackage(split.id)}
-                       className="bg-primary hover:bg-primary/90"
-                       disabled={isLoading}
-                     >
-                       Submit for Pricing
-                     </Button>
-                   </div>
-                 </div>
-               ))}
-             </div>
-          </CardContent>
-        </Card>
-      )}
+
+        {/* Package Results */}
+        {showPackageSplitter && packageSplits.length > 0 && (
+            <div className="space-y-6">
+                {/* Header Section */}
+                <Card className="border border-gray-200">
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-semibold text-gray-900">Package Analysis Results</h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {packageSplits.length} packages identified
+                                </p>
+                            </div>
+                            <div className="flex space-x-2">
+                                <Button
+                                    onClick={runPackageAnalysis}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-gray-300 text-gray-700"
+                                >
+                                    Reanalyze
+                                </Button>
+                                <Button
+                                    onClick={() => setShowPackageSplitter(false)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-gray-300 text-gray-700"
+                                >
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </CardTitle>
+                    </CardHeader>
+                </Card>
+
+                {/* Package Grid */}
+                <div className="grid gap-4">
+                    {packageSplits.map((split, index) => {
+                        return (
+                            <Card
+                                key={split.id}
+                                className={`border ${selectedPackageId === split.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`}
+                            >
+
+                                {/* Package Header */}
+                                <div className="p-6 border-b border-gray-200">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-start gap-4 flex-1">
+                                            <div className="flex items-center gap-3">
+                                                <Checkbox
+                                                    checked={selectedPackageId === split.id}
+                                                    onCheckedChange={() => selectedPackageId === split.id ? setSelectedPackageId(null) : viewPackage(split.id)}
+                                                    className="w-5 h-5"
+                                                />
+                                                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                    <span className="font-semibold text-gray-700">{index + 1}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-2">{split.name}</h3>
+                                                <p className="text-sm text-gray-600 leading-relaxed">{split.reason}</p>
+                                                <div className="mt-3">
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        {split.properties.length} Properties
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                onClick={() => viewPackage(split.id)}
+                                                variant="outline"
+                                                size="sm"
+                                                className="border-gray-300 text-gray-700"
+                                            >
+                                                <Eye className="w-4 h-4 mr-2" />
+                                                View
+                                            </Button>
+                                            <Button
+                                                onClick={() => deletePackage(split.id)}
+                                                variant="outline"
+                                                size="sm"
+                                                className="border-gray-300 text-gray-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Financial Summary */}
+                                <div className="p-6">
+                                    <h4 className="text-base font-semibold text-gray-900 mb-4">Financial Overview</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        {/* Total Portfolio Value */}
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Portfolio Value</div>
+                                        </div>
+
+                                        {/* Mortgage Balance */}
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Mortgage Balance</div>
+                                        </div>
+
+                                        {/* LTV Calculation */}
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                {split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0) > 0
+                                                    ? Math.round((split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0) / split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0)) * 100)
+                                                    : 0}%
+                                            </div>
+                                            <div className="text-sm text-gray-600">Loan-to-Value</div>
+                                        </div>
+
+                                        {/* Annual Expenses */}
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                                            </div>
+                                            <div className="text-sm text-gray-600">
+                                                ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr total
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Property List */}
+                                    <div className="mt-6">
+                                        <h5 className="text-sm font-semibold text-gray-900 mb-3">Properties in this Package</h5>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                                            {split.properties.map((property, propIndex) => (
+                                                <div key={property.id} className="bg-white p-3 rounded-lg border border-gray-200">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex-1">
+                                                            <div className="font-medium text-gray-900 text-sm">
+                                                                {property.fullPropertyAddress || `Property ${propIndex + 1} - Address not entered`}
+                                                            </div>
+                                                            <div className="text-xs text-gray-600 mt-1">
+                                                                {property.structureType && property.countyName
+                                                                    ? `${property.structureType} • ${property.countyName}`
+                                                                    : property.structureType || property.countyName || 'Details not entered'
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-sm font-semibold text-gray-900">
+                                                                ${(property.currentMarketValue || 0).toLocaleString()}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">Market Value</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Button */}
+                                    <div className="mt-6 flex justify-end">
+                                        <Button
+                                            onClick={() => submitPackage(split.id)}
+                                            className="bg-dominion-blue hover:bg-blue-700 text-white"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? 'Processing...' : 'Submit Package for Pricing'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+                        );
+                    })}
+                </div>
+            </div>
+        )}
 
       {/* Property Grid */}
       {showPropertyGrid && (selectedPackageId ? displayedProperties.length > 0 : properties.length > 0) && (
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <div className="bg-primary text-primary-foreground p-6 text-center">
+          <div className="bg-dominion-blue text-white p-6 text-center">
             <h2 className="text-2xl font-semibold mb-2">
               {selectedPackageId 
                 ? `${packageSplits.find(p => p.id === selectedPackageId)?.name || 'Package'} Properties` 
@@ -1482,7 +1656,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                </div>
              </div>
             
-            <Button onClick={handleSubmit} disabled={isLoading} className="bg-primary hover:bg-primary/90">
+            <Button onClick={handleSubmit} disabled={isLoading} className="bg-dominion-blue hover:bg-blue-700 text-white">
               {isLoading ? "Processing..." : "Get Package Loan Quote"}
             </Button>
           </div>

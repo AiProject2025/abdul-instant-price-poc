@@ -21,6 +21,7 @@ export interface DataTapeRow {
   annualHazardInsurance?: number;
   annualFloodInsurance?: number;
   annualHOAFees?: number;
+  annualHomeOwnersAssociation?: number;
   currentCondition?: string;
   strategyForProperty?: string;
   entityName?: string;
@@ -41,9 +42,9 @@ const columnMappings: Record<string, string[]> = {
   structureType: ['Structure Type', 'Property Type', 'Type'],
   condo: ['Condo'],
   legalNonConforming: ['Legal Non-Conforming?', 'Legal Non-Conforming', 'Non-Conforming'],
-  borrowersCreditScore: ['Borrower\'s Credit Score', 'Credit Score', 'FICO Score', 'FICO'],
+  borrowersCreditScore: ["Borrower's Credit Score", 'Credit Score', 'FICO Score', 'FICO'],
   purposeOfLoan: ['Purpose of the Loan', 'Loan Purpose', 'Purpose', 'Purpose of Loan'],
-  purchaseDate: ['Purchase Date'],
+  purchaseDate: ['Purchase Date', 'Date Purchased', 'Purchase_Date'],
   purchasePrice: ['Purchase Price'],
   rehabCosts: ['Rehab Costs'],
   currentMarketValue: ['Current Market Value', 'Market Value', 'Current Value'],
@@ -53,9 +54,23 @@ const columnMappings: Record<string, string[]> = {
   marketRent: ['Market Rent'],
   currentLeaseAmount: ['Current Lease Amount', 'Lease Amount'],
   annualPropertyTaxes: ['Annual Property Taxes', 'Property Taxes'],
-  annualHazardInsurance: ['Annual Hazard  Insurance Premium', 'Hazard Insurance', 'Insurance'],
-  annualFloodInsurance: ['Annual Flood Insurance Premium', 'Flood Insurance'],
-  annualHOAFees: ['Annual Home Owner\'s Association Fees', 'HOA Fees', 'HOA'],
+  annualHazardInsurance: ['Annual Hazard Insurance Premium', 'Annual Hazard  Insurance Premium', 'Hazard Insurance', 'Insurance', 'Annual Insurance'],
+  annualFloodInsurance: ['Annual Flood Insurance Premium', 'Flood Insurance', 'Annual Flood'],
+  annualHOAFees: [
+    'Annual Home Owner\'s Association Fees', 
+    "Annual Home Owner's Association Fees",
+    'Annual Home Owners Association Fees',
+      'annual home owners association fees',
+    'Annual Homeowners Association Fees',
+    'Annual HOA Fees',
+    'Home Owner\'s Association Fees',
+    "Home Owner's Association Fees",
+    'Homeowners Association Fees',
+    'HOA Fees', 
+    'HOA', 
+    'Association Fees',
+    'Home Owners Association'
+  ],
   currentCondition: ['Current Condition', 'Condition'],
   strategyForProperty: ['Strategy for Property', 'Strategy'],
   entityName: ['Entity Name', 'Entity'],
@@ -68,6 +83,9 @@ function normalizeHeaderName(s: any): string {
     .toString()
     .replace(/\u00A0/g, ' ') // replace non-breaking spaces
     .toLowerCase()
+    .replace(/'/g, '') // remove apostrophes
+    .replace(/'/g, '') // remove curly apostrophes  
+    .replace(/['']/g, '') // remove various apostrophe types
     .replace(/\s+/g, ' ') // collapse multiple spaces
     .replace(/[^a-z0-9 ]+/g, ' ') // normalize punctuation
     .replace(/\s+/g, ' ')
@@ -75,16 +93,37 @@ function normalizeHeaderName(s: any): string {
 }
 
 function findColumnIndex(headers: string[], fieldMappings: string[]): number {
+  console.log('Finding column for mappings:', fieldMappings);
+  console.log('Available headers:', headers);
+  
   const normalizedHeaders = headers.map(h => normalizeHeaderName(h));
+  console.log('Normalized headers:', normalizedHeaders);
+  
   for (const mapping of fieldMappings) {
     const nm = normalizeHeaderName(mapping);
+    console.log('Trying to match:', mapping, '→', nm);
+    
     // exact match first
     let index = normalizedHeaders.findIndex(h => h === nm);
-    if (index !== -1) return index;
-    // fallback: contains match either way (helps with small header variations)
-    index = normalizedHeaders.findIndex(h => h.includes(nm) || nm.includes(h));
-    if (index !== -1) return index;
+    if (index !== -1) {
+      console.log('Exact match found at index', index, 'for', mapping);
+      return index;
+    }
+    
+    // more flexible contains match - try both directions
+    index = normalizedHeaders.findIndex(h => {
+      const containsMatch = h.includes(nm) || nm.includes(h);
+      if (containsMatch) {
+        console.log('Contains match found:', h, 'contains/contained by', nm);
+      }
+      return containsMatch;
+    });
+    if (index !== -1) {
+      console.log('Contains match found at index', index, 'for', mapping);
+      return index;
+    }
   }
+  console.log('No match found for mappings:', fieldMappings);
   return -1;
 }
 
@@ -212,10 +251,28 @@ export function parseDataTapeFile(file: File): Promise<ParsedDataTape> {
         const headers = jsonData[0] as string[];
         const rows = jsonData.slice(1);
         
+        console.log('📋 Raw Headers from Data Tape:', headers);
+        console.log('🔍 Looking for HOA-related headers:', headers.filter(h => 
+          h && h.toString().toLowerCase().includes('hoa') || 
+          h && h.toString().toLowerCase().includes('association') ||
+          h && h.toString().toLowerCase().includes('owner')
+        ));
+        
         // Map columns to our fields
         const fieldIndices: Record<string, number> = {};
         Object.entries(columnMappings).forEach(([field, mappings]) => {
           fieldIndices[field] = findColumnIndex(headers, mappings);
+          
+          // Special logging for HOA field
+          if (field === 'annualHOAFees') {
+            console.log('🏠 HOA Field Mapping Result:', {
+              field,
+              mappings,
+              foundIndex: fieldIndices[field],
+              headers: headers,
+              normalizedHeaders: headers.map(h => normalizeHeaderName(h))
+            });
+          }
         });
         
         // Parse rows into properties
@@ -249,6 +306,7 @@ export function parseDataTapeFile(file: File): Promise<ParsedDataTape> {
             annualHazardInsurance: cleanNumericValue(row[fieldIndices.annualHazardInsurance]) || 0,
             annualFloodInsurance: cleanNumericValue(row[fieldIndices.annualFloodInsurance]) || 0,
             annualHOAFees: cleanNumericValue(row[fieldIndices.annualHOAFees]) || 0,
+            annualHomeOwnersAssociation: cleanNumericValue(row[fieldIndices.annualHOAFees]) || 0, // Map to both field names
             currentCondition: cleanStringValue(row[fieldIndices.currentCondition]),
             strategyForProperty: cleanStringValue(row[fieldIndices.strategyForProperty]),
             entityName: cleanStringValue(row[fieldIndices.entityName]),
