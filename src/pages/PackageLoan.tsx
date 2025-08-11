@@ -17,6 +17,7 @@ const PackageLoan = () => {
   const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
   const { toast } = useToast();
   const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   const parseMoney = (val: any) => {
     if (val === null || val === undefined) return 0;
@@ -180,6 +181,52 @@ const PackageLoan = () => {
 
       // Persist for results and document gen
       setLastSubmittedFormData(aggregatedFormData);
+
+      // Apply portfolio rules: filter to primary state and recompute aggregates
+      const primaryState = addr.state;
+      const includedProps = props.filter((p: any) => extractAddressParts(p.fullPropertyAddress).state === primaryState);
+      if (includedProps.length > 0) {
+        const distinctTypes = Array.from(new Set(includedProps.map((p: any) => mapPropertyTypeForForm(p.structureType))));
+        const totals = includedProps.reduce((acc: any, p: any) => {
+          const rent = parseMoney(p.marketRent) || parseMoney(p.currentLeaseAmount);
+          acc.purchase += p.purchasePrice || 0;
+          acc.rehab += p.rehabCosts || 0;
+          acc.mv += p.currentMarketValue || 0;
+          acc.payoff += p.existingMortgageBalance || 0;
+          acc.taxes += p.annualPropertyTaxes || 0;
+          acc.hazard += p.annualHazardInsurance || 0;
+          acc.flood += p.annualFloodInsurance || 0;
+          acc.rent += rent || 0;
+          return acc;
+        }, {purchase:0,rehab:0,mv:0,payoff:0,taxes:0,hazard:0,flood:0,rent:0});
+
+        const creditScores = includedProps.map((p:any) => parseInt(p.borrowersCreditScore || '0', 10)).filter((n:number)=>!isNaN(n) && n>0);
+        const lowestCredit = creditScores.length ? Math.min(...creditScores) : (aggregatedFormData.creditScore || '');
+
+        aggregatedFormData.numberOfProperties = includedProps.length.toString();
+        aggregatedFormData.propertyType = mapPropertyTypeForForm(mostCommon(includedProps.map((p:any)=>p.structureType)));
+        aggregatedFormData.propertyTypes = distinctTypes.join(', ');
+        aggregatedFormData.unit1Rent = totals.rent.toString();
+        aggregatedFormData.annualTaxes = totals.taxes.toString();
+        aggregatedFormData.annualInsurance = (totals.hazard).toString();
+        aggregatedFormData.annualFloodInsurance = totals.flood.toString();
+        aggregatedFormData.annualAssociationFees = includedProps.reduce((s:number,p:any)=> s + (p.annualHomeOwnersAssociation || p.annualHOAFees || 0),0).toString();
+        aggregatedFormData.purchasePrice = totals.purchase.toString();
+        aggregatedFormData.estimatedRehabCost = totals.rehab.toString();
+        aggregatedFormData.marketValue = totals.mv.toString();
+        aggregatedFormData.hasMortgage = totals.payoff > 0 ? 'Yes' : 'No';
+        aggregatedFormData.mortgagePayoff = totals.payoff.toString();
+        aggregatedFormData.creditScore = lowestCredit.toString();
+
+        const dates = includedProps.map((p:any)=>p.purchaseDate).filter(Boolean).sort();
+        aggregatedFormData.datePurchased = dates[0] || aggregatedFormData.datePurchased;
+      }
+
+      // Redirect to DSCR questionnaire with prefilled portfolio data
+      navigate('/quote', { state: { prefill: aggregatedFormData, source: 'package' } });
+      toast({ title: 'Portfolio Ready', description: `Prefilled questionnaire for ${props.length}-property package` });
+      setIsLoading(false);
+      return;
 
       // Call pricing API using the same endpoint as single quote
       const apiPayload = transformFormDataForAPI(aggregatedFormData);

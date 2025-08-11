@@ -28,6 +28,15 @@ const Quote = () => {
 
   const { saveScenarioResults } = useScenarios();
   const { toast } = useToast();
+  const location = useLocation();
+  useEffect(() => {
+    const prefill = (location.state as any)?.prefill;
+    if (prefill) {
+      setLastSubmittedFormData(prefill);
+      setExtractedData(prefill);
+      setCurrentStep('questionnaire');
+    }
+  }, [location.state]);
 
   const transformApiResponseToResults = (apiResponse: any) => {
     // Handle the new response structure where quotes are under the 'quotes' key
