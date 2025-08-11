@@ -390,6 +390,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [displayedProperties, setDisplayedProperties] = useState<Property[]>([]);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const [uploadedDataTapeFile, setUploadedDataTapeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -847,7 +848,8 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         properties: selectedPackage.properties,
         packageType: "package-split",
         packageName: selectedPackage.name,
-        creditScore
+        creditScore,
+        dataTapeFile: uploadedDataTapeFile,
       };
       onSubmit(packageData);
     }
@@ -871,6 +873,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     }
 
     setIsProcessingFile(true);
+    setUploadedDataTapeFile(file);
 
     try {
       const parsedData = await parseDataTapeFile(file);
@@ -963,7 +966,8 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       loanPurpose,
       properties,
       packageType: "multi-property",
-      creditScore
+      creditScore,
+      dataTapeFile: uploadedDataTapeFile,
     };
 
     onSubmit(packageData);
@@ -1049,6 +1053,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                     setPackageSplits([]);
                     setShowPackageSplitter(false);
                     setSelectedPackageId(null);
+                    setUploadedDataTapeFile(null);
                     toast({
                       title: "Data Cleared",
                       description: "Upload a new data tape file to start over",

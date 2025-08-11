@@ -37,32 +37,6 @@ const Quote = () => {
       setExtractedData(prefill);
       setCurrentStep('questionnaire');
     }
-
-    // Fetch detailed data from webhook when arriving from package flow
-    const fetchDetailedData = async () => {
-      try {
-        const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
-          method: 'GET'
-        });
-        if (!res.ok) {
-          throw new Error(`Details API status ${res.status}`);
-        }
-        const payload = await res.json();
-        const output = payload?.output || payload || {};
-        const combined = { ...(prefill || {}), ...output };
-        setLastSubmittedFormData(combined);
-        setExtractedData(combined);
-        setCurrentStep('questionnaire');
-        toast({ title: 'Details loaded', description: 'Questionnaire prefilled from package details' });
-      } catch (err) {
-        console.error('Failed to load detailed data:', err);
-        // Keep existing prefill/manual entry if webhook fails
-      }
-    };
-
-    if (state?.source === 'package') {
-      fetchDetailedData();
-    }
   }, [location.state]);
 
   const transformApiResponseToResults = (apiResponse: any) => {
