@@ -339,7 +339,7 @@ const PackageLoan = () => {
         interestReserves: form.interestReserves || "0",
 
         // Refi specifics
-        hasMortgage: form.hasMortgage || (toNum(form.mortgagePayoff) > 0 ? "Yes" : "No"),
+        hasMortgage: form.hasMortgage || (parseMoney(form.mortgagePayoff) > 0 ? "Yes" : "No"),
         mortgagePayoff: form.mortgagePayoff || "0",
         refinanceType: form.refinanceType || "",
         datePurchased: form.datePurchased || "",
@@ -352,10 +352,10 @@ const PackageLoan = () => {
         section8Lease: form.section8 || "No",
 
         // Expenses (annual)
-        annualTaxes: (12 * toNum(form.monthlyTaxes)).toString(),
-        annualInsurance: (12 * toNum(form.monthlyInsurance)).toString(),
-        annualAssociationFees: (12 * toNum(form.monthlyHOASpecialAssess)).toString(),
-        annualFloodInsurance: (12 * toNum(form.monthlyFloodInsurance)).toString(),
+        annualTaxes: (12 * parseMoney(form.monthlyTaxes)).toString(),
+        annualInsurance: (12 * parseMoney(form.monthlyInsurance)).toString(),
+        annualAssociationFees: (12 * parseMoney(form.monthlyHOASpecialAssess)).toString(),
+        annualFloodInsurance: (12 * parseMoney(form.monthlyFloodInsurance)).toString(),
       };
 
       const apiPayload = transformFormDataForAPI(aggregatedFormData);
@@ -488,6 +488,46 @@ const PackageLoan = () => {
                 </div>
                 <PackageLoanForm onSubmit={handlePackageSubmit} isLoading={isLoading} />
               </>
+            )}
+
+            {currentStep === 'review' && reviewData && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <aside className="md:col-span-1">
+                  <div className="bg-white rounded-lg border p-4">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">Review Checklist</h2>
+                    <div className="space-y-4 text-sm">
+                      <div>
+                        <div className="font-medium text-gray-800 mb-1">Manual input required</div>
+                        <ul className="list-disc list-inside text-gray-700">
+                          {Object.entries(fieldSources)
+                            .filter(([_, v]) => v === 'manualRequired')
+                            .map(([k]) => (
+                              <li key={k}>{k.replace(/_/g, ' ')}</li>
+                            ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-800 mb-1">Defaults applied</div>
+                        <ul className="list-disc list-inside text-gray-700">
+                          {Object.entries(fieldSources)
+                            .filter(([_, v]) => v === 'default')
+                            .map(([k]) => (
+                              <li key={k}>{k.replace(/_/g, ' ')}</li>
+                            ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+                <div className="md:col-span-3">
+                  <LoanPassView
+                    onBack={() => setCurrentStep('form')}
+                    onSubmit={handleReviewSubmit}
+                    isLoading={isLoading}
+                    initialData={reviewData}
+                  />
+                </div>
+              </div>
             )}
 
             {currentStep === 'results' && (
