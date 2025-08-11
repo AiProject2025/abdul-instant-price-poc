@@ -99,20 +99,8 @@ const PackageLoan = () => {
       const props = data.properties || [];
       if (!props.length) throw new Error("No properties in selected package");
 
-      // Validate: Same State Requirement
-      const states = props
-        .map((p: any) => extractAddressParts(p.fullPropertyAddress).state)
-        .filter(Boolean);
-      const uniqueStates = Array.from(new Set(states));
-      if (uniqueStates.length !== 1) {
-        toast({
-          title: "Package Invalid",
-          description: "All properties in a portfolio must be in the same state.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
+      // Removed same-state requirement per project update
+
 
       // Primary property by lowest street number
       const primary = getPrimaryProperty(props);
