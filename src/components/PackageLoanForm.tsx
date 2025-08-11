@@ -916,7 +916,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate required fields
     const missingFields: string[] = [];
     
@@ -962,15 +962,55 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       return;
     }
 
-    const packageData = {
-      loanPurpose,
-      properties,
-      packageType: "multi-property",
-      creditScore,
-      dataTapeFile: uploadedDataTapeFile,
-    };
+    // Require uploaded data tape file for webhook processing
+    if (!uploadedDataTapeFile) {
+      toast({
+        title: "Data Tape Required",
+        description: "Please upload your Excel/CSV data tape before requesting a quote.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    onSubmit(packageData);
+    // Call webhook with the uploaded file; block submission on failure
+    try {
+      const fd = new FormData();
+      fd.append('file', uploadedDataTapeFile);
+      const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
+        method: 'POST',
+        body: fd,
+      });
+
+      if (!res.ok) {
+        toast({
+          title: 'Analysis Failed',
+          description: `Webhook error: ${res.status}`,
+          variant: 'destructive',
+        });
+        return; // Block navigation
+      }
+
+      const payload = await res.json();
+      const webhookOutput = payload?.output || payload || {};
+
+      const packageData = {
+        loanPurpose,
+        properties,
+        packageType: "multi-property",
+        creditScore,
+        webhookOutput,
+      };
+
+      onSubmit(packageData);
+    } catch (err) {
+      console.error('Webhook error:', err);
+      toast({
+        title: 'Analysis Failed',
+        description: 'Could not analyze the uploaded file. Please try again.',
+        variant: 'destructive',
+      });
+      return; // Block navigation
+    }
   };
 
   const handlePropertiesChange = (updatedProperties: Property[]) => {

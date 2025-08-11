@@ -222,25 +222,9 @@ const PackageLoan = () => {
         aggregatedFormData.datePurchased = dates[0] || aggregatedFormData.datePurchased;
       }
 
-      // If data tape file present, send to webhook for detailed data
-      try {
-        if ((data as any).dataTapeFile) {
-          const fd = new FormData();
-          fd.append('file', (data as any).dataTapeFile);
-          const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
-            method: 'POST',
-            body: fd,
-          });
-          if (res.ok) {
-            const payload = await res.json();
-            const output = payload?.output || payload || {};
-            Object.assign(aggregatedFormData, output);
-          } else {
-            console.warn('Details webhook failed with status', res.status);
-          }
-        }
-      } catch (err) {
-        console.error('Details webhook error:', err);
+      // Merge webhook output if provided by form
+      if ((data as any).webhookOutput) {
+        Object.assign(aggregatedFormData, (data as any).webhookOutput);
       }
 
       // Redirect to DSCR questionnaire with prefilled portfolio data
