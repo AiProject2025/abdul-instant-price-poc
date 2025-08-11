@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import QuestionnaireUpload from "@/components/QuestionnaireUpload";
 import DSCRForm from "@/components/DSCRForm";
 import LoanPassView from "@/components/LoanPassView";
@@ -14,6 +14,7 @@ import { ArrowLeft, History } from "lucide-react";
 import { useScenarios, Scenario } from "@/hooks/useScenarios";
 import { useToast } from "@/hooks/use-toast";
 import { transformFormDataForAPI } from "@/utils/pricingPayload";
+import { useLocation } from "react-router-dom";
 const Quote = () => {
   const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results" | "scenarios">("upload");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
