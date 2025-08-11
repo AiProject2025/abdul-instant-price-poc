@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Plus, Trash2, Eye, X } from "lucide-react";
+import { Upload, Plus, Trash2, Eye, X, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseDataTapeFile } from "@/utils/dataTapeParser";
 
@@ -390,6 +390,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [displayedProperties, setDisplayedProperties] = useState<Property[]>([]);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedDataTapeFile, setUploadedDataTapeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -917,52 +918,66 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   };
 
   const handleSubmit = async () => {
-    // Validate required fields
-    const missingFields: string[] = [];
-    
-    if (!loanPurpose) {
-      missingFields.push("Loan Purpose");
+    // Require compatibility analysis and package selection
+    if (!(showPackageSplitter && packageSplits.length > 0)) {
+      toast({
+        title: "Analyze Compatibility First",
+        description: "Please run Analyze Compatibility to generate packages.",
+        variant: "destructive",
+      });
+      return;
     }
-    
-    if (!creditScore) {
-      missingFields.push("Credit Score");
+    if (!selectedPackageId) {
+      toast({
+        title: "Select a Package",
+        description: "Choose a package from the analysis results before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const selectedSplit = packageSplits.find(p => p.id === selectedPackageId);
+    if (!selectedSplit) {
+      toast({
+        title: "Invalid Selection",
+        description: "The selected package could not be found. Please reselect.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    if (properties.length === 0) {
+    // Validate required fields
+    const missingFields: string[] = [];
+    if (!loanPurpose) missingFields.push("Loan Purpose");
+    if (!creditScore) missingFields.push("Credit Score");
+
+    const propertiesToValidate = selectedSplit.properties || [];
+    if (propertiesToValidate.length === 0) {
       missingFields.push("At least one property");
     }
 
-    // Check for empty property fields
     const incompleteProperties: string[] = [];
-    properties.forEach((property, index) => {
+    propertiesToValidate.forEach((property, index) => {
       const emptyFields: string[] = [];
-      
       if (!property.fullPropertyAddress) emptyFields.push("Address");
       if (!property.countyName) emptyFields.push("County");
       if (!property.structureType) emptyFields.push("Structure Type");
       if (!property.condo) emptyFields.push("Condo");
       if (!property.currentMarketValue) emptyFields.push("Current Market Value");
-      
       if (emptyFields.length > 0) {
         incompleteProperties.push(`Property ${index + 1}: ${emptyFields.join(", ")}`);
       }
     });
 
     if (missingFields.length > 0 || incompleteProperties.length > 0) {
-      const allMissing = [...missingFields];
-      if (incompleteProperties.length > 0) {
-        allMissing.push(...incompleteProperties);
-      }
-      
+      const allMissing = [...missingFields, ...incompleteProperties];
       toast({
         title: "Missing Required Fields",
         description: `Please fill in: ${allMissing.join("; ")}`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    // Require uploaded data tape file for webhook processing
     if (!uploadedDataTapeFile) {
       toast({
         title: "Data Tape Required",
@@ -972,22 +987,22 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       return;
     }
 
-    // Call webhook with the uploaded file; block submission on failure
+    setIsSubmitting(true);
     try {
       const fd = new FormData();
-      fd.append('file', uploadedDataTapeFile);
-      const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
-        method: 'POST',
+      fd.append("file", uploadedDataTapeFile);
+      const res = await fetch("https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a", {
+        method: "POST",
         body: fd,
       });
 
       if (!res.ok) {
         toast({
-          title: 'Analysis Failed',
+          title: "Analysis Failed",
           description: `Webhook error: ${res.status}`,
-          variant: 'destructive',
+          variant: "destructive",
         });
-        return; // Block navigation
+        return;
       }
 
       const payload = await res.json();
@@ -995,21 +1010,24 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
 
       const packageData = {
         loanPurpose,
-        properties,
-        packageType: "multi-property",
+        properties: selectedSplit.properties,
+        packageType: "package-split",
+        packageName: selectedSplit.name,
         creditScore,
         webhookOutput,
       };
 
       onSubmit(packageData);
     } catch (err) {
-      console.error('Webhook error:', err);
+      console.error("Webhook error:", err);
       toast({
-        title: 'Analysis Failed',
-        description: 'Could not analyze the uploaded file. Please try again.',
-        variant: 'destructive',
+        title: "Analysis Failed",
+        description: "Could not analyze the uploaded file. Please try again.",
+        variant: "destructive",
       });
-      return; // Block navigation
+      return;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1587,11 +1605,22 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                                     {/* Action Button */}
                                     <div className="mt-6 flex justify-end">
                                         <Button
-                                            onClick={() => submitPackage(split.id)}
-                                            className="bg-dominion-blue hover:bg-blue-700 text-white"
-                                            disabled={isLoading}
+                                            onClick={() => {
+                                              setSelectedPackageId(split.id);
+                                              setDisplayedProperties(split.properties);
+                                              toast({
+                                                title: "Package Selected",
+                                                description: `Selected "${split.name}". Now click Get Package Loan Quote.`,
+                                              });
+                                            }}
+                                            variant={selectedPackageId === split.id ? "secondary" : "default"}
+                                            className={`${selectedPackageId === split.id ? "" : "bg-dominion-blue hover:bg-blue-700 text-white"}`}
                                         >
-                                            {isLoading ? 'Processing...' : 'Submit Package for Pricing'}
+                                            {selectedPackageId === split.id ? (
+                                              <span className="flex items-center"><Check className="w-4 h-4 mr-2" /> Selected</span>
+                                            ) : (
+                                              "Select this"
+                                            )}
                                         </Button>
                                     </div>
                                 </div>
