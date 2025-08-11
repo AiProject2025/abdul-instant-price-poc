@@ -6,15 +6,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, LogOut } from "lucide-react";
 import PricingResults from "@/components/PricingResults";
+import LoanPassView from "@/components/LoanPassView";
 import { transformFormDataForAPI } from "@/utils/pricingPayload";
 
 const PackageLoan = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState<"form" | "results">("form");
+  const [currentStep, setCurrentStep] = useState<"form" | "review" | "results">("form");
   const [pricingResults, setPricingResults] = useState<any[]>([]);
   const [ineligibleBuyers, setIneligibleBuyers] = useState<any[]>([]);
   const [flags, setFlags] = useState<string[]>([]);
   const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
+  const [reviewData, setReviewData] = useState<any | null>(null);
+  const [fieldSources, setFieldSources] = useState<Record<string, "tape" | "derived" | "default" | "manualRequired">>({});
   const { toast } = useToast();
   const { signOut } = useAuth();
 
@@ -97,7 +100,9 @@ const PackageLoan = () => {
       if (!props.length) throw new Error("No properties in selected package");
 
       // Validate: Same State Requirement
-      const states = props.map((p: any) => extractAddressParts(p.fullPropertyAddress).state).filter(Boolean);
+      const states = props
+        .map((p: any) => extractAddressParts(p.fullPropertyAddress).state)
+        .filter(Boolean);
       const uniqueStates = Array.from(new Set(states));
       if (uniqueStates.length !== 1) {
         toast({
@@ -105,6 +110,7 @@ const PackageLoan = () => {
           description: "All properties in a portfolio must be in the same state.",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -112,80 +118,253 @@ const PackageLoan = () => {
       const primary = getPrimaryProperty(props);
       const addr = extractAddressParts(primary.fullPropertyAddress);
 
-      // Property type = most common type across portfolio
-      const propertyType = mapPropertyTypeForForm(mostCommon(props.map((p: any) => p.structureType)));
-      const numberOfUnits = primary.numberOfUnits || 1;
+      // Property type - most restrictive: any Multi-Family => Multi-Family, else any Condo => Condominium, else Townhome, else Single Family
+      const hasMF = props.some((p: any) => (p.structureType || "").toLowerCase().includes("multi"));
+      const hasCondo = props.some((p: any) => (p.structureType || "").toLowerCase().includes("condo"));
+      const hasTown = props.some((p: any) => (p.structureType || "").toLowerCase().includes("town"));
+      const propertyType = hasMF ? "Multi-Family" : hasCondo ? "Condominium" : hasTown ? "Townhouse" : "Single Family";
+
+      // Units come from primary property
+      const numberOfUnits = (primary.numberOfUnits || 1).toString();
 
       // Aggregations (portfolio totals)
-      const totalPurchasePrice = props.reduce((s: number, p: any) => s + (p.purchasePrice || 0), 0);
-      const totalRehabCosts = props.reduce((s: number, p: any) => s + (p.rehabCosts || 0), 0);
-      const totalMarketValue = props.reduce((s: number, p: any) => s + (p.currentMarketValue || 0), 0);
-      const totalMortgagePayoff = props.reduce((s: number, p: any) => s + (p.existingMortgageBalance || 0), 0);
-      const totalAnnualTaxes = props.reduce((s: number, p: any) => s + (p.annualPropertyTaxes || 0), 0);
-      const totalAnnualInsurance = props.reduce((s: number, p: any) => s + (p.annualHazardInsurance || 0), 0);
-      const totalAnnualFlood = props.reduce((s: number, p: any) => s + (p.annualFloodInsurance || 0), 0);
-      const totalAnnualHOA = props.reduce((s: number, p: any) => s + (p.annualHomeOwnersAssociation || p.annualHOAFees || 0), 0);
+      const toNum = (v: any) => {
+        if (v === null || v === undefined) return 0;
+        const n = parseFloat(v.toString().replace(/[^0-9.\-]/g, ""));
+        return isNaN(n) ? 0 : n;
+      };
+
+      const sum = (arr: any[], key: string) => arr.reduce((s, p: any) => s + toNum(p[key]), 0);
+
+      const totalPurchasePrice = sum(props, "purchasePrice");
+      const totalRehabCosts = sum(props, "rehabCosts");
+      const totalMarketValue = sum(props, "currentMarketValue");
+      const totalMortgagePayoff = sum(props, "existingMortgageBalance");
+      const totalAnnualTaxes = sum(props, "annualPropertyTaxes");
+      const totalAnnualInsurance = sum(props, "annualHazardInsurance");
+      const totalAnnualFlood = sum(props, "annualFloodInsurance");
+      const totalAnnualHOA = sum(props, "annualHomeOwnersAssociation");
+      const totalSquareFeet = sum(props, "squareFootage");
 
       // Rent: sum monthly market rents or lease amounts
-      const totalMonthlyRent = props.reduce((s: number, p: any) => s + (parseMoney(p.marketRent) || parseMoney(p.currentLeaseAmount)), 0);
+      const totalMonthlyRent = props.reduce((s: number, p: any) => s + (toNum(p.marketRent) || toNum(p.currentLeaseAmount)), 0);
 
       // Earliest purchase date for refinance
       const purchaseDates = props
         .map((p: any) => p.purchaseDate)
         .filter(Boolean)
         .sort();
-      const earliestPurchaseDate = purchaseDates[0] || '';
+      const earliestPurchaseDate = purchaseDates[0] || "";
 
-      // Build aggregated form data matching single-quote schema
-      const aggregatedFormData: any = {
-        // Loan/Portfolio
-        loanPurpose: (data.loanPurpose || primary.purposeOfLoan || '').toString(),
-        creditScore: data.creditScore || primary.borrowersCreditScore || '',
-        crossCollateralLoan: 'Yes',
-        numberOfProperties: props.length.toString(),
+      // Borrower score: lowest across properties, or from form-level
+      const scores = props
+        .map((p: any) => toNum(p.borrowersCreditScore))
+        .filter((n: number) => n > 0);
+      const decisionCreditScore = scores.length ? Math.min(...scores) : toNum(data.creditScore);
 
-        // Address (single address rule)
-        streetAddress: addr.streetAddress,
-        city: addr.city,
-        propertyState: addr.state,
-        zipCode: addr.zipCode,
-        propertyCounty: primary.countyName || '',
+      // Derivations/defaults per guidance
+      const occupancyValues = props.map((p: any) => (p.currentOccupancyStatus || "").toLowerCase());
+      const inferredLeaseInPlace = occupancyValues.some((v) => v.includes("lease") || v.includes("leased")) ? "Yes" : "No";
+
+      const rural = props.some((p: any) => (p.isRural || "").toString().toLowerCase() === "yes") ? "Yes" : "No";
+
+      // Field sources tracker
+      const sources: Record<string, "tape" | "derived" | "default" | "manualRequired"> = {};
+
+      const review: any = {
+        // Borrower
+        entityOrPersonal: "", // manual
+        citizenshipType: "", // manual
+        decisionCreditScore: decisionCreditScore ? decisionCreditScore.toString() : "",
 
         // Property
+        state: addr.state,
+        county: primary.countyName || "",
+        zipCode: addr.zipCode,
+        streetAddress: addr.streetAddress,
+        city: addr.city,
         propertyType,
-        propertyCondition: primary.currentCondition || 'C3',
-        numberOfUnits: numberOfUnits.toString(),
-        leaseInPlace: 'Yes',
-        unit1Rent: totalMonthlyRent.toString(),
+        numberOfUnits,
+        propertyCondition: primary.currentCondition || "",
+        ruralProperty: rural,
+        decliningMarkets: "", // manual
+        propertySquareFootage: totalSquareFeet ? totalSquareFeet.toString() : "",
 
-        // Expenses (annual)
-        annualTaxes: totalAnnualTaxes.toString(),
-        annualInsurance: totalAnnualInsurance.toString(),
-        annualAssociationFees: totalAnnualHOA.toString(),
-        annualFloodInsurance: totalAnnualFlood.toString(),
+        // Conditional
+        condoApprovalType: propertyType === "Condominium" ? "" : "",
 
-        // Purchase/Refi specifics
-        purchasePrice: totalPurchasePrice.toString(),
-        estimatedRehabCost: totalRehabCosts.toString(),
-        marketValue: totalMarketValue.toString(),
-        hasMortgage: totalMortgagePayoff > 0 ? 'Yes' : 'No',
-        mortgagePayoff: totalMortgagePayoff.toString(),
-        datePurchased: earliestPurchaseDate,
+        // Dates
+        datePurchased: earliestPurchaseDate || null,
 
-        // Misc
-        yourCompany: primary.entityName || '',
+        // Financial (monthly for UX)
+        marketRent: totalMonthlyRent ? totalMonthlyRent.toString() : "",
+        monthlyTaxes: Math.round(totalAnnualTaxes / 12).toString(),
+        monthlyInsurance: Math.round(totalAnnualInsurance / 12).toString(),
+        monthlyHOASpecialAssess: Math.round(totalAnnualHOA / 12).toString(),
+        monthlyFloodInsurance: Math.round(totalAnnualFlood / 12).toString(),
+
+        // Loan Details
+        crossCollateralized: "No", // default
+        interestOnly: "No", // default
+        loanPurpose: (data.loanPurpose || primary.purposeOfLoan || "").toString(),
+        refinanceType: "",
+        appraisedValue: totalMarketValue ? totalMarketValue.toString() : "",
+        purchasePrice: totalPurchasePrice ? totalPurchasePrice.toString() : "",
+        rehabCost: totalRehabCosts ? totalRehabCosts.toString() : "",
+        hasMortgage: totalMortgagePayoff > 0 ? "Yes" : "No",
+        mortgagePayoff: totalMortgagePayoff ? totalMortgagePayoff.toString() : "",
+        interestReserves: "0", // default to 0 months
+        inPlaceLease: inferredLeaseInPlace,
+        shortTermRental: "No", // default lease structure -> Long-term
+        section8: "No", // default
+
+        numberOfPropertiesOnLoan: props.length.toString(),
       };
 
-      // Persist for results and document gen
-      setLastSubmittedFormData(aggregatedFormData);
+      // Populate sources map
+      sources.decision_credit_score = decisionCreditScore ? "derived" : "manualRequired";
+      sources.property_type = "derived";
+      sources.number_of_units = "derived";
+      sources.total_square_feet = totalSquareFeet ? "derived" : "manualRequired";
+      sources.property_condition = primary.currentCondition ? "tape" : "manualRequired";
+      sources.rural = rural ? "derived" : "manualRequired";
+      sources.declining_market = "manualRequired";
+      sources.condo_approval_type = propertyType === "Condominium" ? "manualRequired" : "derived";
+      sources.loan_purpose = review.loanPurpose ? "tape" : "manualRequired";
+      sources.purchase_price = totalPurchasePrice ? "derived" : "manualRequired";
+      sources.market_value = totalMarketValue ? "derived" : "manualRequired";
+      sources.desired_ltv = "manualRequired";
+      sources.rehab_cost = totalRehabCosts ? "derived" : "manualRequired";
+      sources.has_mortgage = "derived";
+      sources.mortgage_payoff = review.hasMortgage === "Yes" ? (totalMortgagePayoff ? "derived" : "manualRequired") : "derived";
+      sources.cross_collateral_loan = "default";
+      sources.interest_only = "default";
+      sources.market_rent = totalMonthlyRent ? "derived" : "manualRequired";
+      sources.lease_in_place = inferredLeaseInPlace ? "derived" : "manualRequired";
+      sources.lease_structure = "default";
+      sources.section_8 = "default";
+      sources.annual_taxes = totalAnnualTaxes ? "derived" : "manualRequired";
+      sources.annual_insurance = totalAnnualInsurance ? "derived" : "manualRequired";
+      sources.annual_association_fees = totalAnnualHOA ? "derived" : "manualRequired";
+      sources.annual_flood_insurance = totalAnnualFlood ? "derived" : "manualRequired";
+      sources.state = addr.state ? "tape" : "manualRequired";
+      sources.county = review.county ? "tape" : "manualRequired";
+      sources.interest_reserves = "default";
+      sources.us_citizen = "manualRequired";
+      sources.borrower_type = "manualRequired";
 
-      // Call pricing API using the same endpoint as single quote
+      setReviewData(review);
+      setFieldSources(sources);
+      setCurrentStep("review");
+
+      toast({
+        title: "Review Required",
+        description: "Confirm required LoanPASS fields before pricing.",
+      });
+    } catch (error) {
+      console.error("Error preparing review:", error);
+      toast({
+        title: "Error",
+        description: "Failed to prepare review. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReviewSubmit = async (form: any) => {
+    // Validate required items
+    const requiredChecks: Array<[string, any]> = [
+      ["citizenshipType", form.citizenshipType],
+      ["entityOrPersonal", form.entityOrPersonal],
+      ["decisionCreditScore", form.decisionCreditScore],
+      ["propertyType", form.propertyType],
+      ["numberOfUnits", form.numberOfUnits],
+      ["propertySquareFootage", form.propertySquareFootage],
+      ["state", form.state],
+      ["county", form.county],
+      ["loanPurpose", form.loanPurpose],
+      ["appraisedValue", form.appraisedValue],
+      ["marketRent", form.marketRent],
+      ["monthlyTaxes", form.monthlyTaxes],
+      ["monthlyInsurance", form.monthlyInsurance],
+      ["monthlyHOASpecialAssess", form.monthlyHOASpecialAssess],
+      ["monthlyFloodInsurance", form.monthlyFloodInsurance],
+    ];
+
+    const missing = requiredChecks.filter(([_, v]) => v === undefined || v === null || v === "" || v === 0).map(([k]) => k);
+    if (missing.length) {
+      toast({
+        title: "Missing Required Fields",
+        description: `Please complete: ${missing.join(", ")}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Map LoanPassView form to pricing payload shape
+      const aggregatedFormData: any = {
+        // Borrower
+        closingType: form.entityOrPersonal, // Entity | Personal
+        usCitizen: form.citizenshipType === "US Citizen" ? "Yes" : "No",
+        creditScore: form.decisionCreditScore,
+        yourCompany: form.businessName || "",
+
+        // Address
+        streetAddress: form.streetAddress,
+        city: form.city,
+        propertyState: (form.state || "").split(" ").pop(),
+        zipCode: form.zipCode,
+        propertyCounty: form.county,
+
+        // Property
+        propertyType: form.propertyType,
+        numberOfUnits: form.numberOfUnits,
+        propertyCondition: form.propertyCondition || "",
+        rural: form.ruralProperty,
+        decliningMarket: form.decliningMarkets || "No",
+        totalSquareFeet: form.propertySquareFootage,
+
+        // Loan
+        loanPurpose: form.loanPurpose,
+        purchasePrice: form.purchasePrice,
+        estimatedRehabCost: form.rehabCost,
+        marketValue: form.appraisedValue,
+        desiredLTV: form.desiredLTV || "",
+        crossCollateralLoan: form.crossCollateralized,
+        interestOnly: form.interestOnly,
+        interestReserves: form.interestReserves || "0",
+
+        // Refi specifics
+        hasMortgage: form.hasMortgage || (toNum(form.mortgagePayoff) > 0 ? "Yes" : "No"),
+        mortgagePayoff: form.mortgagePayoff || "0",
+        refinanceType: form.refinanceType || "",
+        datePurchased: form.datePurchased || "",
+
+        // Income/DSCR
+        marketRent: form.marketRent,
+        hasVacantUnits: undefined,
+        leaseInPlace: form.inPlaceLease || "No",
+        leaseStructure: form.shortTermRental === "Yes" ? "Short Term" : "Long Term",
+        section8Lease: form.section8 || "No",
+
+        // Expenses (annual)
+        annualTaxes: (12 * toNum(form.monthlyTaxes)).toString(),
+        annualInsurance: (12 * toNum(form.monthlyInsurance)).toString(),
+        annualAssociationFees: (12 * toNum(form.monthlyHOASpecialAssess)).toString(),
+        annualFloodInsurance: (12 * toNum(form.monthlyFloodInsurance)).toString(),
+      };
+
       const apiPayload = transformFormDataForAPI(aggregatedFormData);
+
       const response = await fetch(
-        'https://n8n-prod.onrender.com/webhook/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/pricing',
+        "https://n8n-prod.onrender.com/webhook/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/pricing",
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(apiPayload),
         }
       );
@@ -195,13 +374,11 @@ const PackageLoan = () => {
       }
 
       const pricingResponse = await response.json();
-
-      // Extract eligible results
       const quotesData = pricingResponse.quotes || pricingResponse || {};
       const results = Object.entries(quotesData)
         .filter(([, d]: any) => d.flags && d.flags.length === 0 && d.adjusted_interest_rate)
         .map(([noteBuyer, d]: any) => ({
-          lender: 'Dominion Financial',
+          lender: "Dominion Financial",
           noteBuyer,
           product: noteBuyer,
           rate: d.adjusted_interest_rate,
@@ -209,12 +386,12 @@ const PackageLoan = () => {
           totalInterest: Math.round(parseFloat(d.loan_amount) * 0.65),
           loanAmount: parseFloat(d.loan_amount),
           dscr: d.final_dscr,
-          propertyType: (d.property_type || '').replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-          loanPurpose: apiPayload.loan_purpose === 'refinance' ? 'Refinance' : 'Purchase',
+          propertyType: (d.property_type || "").replace("-", " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
+          loanPurpose: apiPayload.loan_purpose === "refinance" ? "Refinance" : "Purchase",
           ltv: parseFloat(d.ltv),
           points: d.adjusted_price - 100,
           pppDuration: `${d.rate_lock_period_days} days`,
-          refinanceType: apiPayload.refinance_type ? (apiPayload.refinance_type === 'cashout' ? 'Cash Out' : 'Rate/Term') : undefined,
+          refinanceType: apiPayload.refinance_type ? (apiPayload.refinance_type === "cashout" ? "Cash Out" : "Rate/Term") : undefined,
           rateLockDays: d.rate_lock_period_days,
           isLocked: false,
         }))
@@ -227,17 +404,18 @@ const PackageLoan = () => {
       setPricingResults(results);
       setIneligibleBuyers(ineligible);
       setFlags(pricingResponse.flags || []);
-      setCurrentStep('results');
+      setLastSubmittedFormData(aggregatedFormData);
+      setCurrentStep("results");
 
       toast({
-        title: 'Package Priced',
-        description: `Received ${results.length} offers for ${props.length}-property portfolio`,
+        title: "Package Priced",
+        description: `Received ${results.length} offers`,
       });
     } catch (error) {
-      console.error('Error submitting package:', error);
+      console.error("Error submitting pricing:", error);
       toast({
         title: "Error",
-        description: "Failed to get package pricing. Please try again.",
+        description: "Failed to get package pricing. Please review and try again.",
         variant: "destructive",
       });
     } finally {
