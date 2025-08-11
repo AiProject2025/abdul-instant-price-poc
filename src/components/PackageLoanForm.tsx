@@ -104,7 +104,8 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
             <SelectItem value="Single Family">Single Family</SelectItem>
             <SelectItem value="Townhome">Townhome</SelectItem>
             <SelectItem value="Condo">Condo</SelectItem>
-            <SelectItem value="Multi-Family">Multi-Family</SelectItem>
+              <SelectItem value="Multi-Family">Multi-Family</SelectItem>
+              <SelectItem value="Duplex">Duplex</SelectItem>
           </SelectContent>
         </Select>
       </td>

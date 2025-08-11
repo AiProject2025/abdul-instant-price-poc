@@ -282,7 +282,7 @@ export function parseDataTapeFile(file: File): Promise<ParsedDataTape> {
         
         rows.forEach((row: any[], index) => {
           // Skip empty rows and the first row (example data)
-          if (!row || row.every(cell => !cell) || index === 0) return;
+          if (!row || row.every(cell => !cell)) return;
           
           const property: any = {
             id: `datatape-${index}`,
