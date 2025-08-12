@@ -134,7 +134,16 @@ const Quote = () => {
       const extractionResult = await response.json();
       console.log('Document extraction result:', extractionResult);
 
-      setExtractedData(extractionResult);
+      // Flatten common n8n shape { output: { ...fields }} to direct fields for the form
+      const prefillData = (extractionResult && extractionResult.output) ? extractionResult.output : extractionResult;
+
+      // Normalize loan purpose wording if present (e.g., "Cash-Out Refinance" -> "Refinance")
+      if (prefillData && prefillData.loanPurpose) {
+        const s = prefillData.loanPurpose.toString().toLowerCase();
+        prefillData.loanPurpose = s.includes('refi') ? 'Refinance' : 'Purchase';
+      }
+
+      setExtractedData(prefillData);
       setCurrentStep("questionnaire");
       setIsProcessing(false);
     } catch (error) {
