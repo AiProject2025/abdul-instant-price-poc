@@ -8,7 +8,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Plus, Trash2, Eye, X, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { parseDataTapeFile } from "@/utils/dataTapeParser";
 
 interface Property {
   id: string;
@@ -421,6 +420,92 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       }
     }
   }, [toast]);
+
+  // Map n8n API output item to internal Property shape
+  const mapN8nOutputToProperty = (item: any, idx: number): Property => {
+    const mapStructureType = (s?: string) => {
+      const t = (s || '').toLowerCase();
+      if (t.includes('single')) return 'Single Family';
+      if (t.includes('duplex')) return 'Duplex';
+      if (t.includes('triplex') || t.includes('fourplex') || t.includes('plex')) return 'Multi-Family';
+      if (t.includes('condo')) return 'Condo';
+      if (t.includes('town')) return 'Townhome';
+      if (t.includes('manufactured') || t.includes('mobile')) return 'Single Family';
+      return s || '';
+    };
+
+    const mapOccupancy = (s?: string) => {
+      const t = (s || '').toLowerCase();
+      if (t.includes('tenant')) return 'Leased';
+      if (t.includes('owner')) return 'Owner Occupied';
+      if (t.includes('vacant')) return 'Vacant';
+      if (t.includes('mtm') || t.includes('month')) return 'MTM';
+      return '';
+    };
+
+    const dollars = (n: any) => {
+      const v = Number(n) || 0;
+      return v > 0 ? `$${Math.round(v).toLocaleString()}` : '';
+    };
+
+    return {
+      id: `property-${Date.now()}-${idx}`,
+      fullPropertyAddress: item.full_property_address || '',
+      countyName: item.county_name || '',
+      structureType: mapStructureType(item.structure_type),
+      numberOfUnits: undefined,
+      squareFootage: 0,
+      sqfType: '',
+      condo: item.condo ? 'Yes' : 'No',
+      legalNonConforming: 'No',
+      isRural: 'no',
+      borrowersCreditScore: (item.borrower_credit_score ?? '').toString(),
+      purposeOfLoan: (item.purpose_of_loan || '').includes('Refinance') ? (item.purpose_of_loan?.includes('Cash-Out') ? 'Cash-Out' : 'Refinance') : 'Purchase',
+      purchaseDate: item.purchase_date || '',
+      purchasePrice: Number(item.purchase_price) || 0,
+      rehabCosts: Number(item.rehab_costs) || 0,
+      currentMarketValue: Number(item.current_market_value) || 0,
+      existingMortgageBalance: Number(item.existing_mortgage_balance) || 0,
+      currentMortgageRate: Number(item.current_mortgage_rate) || 0,
+      currentOccupancyStatus: mapOccupancy(item.current_occupancy_status),
+      marketRent: dollars(item.market_rent),
+      currentLeaseAmount: dollars(item.current_lease_amount),
+      annualPropertyTaxes: Number(item.annual_property_taxes) || 0,
+      annualHazardInsurance: Number(item.annual_hazard_insurance_premium) || 0,
+      annualFloodInsurance: Number(item.annual_flood_insurance_premium) || 0,
+      annualHomeOwnersAssociation: Number(item.annual_home_owner_association_fees) || 0,
+      currentCondition: item.current_condition || '',
+      strategyForProperty: item.strategy_for_property || '',
+      entityName: item.entity_name || '',
+      notes: item.notes || '',
+    };
+  };
+
+  const deriveLoanPurposeFromOutput = (list: any[]) => {
+    const hasRefi = list.some(i => (i.purpose_of_loan || '').toLowerCase().includes('refinance'));
+    return hasRefi ? 'refinance' : 'purchase';
+  };
+
+  const mapN8nResponseToState = (payload: any) => {
+    const output: any[] = payload?.output || payload || [];
+    const mapped = output.map(mapN8nOutputToProperty);
+    const inferredPurpose = deriveLoanPurposeFromOutput(output);
+    const inferredScore = (output[0]?.borrower_credit_score ?? '').toString();
+
+    setLoanPurpose(inferredPurpose);
+    setCreditScore(inferredScore);
+    setNumberOfProperties(mapped.length.toString());
+    setProperties(mapped);
+    setShowPropertyGrid(true);
+
+    const persisted = {
+      loanPurpose: inferredPurpose,
+      creditScore: inferredScore,
+      numberOfProperties: mapped.length,
+      properties: mapped,
+    };
+    localStorage.setItem('dominionDataTape', JSON.stringify(persisted));
+  };
 
   const initializeEmptyProperties = () => {
     const count = parseInt(numberOfProperties);
@@ -877,40 +962,40 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     setUploadedDataTapeFile(file);
 
     try {
-      const parsedData = await parseDataTapeFile(file);
-      
-      // Auto-populate form fields with proper mapping
-      if (parsedData.loanPurpose) {
-        setLoanPurpose(parsedData.loanPurpose);
-      }
-      if (parsedData.creditScore) {
-        setCreditScore(parsedData.creditScore.toString());
-      }
-      setNumberOfProperties(parsedData.numberOfProperties.toString());
-      setProperties(parsedData.properties);
-      
-      // Store parsed data in localStorage for persistence between routes
-      localStorage.setItem('dominionDataTape', JSON.stringify(parsedData));
-      
-      // Store parsed data in localStorage for persistence between routes
-      localStorage.setItem('dominionDataTape', JSON.stringify(parsedData));
-      setShowPropertyGrid(true);
-      
-      toast({
-        title: "Data Tape Processed Successfully",
-        description: `Imported ${parsedData.numberOfProperties} properties from ${file.name}`,
+      const fd = new FormData();
+      fd.append('file', file);
+
+      // Call n8n to parse the data sheet and return normalized portfolio data
+      const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
+        method: 'POST',
+        body: fd,
       });
-      
+
+      if (!res.ok) {
+        throw new Error(`Data parsing failed with status: ${res.status}`);
+      }
+
+      const payload = await res.json();
+      console.log('n8n package data:', payload);
+
+      // Map response to our internal state (fills the grid automatically)
+      mapN8nResponseToState(payload);
+
+      toast({
+        title: 'Data Tape Processed Successfully',
+        description: `Imported ${(payload?.output || payload || []).length} properties from ${file.name}`,
+      });
+
       // Clear the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      
     } catch (error) {
+      console.error('Error processing data tape via API:', error);
       toast({
-        title: "Processing Error",
-        description: error instanceof Error ? error.message : "Failed to process data tape file.",
-        variant: "destructive"
+        title: 'Processing Error',
+        description: error instanceof Error ? error.message : 'Failed to process data tape file.',
+        variant: 'destructive',
       });
     } finally {
       setIsProcessingFile(false);
@@ -945,90 +1030,25 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       return;
     }
 
-    // Validate required fields
-    const missingFields: string[] = [];
-    if (!loanPurpose) missingFields.push("Loan Purpose");
-    if (!creditScore) missingFields.push("Credit Score");
-
-    const propertiesToValidate = selectedSplit.properties || [];
-    if (propertiesToValidate.length === 0) {
-      missingFields.push("At least one property");
-    }
-
-    const incompleteProperties: string[] = [];
-    propertiesToValidate.forEach((property, index) => {
-      const emptyFields: string[] = [];
-      if (!property.fullPropertyAddress) emptyFields.push("Address");
-      if (!property.countyName) emptyFields.push("County");
-      if (!property.structureType) emptyFields.push("Structure Type");
-      if (!property.condo) emptyFields.push("Condo");
-      if (!property.currentMarketValue) emptyFields.push("Current Market Value");
-      if (emptyFields.length > 0) {
-        incompleteProperties.push(`Property ${index + 1}: ${emptyFields.join(", ")}`);
-      }
-    });
-
-    if (missingFields.length > 0 || incompleteProperties.length > 0) {
-      const allMissing = [...missingFields, ...incompleteProperties];
-      toast({
-        title: "Missing Required Fields",
-        description: `Please fill in: ${allMissing.join("; ")}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!uploadedDataTapeFile) {
       toast({
         title: "Data Tape Required",
-        description: "Please upload your Excel/CSV data tape before requesting a quote.",
+        description: "Please upload your Excel/CSV data tape before continuing.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", uploadedDataTapeFile);
-      const res = await fetch("https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a", {
-        method: "POST",
-        body: fd,
-      });
-
-      if (!res.ok) {
-        toast({
-          title: "Analysis Failed",
-          description: `Webhook error: ${res.status}`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const payload = await res.json();
-      const webhookOutput = payload?.output || payload || {};
-
-      const packageData = {
-        loanPurpose,
-        properties: selectedSplit.properties,
-        packageType: "package-split",
-        packageName: selectedSplit.name,
-        creditScore,
-        webhookOutput,
-      };
-
-      onSubmit(packageData);
-    } catch (err) {
-      console.error("Webhook error:", err);
-      toast({
-        title: "Analysis Failed",
-        description: "Could not analyze the uploaded file. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    } finally {
-      setIsSubmitting(false);
-    }
+    // As requested: do not call pricing; just log what would be sent
+    const payloadPreview = {
+      loanPurpose,
+      creditScore,
+      packageType: 'package-split',
+      packageName: selectedSplit.name,
+      properties: selectedSplit.properties,
+      totalProperties: selectedSplit.properties.length,
+    };
+    console.log('Get Package Loan Quote - payload preview:', payloadPreview);
   };
 
   const handlePropertiesChange = (updatedProperties: Property[]) => {

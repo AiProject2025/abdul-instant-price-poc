@@ -61,13 +61,89 @@ const QuestionnaireUpload = ({
 
   const processDataTapeForPackage = async (file: File) => {
     try {
-      // Import the parser and process the file
-      const { parseDataTapeFile } = await import('@/utils/dataTapeParser');
-      const parsedData = await parseDataTapeFile(file);
+      // Send to n8n to parse and normalize the portfolio
+      const fd = new FormData();
+      fd.append('file', file);
 
-      // Clear any existing data and store the new parsed data
+      const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
+        method: 'POST',
+        body: fd,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Data tape API failed with status: ${res.status}`);
+      }
+
+      const payload = await res.json();
+      const list: any[] = payload?.output || payload || [];
+
+      const mapStructureType = (s?: string) => {
+        const t = (s || '').toLowerCase();
+        if (t.includes('single')) return 'Single Family';
+        if (t.includes('duplex')) return 'Duplex';
+        if (t.includes('triplex') || t.includes('fourplex') || t.includes('plex')) return 'Multi-Family';
+        if (t.includes('condo')) return 'Condo';
+        if (t.includes('town')) return 'Townhome';
+        if (t.includes('manufactured') || t.includes('mobile')) return 'Single Family';
+        return s || '';
+      };
+      const mapOccupancy = (s?: string) => {
+        const t = (s || '').toLowerCase();
+        if (t.includes('tenant')) return 'Leased';
+        if (t.includes('owner')) return 'Owner Occupied';
+        if (t.includes('vacant')) return 'Vacant';
+        if (t.includes('mtm') || t.includes('month')) return 'MTM';
+        return '';
+      };
+      const dollars = (n: any) => {
+        const v = Number(n) || 0;
+        return v > 0 ? `$${Math.round(v).toLocaleString()}` : '';
+      };
+
+      const properties = list.map((item, idx) => ({
+        id: `property-${Date.now()}-${idx}`,
+        fullPropertyAddress: item.full_property_address || '',
+        countyName: item.county_name || '',
+        structureType: mapStructureType(item.structure_type),
+        numberOfUnits: undefined,
+        squareFootage: 0,
+        sqfType: '',
+        condo: item.condo ? 'Yes' : 'No',
+        legalNonConforming: 'No',
+        isRural: 'no',
+        borrowersCreditScore: (item.borrower_credit_score ?? '').toString(),
+        purposeOfLoan: (item.purpose_of_loan || '').includes('Refinance') ? (item.purpose_of_loan?.includes('Cash-Out') ? 'Cash-Out' : 'Refinance') : 'Purchase',
+        purchaseDate: item.purchase_date || '',
+        purchasePrice: Number(item.purchase_price) || 0,
+        rehabCosts: Number(item.rehab_costs) || 0,
+        currentMarketValue: Number(item.current_market_value) || 0,
+        existingMortgageBalance: Number(item.existing_mortgage_balance) || 0,
+        currentMortgageRate: Number(item.current_mortgage_rate) || 0,
+        currentOccupancyStatus: mapOccupancy(item.current_occupancy_status),
+        marketRent: dollars(item.market_rent),
+        currentLeaseAmount: dollars(item.current_lease_amount),
+        annualPropertyTaxes: Number(item.annual_property_taxes) || 0,
+        annualHazardInsurance: Number(item.annual_hazard_insurance_premium) || 0,
+        annualFloodInsurance: Number(item.annual_flood_insurance_premium) || 0,
+        annualHomeOwnersAssociation: Number(item.annual_home_owner_association_fees) || 0,
+        currentCondition: item.current_condition || '',
+        strategyForProperty: item.strategy_for_property || '',
+        entityName: item.entity_name || '',
+        notes: item.notes || '',
+      }));
+
+      const inferredPurpose = list.some(i => (i.purpose_of_loan || '').toLowerCase().includes('refinance')) ? 'refinance' : 'purchase';
+      const inferredScore = (list[0]?.borrower_credit_score ?? '').toString();
+
+      const persisted = {
+        loanPurpose: inferredPurpose,
+        creditScore: inferredScore,
+        numberOfProperties: properties.length,
+        properties,
+      };
+
       localStorage.removeItem('dominionDataTape');
-      localStorage.setItem('dominionDataTape', JSON.stringify(parsedData));
+      localStorage.setItem('dominionDataTape', JSON.stringify(persisted));
 
       // Navigate to package loan page
       navigate('/package-loan');
@@ -76,7 +152,6 @@ const QuestionnaireUpload = ({
       alert('Error processing data tape file. Please check the file format and try again.');
     }
   };
-
   const handleDataTapeSelection = (file: File) => {
     setPendingFile(file);
     setShowDataTapeDialog(true);

@@ -151,76 +151,84 @@ const Quote = () => {
     setIsProcessing(true);
 
     try {
-      console.log('Processing data tape file:', file.name);
+      console.log('Processing data tape file via n8n:', file.name);
 
-      // Import the data tape parser
-      const { parseDataTapeFile } = await import('@/utils/dataTapeParser');
-      const parsedData = await parseDataTapeFile(file);
+      const fd = new FormData();
+      fd.append('file', file);
 
-      console.log('Parsed data tape:', parsedData);
+      // Use n8n API to parse portfolio sheet and return normalized data
+      const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
+        method: 'POST',
+        body: fd,
+      });
 
-      // For single quotes, use the first property from the data tape
-      if (parsedData.properties && parsedData.properties.length > 0) {
-        const firstProperty = parsedData.properties[0];
-
-        // Map the data tape fields to DSCR form fields
-        const mappedFormData = {
-          // Basic info from data tape
-          loanPurpose: parsedData.loanPurpose || firstProperty.purposeOfLoan || '',
-          creditScore: parsedData.creditScore || firstProperty.borrowersCreditScore || '',
-
-          // Property address (parse from fullPropertyAddress)
-          streetAddress: firstProperty.fullPropertyAddress || '',
-          propertyCounty: firstProperty.countyName || '',
-
-          // Property details
-          propertyType: firstProperty.structureType || '',
-          propertyCondition: firstProperty.currentCondition || 'C3',
-
-          // Purchase/refinance details
-          datePurchased: firstProperty.purchaseDate || '',
-          purchasePrice: firstProperty.purchasePrice || '',
-          marketValue: firstProperty.currentMarketValue || '',
-
-          // Existing mortgage
-          mortgagePayoff: firstProperty.existingMortgageBalance || '',
-
-          // Rehab costs
-          rehabCostSpent: firstProperty.rehabCosts || '',
-
-          // Rental income
-          unit1Rent: firstProperty.marketRent || firstProperty.currentLeaseAmount || '',
-
-          // Annual expenses - Map data tape fields to form fields
-          annualTaxes: firstProperty.annualPropertyTaxes || '',
-          annualInsurance: firstProperty.annualHazardInsurance || '', // Map annualHazardInsurance -> annualInsurance
-          annualAssociationFees: firstProperty.annualHOAFees || '', // Map annualHOAFees -> annualAssociationFees
-          annualFloodInsurance: firstProperty.annualFloodInsurance || '',
-
-          // Property status
-          currentOccupancyStatus: firstProperty.currentOccupancyStatus || '',
-
-          // Entity
-          yourCompany: firstProperty.entityName || '',
-
-          // Notes can go in a general field if available
-          // notes: firstProperty.notes || '',
-        };
-
-        console.log('Mapped form data from data tape:', mappedFormData);
-
-        setExtractedData(mappedFormData);
-        setLastSubmittedFormData(mappedFormData);
-        setCurrentStep("questionnaire");
-      } else {
-        throw new Error('No properties found in data tape file');
+      if (!res.ok) {
+        throw new Error(`Data tape API failed with status: ${res.status}`);
       }
 
+      const payload = await res.json();
+      const list: any[] = payload?.output || payload || [];
+
+      if (!Array.isArray(list) || list.length === 0) {
+        throw new Error('No properties found in uploaded file');
+      }
+
+      const p = list[0];
+      const mapStructureType = (s?: string) => {
+        const t = (s || '').toLowerCase();
+        if (t.includes('single')) return 'Single Family';
+        if (t.includes('condo')) return 'Condominium';
+        if (t.includes('duplex') || t.includes('fourplex') || t.includes('triplex') || t.includes('plex')) return 'Two to Four Family';
+        if (t.includes('mixed')) return 'Mixed Use';
+        return 'Single Family';
+      };
+      const mapOccupancy = (s?: string) => {
+        const t = (s || '').toLowerCase();
+        if (t.includes('tenant')) return 'Leased';
+        if (t.includes('owner')) return 'Owner Occupied';
+        if (t.includes('vacant')) return 'Vacant';
+        return '';
+      };
+
+      const mappedFormData = {
+        loanPurpose: (p.purpose_of_loan || '').includes('Refinance') ? 'Refinance' : 'Purchase',
+        creditScore: (p.borrower_credit_score ?? '').toString(),
+
+        streetAddress: p.full_property_address || '',
+        propertyCounty: p.county_name || '',
+
+        propertyType: mapStructureType(p.structure_type),
+        propertyCondition: p.current_condition || 'C3',
+
+        datePurchased: p.purchase_date || '',
+        purchasePrice: p.purchase_price || '',
+        marketValue: p.current_market_value || '',
+
+        mortgagePayoff: p.existing_mortgage_balance || '',
+
+        rehabCostSpent: p.rehab_costs || '',
+
+        unit1Rent: p.market_rent || p.current_lease_amount || '',
+
+        annualTaxes: p.annual_property_taxes || '',
+        annualInsurance: p.annual_hazard_insurance_premium || '',
+        annualAssociationFees: p.annual_home_owner_association_fees || '',
+        annualFloodInsurance: p.annual_flood_insurance_premium || '',
+
+        currentOccupancyStatus: mapOccupancy(p.current_occupancy_status),
+
+        yourCompany: p.entity_name || '',
+      };
+
+      console.log('Mapped form data from n8n:', mappedFormData);
+
+      setExtractedData(mappedFormData);
+      setLastSubmittedFormData(mappedFormData);
+      setCurrentStep('questionnaire');
     } catch (error) {
-      console.error('Error processing data tape file:', error);
-      // Still allow user to proceed manually if data tape fails
+      console.error('Error processing data tape via n8n:', error);
       setExtractedData(null);
-      setCurrentStep("questionnaire");
+      setCurrentStep('questionnaire');
     } finally {
       setIsProcessing(false);
     }
