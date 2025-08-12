@@ -599,6 +599,7 @@ const Quote = () => {
               onSubmit={handleQuestionnaireSubmit}
               onBack={handleBackToUpload}
               isLoading={isProcessing}
+              isPackageLoan={new URLSearchParams(location.search).get('packageLoan') === 'true' || (location.state as any)?.source === 'package'}
             />
           )}
 

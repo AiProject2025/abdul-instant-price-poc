@@ -12,13 +12,15 @@ interface DSCRFormProps {
   onSubmit: (data: any) => void;
   onBack: () => void;
   isLoading?: boolean;
+  isPackageLoan?: boolean;
 }
 
 const DSCRForm: React.FC<DSCRFormProps> = ({
   initialData,
   onSubmit,
   onBack,
-  isLoading
+  isLoading,
+  isPackageLoan
 }) => {
   const [formState, setFormState] = useState({
     // Personal Info
@@ -99,6 +101,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     unit8Rent: '',
     unit9Rent: '',
     unit10Rent: '',
+    dscrRent: '',
     totalSquareFeet: '2000', // Default to single family
     
     // Annual Property Expenses
@@ -146,6 +149,10 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
 
   // Calculate total rental income
   const calculateTotalRental = () => {
+    if (isPackageLoan && formState.dscrRent) {
+      const v = parseFloat(formState.dscrRent) || 0;
+      return v;
+    }
     const units = parseInt(formState.numberOfUnits) || 0;
     let total = 0;
     
@@ -170,6 +177,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     'rehabCostSpent', 'rehabCostNeeded', 'totalNetOperationIncome',
     'unit1Rent', 'unit2Rent', 'unit3Rent', 'unit4Rent', 'unit5Rent',
     'unit6Rent', 'unit7Rent', 'unit8Rent', 'unit9Rent', 'unit10Rent',
+    'dscrRent',
     'annualTaxes', 'annualInsurance', 'annualAssociationFees', 'annualFloodInsurance',
     'creditScore', 'desiredLTV', 'totalSquareFeet'
   ];
@@ -1274,6 +1282,18 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {isPackageLoan && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">DSCR Rent (Monthly)</label>
+                  <Input 
+                    type="number" 
+                    value={formState.dscrRent}
+                    onChange={e => handleInputChange('dscrRent', e.target.value)} 
+                    placeholder="$0" 
+                  />
+                  <p className="text-xs text-gray-500 mt-1">If provided, this overrides total unit rents for package loan pricing.</p>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {renderRentalIncomeFields()}
               </div>

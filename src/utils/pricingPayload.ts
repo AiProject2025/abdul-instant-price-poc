@@ -14,6 +14,11 @@ export const transformFormDataForAPI = (formData: any) => {
 
   // Calculate total rental income
   const calculateTotalRental = () => {
+    // If DSCR Rent is provided (e.g., for package loans), use it
+    if (formData.dscrRent) {
+      const v = parseFloat(formData.dscrRent.toString().replace(/[^0-9.-]/g, '')) || 0;
+      return v.toString();
+    }
     const units = parseInt(formData.numberOfUnits) || 0;
     let total = 0;
 

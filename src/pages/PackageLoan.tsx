@@ -240,7 +240,7 @@ const PackageLoan = () => {
       }
 
       // Redirect to DSCR questionnaire with prefilled portfolio data
-      navigate('/quote', { state: { prefill: aggregatedFormData, source: 'package' } });
+      navigate('/quote?packageLoan=true', { state: { prefill: aggregatedFormData, source: 'package' } });
       toast({ title: 'Portfolio Ready', description: `Prefilled questionnaire for ${props.length}-property package` });
       setIsLoading(false);
       return;
