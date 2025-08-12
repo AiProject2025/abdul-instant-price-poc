@@ -33,8 +33,13 @@ const Quote = () => {
     const state = location.state as any;
     const prefill = state?.prefill;
     if (prefill) {
-      setLastSubmittedFormData(prefill);
-      setExtractedData(prefill);
+      const normalized = { ...prefill };
+      if (normalized.loanPurpose) {
+        const s = normalized.loanPurpose.toString().toLowerCase();
+        normalized.loanPurpose = s.includes('refi') ? 'Refinance' : 'Purchase';
+      }
+      setLastSubmittedFormData(normalized);
+      setExtractedData(normalized);
       setCurrentStep('questionnaire');
     }
   }, [location.state]);

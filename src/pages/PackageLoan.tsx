@@ -142,7 +142,13 @@ const PackageLoan = () => {
       // Build aggregated form data matching single-quote schema
       const aggregatedFormData: any = {
         // Loan/Portfolio
-        loanPurpose: (data.loanPurpose || primary.purposeOfLoan || '').toString(),
+        loanPurpose: (() => {
+          const v = (data.loanPurpose || primary.purposeOfLoan || '').toString();
+          const s = v.toLowerCase();
+          if (s.includes('refi')) return 'Refinance';
+          if (s.includes('refinance')) return 'Refinance';
+          return 'Purchase';
+        })(),
         creditScore: data.creditScore || primary.borrowersCreditScore || '',
         crossCollateralLoan: 'Yes',
         numberOfProperties: props.length.toString(),
@@ -225,6 +231,12 @@ const PackageLoan = () => {
       // Merge webhook output if provided by form
       if ((data as any).webhookOutput) {
         Object.assign(aggregatedFormData, (data as any).webhookOutput);
+      }
+
+      // Normalize loan purpose after merge to match DSCR form options
+      if (aggregatedFormData.loanPurpose) {
+        const s = aggregatedFormData.loanPurpose.toString().toLowerCase();
+        aggregatedFormData.loanPurpose = s.includes('refi') ? 'Refinance' : 'Purchase';
       }
 
       // Redirect to DSCR questionnaire with prefilled portfolio data
