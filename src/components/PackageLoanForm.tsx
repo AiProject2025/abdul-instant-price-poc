@@ -1039,16 +1039,85 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       return;
     }
 
-    // As requested: do not call pricing; just log what would be sent
-    const payloadPreview = {
+    // Build payload for webhook using selected package
+    const num = (v: any) => {
+      if (typeof v === 'number') return isNaN(v) ? 0 : v;
+      if (typeof v === 'string') {
+        const n = parseFloat(v.replace(/[^0-9.-]/g, ''));
+        return isNaN(n) ? 0 : n;
+      }
+      const n = Number(v);
+      return isNaN(n) ? 0 : n;
+    };
+
+    const propertiesPayload = selectedSplit.properties.map((p) => ({
+      annual_property_taxes: p.annualPropertyTaxes || 0,
+      borrower_credit_score: Number(p.borrowersCreditScore) || Number(creditScore) || 0,
+      condo: (p.condo || '').toLowerCase() === 'yes',
+      county_name: p.countyName || '',
+      current_market_value: p.currentMarketValue || 0,
+      current_occupancy_status: p.currentOccupancyStatus || '',
+      existing_mortgage_balance: p.existingMortgageBalance || 0,
+      full_property_address: p.fullPropertyAddress || '',
+      purchase_date: p.purchaseDate || '',
+      purchase_price: p.purchasePrice || 0,
+      purpose_of_loan: p.purposeOfLoan || loanPurpose,
+      structure_type: p.structureType || '',
+      annual_flood_insurance_premium: p.annualFloodInsurance || 0,
+      annual_hazard_insurance_premium: p.annualHazardInsurance || 0,
+      annual_home_owner_association_fees: p.annualHomeOwnersAssociation || 0,
+      current_condition: p.currentCondition || '',
+      current_lease_amount: num(p.currentLeaseAmount),
+      current_mortgage_rate: p.currentMortgageRate || 0,
+      entity_name: p.entityName || '',
+      market_rent: num(p.marketRent),
+      notes: p.notes || '',
+      rehab_costs: p.rehabCosts || 0,
+      strategy_for_property: p.strategyForProperty || '',
+    }));
+
+    const requestPayload = {
+      packageName: selectedSplit.name,
+      packageId: selectedSplit.id,
       loanPurpose,
       creditScore,
-      packageType: 'package-split',
-      packageName: selectedSplit.name,
-      properties: selectedSplit.properties,
       totalProperties: selectedSplit.properties.length,
+      properties: propertiesPayload,
     };
-    console.log('Get Package Loan Quote - payload preview:', payloadPreview);
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('https://n8n-prod.onrender.com/webhook/e4a0c723-904a-4514-8c37-c6a7d7f29ce2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestPayload),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Webhook failed with status: ${res.status}`);
+      }
+
+      const webhookOutput = await res.json();
+
+      // Pass to parent so it can merge and navigate to /quote with prefill
+      onSubmit({
+        loanPurpose,
+        creditScore,
+        packageType: 'package-split',
+        packageName: selectedSplit.name,
+        properties: selectedSplit.properties,
+        webhookOutput,
+      });
+    } catch (error) {
+      console.error('Error calling package loan data webhook:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch package loan data. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePropertiesChange = (updatedProperties: Property[]) => {
@@ -1751,8 +1820,16 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                </div>
              </div>
             
-            <Button onClick={handleSubmit} disabled={isLoading} className="bg-dominion-blue hover:bg-blue-700 text-white">
-              {isLoading ? "Processing..." : "Get Package Loan Quote"}
+            <Button
+              onClick={handleSubmit}
+              disabled={isLoading || isSubmitting || !(showPackageSplitter && packageSplits.length > 0 && selectedPackageId)}
+              className="bg-dominion-blue hover:bg-blue-700 text-white"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</span>
+              ) : (
+                'Get Package Loan Data'
+              )}
             </Button>
           </div>
         </div>
