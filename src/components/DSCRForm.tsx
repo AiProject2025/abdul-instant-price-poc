@@ -4,7 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statesWithAbbreviations } from '@/utils/locationData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, FileText } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Loader2, FileText, AlertTriangle, User, Home, DollarSign, Calendar, Shield } from 'lucide-react';
 import StateCountySelector from '@/components/StateCountySelector';
 
 interface DSCRFormProps {
@@ -118,6 +120,40 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     // Final Details
     creditScore: ''
   });
+
+  // Define required fields for validation
+  const requiredFields = {
+    firstName: 'First Name',
+    lastName: 'Last Name', 
+    phone: 'Phone',
+    email: 'Email',
+    usCitizen: 'U.S. Citizen',
+    closingType: 'Closing Type',
+    crossCollateralLoan: 'Cross Collateral Loan',
+    streetAddress: 'Street Address',
+    city: 'City',
+    propertyState: 'Property State',
+    zipCode: 'ZIP Code',
+    propertyCounty: 'Property County',
+    loanPurpose: 'Loan Purpose',
+    propertyType: 'Property Type',
+    numberOfUnits: 'Number of Units',
+    desiredLTV: 'Desired LTV',
+    creditScore: 'Credit Score'
+  };
+
+  // Check if a field is required and empty
+  const isFieldInvalid = (fieldName: string) => {
+    return requiredFields[fieldName as keyof typeof requiredFields] && !formState[fieldName as keyof typeof formState];
+  };
+
+  // Get error message for a field
+  const getFieldError = (fieldName: string) => {
+    if (isFieldInvalid(fieldName)) {
+      return `${requiredFields[fieldName as keyof typeof requiredFields]} is required`;
+    }
+    return '';
+  };
 
   console.log('Extracted Data',initialData)
 
@@ -311,187 +347,340 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-dominion-blue mb-2">DSCR Questionnaire</h1>
-        <p className="text-gray-600">Complete the form below to get your loan pricing</p>
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-6 border border-primary/20">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <FileText className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-primary">DSCR Questionnaire</h1>
+            <p className="text-muted-foreground">Complete all required fields to get your loan pricing</p>
+          </div>
+        </div>
+        
         {initialData && (
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center">
-              <FileText className="h-5 w-5 text-green-600 mr-2" />
-              <span className="text-green-700 font-medium">Form auto-populated from uploaded document</span>
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-green-600" />
+              <span className="text-green-700 text-sm font-medium">Form auto-populated from uploaded document</span>
             </div>
           </div>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Personal Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl text-dominion-blue">Personal Info</CardTitle>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Personal Information */}
+        <Card className="border-l-4 border-l-primary shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              <CardTitle className="text-xl text-primary">Personal Information</CardTitle>
+              <Badge variant="secondary" className="ml-auto">Required</Badge>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('firstName') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  First Name *
+                </label>
                 <Input 
                   type="text" 
                   value={formState.firstName} 
-                  onChange={e => handleInputChange('firstName', e.target.value)} 
-                  required 
+                  onChange={e => handleInputChange('firstName', e.target.value)}
+                  className={isFieldInvalid('firstName') ? 'border-red-500 focus:border-red-500' : ''}
+                  placeholder="Enter your first name"
                 />
+                {getFieldError('firstName') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('firstName')}
+                  </div>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+              
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('lastName') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  Last Name *
+                </label>
                 <Input 
                   type="text" 
                   value={formState.lastName} 
-                  onChange={e => handleInputChange('lastName', e.target.value)} 
-                  required 
+                  onChange={e => handleInputChange('lastName', e.target.value)}
+                  className={isFieldInvalid('lastName') ? 'border-red-500 focus:border-red-500' : ''}
+                  placeholder="Enter your last name"
                 />
+                {getFieldError('lastName') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('lastName')}
+                  </div>
+                )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('phone') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  Phone Number *
+                </label>
                 <Input 
                   type="tel" 
                   value={formState.phone} 
-                  onChange={e => handleInputChange('phone', e.target.value)} 
-                  required 
+                  onChange={e => handleInputChange('phone', e.target.value)}
+                  className={isFieldInvalid('phone') ? 'border-red-500 focus:border-red-500' : ''}
+                  placeholder="(555) 123-4567"
                 />
+                {getFieldError('phone') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('phone')}
+                  </div>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('email') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  Email Address *
+                </label>
                 <Input 
                   type="email" 
                   value={formState.email} 
-                  onChange={e => handleInputChange('email', e.target.value)} 
-                  required 
+                  onChange={e => handleInputChange('email', e.target.value)}
+                  className={isFieldInvalid('email') ? 'border-red-500 focus:border-red-500' : ''}
+                  placeholder="your.email@example.com"
                 />
+                {getFieldError('email') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('email')}
+                  </div>
+                )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Your Company</label>
+
+            <Separator />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Company (Optional)
+                </label>
                 <Input 
                   type="text" 
                   value={formState.yourCompany} 
-                  onChange={e => handleInputChange('yourCompany', e.target.value)} 
+                  onChange={e => handleInputChange('yourCompany', e.target.value)}
+                  placeholder="Your company name"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Are you a U.S. Citizen? *</label>
+              
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('usCitizen') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  U.S. Citizen Status *
+                </label>
                 <Select value={formState.usCitizen} onValueChange={value => handleInputChange('usCitizen', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                  <SelectTrigger className={isFieldInvalid('usCitizen') ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select citizenship status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Yes">Yes</SelectItem>
-                    <SelectItem value="No">No</SelectItem>
+                    <SelectItem value="Yes">Yes, I am a U.S. Citizen</SelectItem>
+                    <SelectItem value="No">No, I am not a U.S. Citizen</SelectItem>
                   </SelectContent>
                 </Select>
+                {getFieldError('usCitizen') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('usCitizen')}
+                  </div>
+                )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Will this be closing under an Entity or Personal? *
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('closingType') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  Closing Type *
                 </label>
                 <Select value={formState.closingType} onValueChange={value => handleInputChange('closingType', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
+                  <SelectTrigger className={isFieldInvalid('closingType') ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select closing type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Entity">Entity</SelectItem>
-                    <SelectItem value="Personal">Personal</SelectItem>
+                    <SelectItem value="Entity">Entity (LLC, Corp, etc.)</SelectItem>
+                    <SelectItem value="Personal">Personal Name</SelectItem>
                   </SelectContent>
                 </Select>
+                {getFieldError('closingType') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('closingType')}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Cross Collateral Loan */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl text-dominion-blue">Cross Collateral Information</CardTitle>
+        {/* Loan Structure */}
+        <Card className="border-l-4 border-l-orange-500 shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-orange-500" />
+              <CardTitle className="text-xl text-orange-700">Loan Structure</CardTitle>
+              <Badge variant="secondary" className="ml-auto">Required</Badge>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Cross Collateral loan? *</label>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <label className={`block text-sm font-medium ${isFieldInvalid('crossCollateralLoan') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                Cross Collateral Loan *
+              </label>
               <Select value={formState.crossCollateralLoan} onValueChange={value => handleInputChange('crossCollateralLoan', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select" />
+                <SelectTrigger className={isFieldInvalid('crossCollateralLoan') ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select loan structure" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Yes">Yes</SelectItem>
-                  <SelectItem value="No">No</SelectItem>
+                  <SelectItem value="Yes">Yes - Multiple Properties</SelectItem>
+                  <SelectItem value="No">No - Single Property</SelectItem>
                 </SelectContent>
               </Select>
+              {getFieldError('crossCollateralLoan') && (
+                <div className="flex items-center gap-1 text-red-600 text-xs">
+                  <AlertTriangle className="h-3 w-3" />
+                  {getFieldError('crossCollateralLoan')}
+                </div>
+              )}
               
-              {/* Conditional Number of Properties - appears as sub-field */}
+              {/* Conditional Number of Properties - Enhanced Design */}
               {formState.crossCollateralLoan === 'Yes' && (
-                <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <span className="text-blue-700">↳</span> How many properties? (Max 25)
-                  </label>
+                <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-orange-100/50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <label className="text-sm font-medium text-orange-700">
+                      Number of Properties (Max 25)
+                    </label>
+                  </div>
                   <Input 
                     type="number" 
                     value={formState.numberOfProperties} 
                     onChange={e => handleInputChange('numberOfProperties', e.target.value)} 
                     placeholder="Enter number of properties" 
-                    className="bg-white"
+                    className="bg-white border-orange-200 focus:border-orange-400"
                     min="2"
                     max="25"
                   />
                   {parseInt(formState.numberOfProperties) > 25 && (
-                    <div className="mt-2 text-sm text-red-600">
+                    <div className="mt-2 flex items-center gap-1 text-red-600 text-xs">
+                      <AlertTriangle className="h-3 w-3" />
                       Maximum of 25 properties allowed for cross collateral loans.
                     </div>
                   )}
+                  <p className="text-xs text-orange-600 mt-2">
+                    Cross collateral loans allow you to use multiple properties as collateral for a single loan.
+                  </p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Subject Property Address */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl text-dominion-blue">Subject Property Address</CardTitle>
+        {/* Property Address */}
+        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2">
+              <Home className="h-5 w-5 text-blue-500" />
+              <CardTitle className="text-xl text-blue-700">Property Address</CardTitle>
+              <Badge variant="secondary" className="ml-auto">Required</Badge>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Street *</label>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <label className={`block text-sm font-medium ${isFieldInvalid('streetAddress') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                Street Address *
+              </label>
               <Input 
                 type="text" 
                 value={formState.streetAddress} 
-                onChange={e => handleInputChange('streetAddress', e.target.value)} 
-                required 
+                onChange={e => handleInputChange('streetAddress', e.target.value)}
+                className={isFieldInvalid('streetAddress') ? 'border-red-500 focus:border-red-500' : ''}
+                placeholder="123 Main Street"
               />
+              {getFieldError('streetAddress') && (
+                <div className="flex items-center gap-1 text-red-600 text-xs">
+                  <AlertTriangle className="h-3 w-3" />
+                  {getFieldError('streetAddress')}
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('city') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  City *
+                </label>
                 <Input 
                   type="text" 
                   value={formState.city} 
-                  onChange={e => handleInputChange('city', e.target.value)} 
-                  required 
+                  onChange={e => handleInputChange('city', e.target.value)}
+                  className={isFieldInvalid('city') ? 'border-red-500 focus:border-red-500' : ''}
+                  placeholder="City name"
                 />
+                {getFieldError('city') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('city')}
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label className={`block text-sm font-medium ${isFieldInvalid('zipCode') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                  ZIP Code *
+                </label>
+                <Input 
+                  type="text" 
+                  value={formState.zipCode} 
+                  onChange={e => handleInputChange('zipCode', e.target.value)}
+                  className={isFieldInvalid('zipCode') ? 'border-red-500 focus:border-red-500' : ''}
+                  placeholder="12345"
+                />
+                {getFieldError('zipCode') && (
+                  <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <AlertTriangle className="h-3 w-3" />
+                    {getFieldError('zipCode')}
+                  </div>
+                )}
               </div>
             </div>
             
-            <StateCountySelector
-              selectedState={formState.propertyState}
-              selectedCounty={formState.propertyCounty}
-              selectedZipCode={formState.zipCode}
-              onStateChange={(state) => handleInputChange('propertyState', state)}
-              onCountyChange={(county) => handleInputChange('propertyCounty', county)}
-              onZipCodeChange={(zipCode) => handleInputChange('zipCode', zipCode)}
-            />
+            <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200">
+              <StateCountySelector
+                selectedState={formState.propertyState}
+                selectedCounty={formState.propertyCounty}
+                selectedZipCode={formState.zipCode}
+                onStateChange={(state) => handleInputChange('propertyState', state)}
+                onCountyChange={(county) => handleInputChange('propertyCounty', county)}
+                onZipCodeChange={(zip) => handleInputChange('zipCode', zip)}
+              />
+              {(getFieldError('propertyState') || getFieldError('propertyCounty')) && (
+                <div className="mt-2 space-y-1">
+                  {getFieldError('propertyState') && (
+                    <div className="flex items-center gap-1 text-red-600 text-xs">
+                      <AlertTriangle className="h-3 w-3" />
+                      {getFieldError('propertyState')}
+                    </div>
+                  )}
+                  {getFieldError('propertyCounty') && (
+                    <div className="flex items-center gap-1 text-red-600 text-xs">
+                      <AlertTriangle className="h-3 w-3" />
+                      {getFieldError('propertyCounty')}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
