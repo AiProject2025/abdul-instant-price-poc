@@ -271,7 +271,7 @@ const Quote = () => {
       console.log('API Payload:', apiPayload);
 
       // Make API call to pricing endpoint
-      const response = await fetch('https://n8n-prod.onrender.com/webhook/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/pricing', {
+      const response = await fetch('http://localhost:4000/api/pricing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -450,7 +450,7 @@ const Quote = () => {
       const transformedData = transformFormDataForAPI(scenario.form_data);
 
       // Make a fresh pricing API call
-      const response = await fetch('https://n8n-prod.onrender.com/webhook/59ba939c-b2ff-450f-a9d4-04134eeda0de/instant-pricing/pricing', {
+      const response = await fetch('http://localhost:4000/api/pricing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

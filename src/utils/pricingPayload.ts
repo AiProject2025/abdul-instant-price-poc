@@ -98,6 +98,11 @@ export const transformFormDataForAPI = (formData: any) => {
 
     // Calculated Rental Income
     market_rent: calculateTotalRental(),
+    dscr_rent: normalizeNumericValue(formData.dscrRent),
+    est_rent: normalizeNumericValue(formData.estRent),
+    
+    // Package Loan specific fields
+    pre_payment_penalty_term: formData.prePaymentPenaltyTerm || '',
 
     // Property Details
     total_square_feet: normalizeNumericValue(formData.totalSquareFeet),

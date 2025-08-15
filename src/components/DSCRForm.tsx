@@ -83,7 +83,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     desiredLTV: '',
     desiredClosingDate: (() => {
       const date = new Date();
-      date.setDate(date.getDate() + 30);
+      date.setMonth(date.getMonth() + 1); // Set to 1 month from today
       const formattedDate = date.toISOString().split('T')[0];
       console.log('Setting default closing date to:', formattedDate);
       return formattedDate;
@@ -106,6 +106,9 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     mktRent: '',
     totalSquareFeet: '2000', // Default to single family
     
+    // Package Loan specific fields
+    prePaymentPenaltyTerm: '',
+    
     // Annual Property Expenses
     annualTaxes: '',
     annualInsurance: '',
@@ -115,6 +118,8 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     // Final Details
     creditScore: ''
   });
+
+  console.log('Extracted Data',initialData)
 
   // Initialize form with data if available
   useEffect(() => {
@@ -141,13 +146,37 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
           console.log('Setting initial square footage to 8000 for 5-10 units');
         }
       }
+
+      // For package loans, ensure Cross Collateral Loan is set to 'Yes'
+      if (isPackageLoan) {
+        updatedData.crossCollateralLoan = 'Yes';
+        console.log('Setting crossCollateralLoan to Yes for package loan');
+      }
+
+      // If desiredLTV is not set but we have one in initialData, ensure it's used
+      if (updatedData.desiredLTV) {
+        console.log('Using desiredLTV from initialData:', updatedData.desiredLTV);
+      }
+
+      // If numberOfProperties is not set but we have one in initialData, ensure it's used  
+      if (updatedData.numberOfProperties) {
+        console.log('Using numberOfProperties from initialData:', updatedData.numberOfProperties);
+      }
+
+      // If desiredClosingDate is not provided in initialData, use default (1 month from today)
+      if (!updatedData.desiredClosingDate) {
+        const date = new Date();
+        date.setMonth(date.getMonth() + 1);
+        updatedData.desiredClosingDate = date.toISOString().split('T')[0];
+        console.log('Setting default desiredClosingDate to:', updatedData.desiredClosingDate);
+      }
       
       setFormState(prev => ({
         ...prev,
         ...updatedData
       }));
     }
-  }, [initialData]);
+  }, [initialData, isPackageLoan]);
 
   // Calculate total rental income
   const calculateTotalRental = () => {
@@ -1323,6 +1352,24 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                       onChange={e => handleInputChange('mktRent', e.target.value)} 
                       placeholder="$0" 
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Pre Payment Penalty Term *</label>
+                    <Select value={formState.prePaymentPenaltyTerm} onValueChange={value => handleInputChange('prePaymentPenaltyTerm', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select prepayment penalty term" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-prepay">No Prepay</SelectItem>
+                        <SelectItem value="1-year">1 Year</SelectItem>
+                        <SelectItem value="2-year">2 Year</SelectItem>
+                        <SelectItem value="3-year">3 Year</SelectItem>
+                        <SelectItem value="4-year">4 Year</SelectItem>
+                        <SelectItem value="5-year">5 Year</SelectItem>
+                        <SelectItem value="6-year">6 Year</SelectItem>
+                        <SelectItem value="7-year">7 Year</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               )}
