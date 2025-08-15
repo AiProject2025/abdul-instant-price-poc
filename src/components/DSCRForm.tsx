@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, FileText, AlertTriangle, User, Home, DollarSign, Calendar, Shield } from 'lucide-react';
 import StateCountySelector from '@/components/StateCountySelector';
+import ConfirmPricingDialog from '@/components/ConfirmPricingDialog';
 
 interface DSCRFormProps {
   initialData?: any;
@@ -24,6 +25,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
   isLoading,
   isPackageLoan
 }) => {
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formState, setFormState] = useState({
     // Personal Info
     firstName: '',
@@ -153,6 +155,17 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       return `${requiredFields[fieldName as keyof typeof requiredFields]} is required`;
     }
     return '';
+  };
+
+  // Validate all required fields
+  const validateForm = () => {
+    const missingFields: string[] = [];
+    Object.keys(requiredFields).forEach(fieldName => {
+      if (isFieldInvalid(fieldName)) {
+        missingFields.push(fieldName);
+      }
+    });
+    return missingFields;
   };
 
   console.log('Extracted Data',initialData)
@@ -305,22 +318,33 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if form is valid before showing confirmation dialog
+    const missingFields = validateForm();
+    if (missingFields.length > 0) {
+      // Form has errors, don't show dialog
+      return;
+    }
+    
+    // Show confirmation dialog instead of directly submitting
+    setShowConfirmDialog(true);
+  };
 
-    // Always pass form data to parent component
+  const handleConfirmPricing = (data: { desiredLTV: string; desiredClosingDate: string }) => {
+    // Update form state with confirmed values
+    const updatedFormState = {
+      ...formState,
+      desiredLTV: data.desiredLTV,
+      desiredClosingDate: data.desiredClosingDate
+    };
+    
+    setShowConfirmDialog(false);
     onSubmit({
-      formData: formState,
+      formData: updatedFormState,
       isLoading: true
     });
-
-    // For now, we'll just pass the form data as-is
-    // The API integration can be added later if needed
-    setTimeout(() => {
-      onSubmit({
-        formData: formState
-      });
-    }, 1000);
   };
 
   const renderRentalIncomeFields = () => {
@@ -716,17 +740,23 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     <SelectTrigger>
                       <SelectValue placeholder="Select property type" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Single Family">Single Family</SelectItem>
-                      <SelectItem value="Two to Four Family">Two to Four Family</SelectItem>
-                      <SelectItem value="Multi Family">Multi Family</SelectItem>
-                      <SelectItem value="Mixed Use">Mixed Use</SelectItem>
-                      <SelectItem value="Condominium">Condominium</SelectItem>
-                    </SelectContent>
+                     <SelectContent>
+                       <SelectItem value="single-family">Single Family</SelectItem>
+                       <SelectItem value="condominium">Condominium</SelectItem>
+                       <SelectItem value="condotel">Condotel</SelectItem>
+                       <SelectItem value="two-to-four-family">Two to Four Family</SelectItem>
+                       <SelectItem value="mixed-use">Mixed-Use</SelectItem>
+                       <SelectItem value="pud">PUD</SelectItem>
+                       <SelectItem value="townhouse">Townhouse</SelectItem>
+                       <SelectItem value="cooperative">Cooperative</SelectItem>
+                       <SelectItem value="multi-family">Multi-Family</SelectItem>
+                       <SelectItem value="modular-home">Modular Home</SelectItem>
+                       <SelectItem value="manufactured-home">Manufactured Home</SelectItem>
+                     </SelectContent>
                   </Select>
                   
-                  {/* Conditional Condo Approval Type - appears as sub-field */}
-                  {formState.propertyType === 'Condominium' && (
+                   {/* Conditional Condo Approval Type - appears as sub-field */}
+                   {formState.propertyType === 'condominium' && (
                     <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <span className="text-blue-700">↳</span> Condominium Approval Type
@@ -1071,17 +1101,23 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                     <SelectTrigger>
                       <SelectValue placeholder="Select property type" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Single Family">Single Family</SelectItem>
-                      <SelectItem value="Two to Four Family">Two to Four Family</SelectItem>
-                      <SelectItem value="Multi Family">Multi Family</SelectItem>
-                      <SelectItem value="Mixed Use">Mixed Use</SelectItem>
-                      <SelectItem value="Condominium">Condominium</SelectItem>
-                    </SelectContent>
+                     <SelectContent>
+                       <SelectItem value="single-family">Single Family</SelectItem>
+                       <SelectItem value="condominium">Condominium</SelectItem>
+                       <SelectItem value="condotel">Condotel</SelectItem>
+                       <SelectItem value="two-to-four-family">Two to Four Family</SelectItem>
+                       <SelectItem value="mixed-use">Mixed-Use</SelectItem>
+                       <SelectItem value="pud">PUD</SelectItem>
+                       <SelectItem value="townhouse">Townhouse</SelectItem>
+                       <SelectItem value="cooperative">Cooperative</SelectItem>
+                       <SelectItem value="multi-family">Multi-Family</SelectItem>
+                       <SelectItem value="modular-home">Modular Home</SelectItem>
+                       <SelectItem value="manufactured-home">Manufactured Home</SelectItem>
+                     </SelectContent>
                   </Select>
                   
-                  {/* Conditional Condo Approval Type */}
-                  {formState.propertyType === 'Condominium' && (
+                   {/* Conditional Condo Approval Type */}
+                   {formState.propertyType === 'condominium' && (
                     <div className="mt-4 ml-6 pl-4 border-l-2 border-blue-200 bg-blue-50/30 rounded-r-lg p-3">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <span className="text-blue-700">↳</span> Condominium Approval Type
@@ -1696,6 +1732,14 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
           </Button>
         </div>
       </form>
+
+      <ConfirmPricingDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirmPricing}
+        currentLTV={formState.desiredLTV}
+        currentClosingDate={formState.desiredClosingDate}
+      />
     </div>
   );
 };

@@ -78,7 +78,7 @@ export const transformFormDataForAPI = (formData: any) => {
 
     // Cross Collateral Information
     cross_collateral_loan: normalizeTextValue(formData.crossCollateralLoan),
-    number_of_properties: normalizeNumericValue(formData.numberOfProperties),
+    number_of_properties: formData.crossCollateralLoan === 'Yes' ? normalizeNumericValue(formData.numberOfProperties) : '1',
 
     // Property Details (normalize dropdown values)
     property_type: normalizeTextValue(formData.propertyType),
@@ -121,7 +121,7 @@ export const transformFormDataForAPI = (formData: any) => {
   };
 
   // Add conditional fields based on property type
-  if (formData.propertyType === 'Condominium') {
+  if (formData.propertyType === 'condominium') {
     apiData['condo_approval_type'] = normalizeTextValue(formData.condoApprovalType);
   }
 

@@ -190,11 +190,13 @@ const Quote = () => {
       const p = list[0];
       const mapStructureType = (s?: string) => {
         const t = (s || '').toLowerCase();
-        if (t.includes('single')) return 'Single Family';
-        if (t.includes('condo')) return 'Condominium';
-        if (t.includes('duplex') || t.includes('fourplex') || t.includes('triplex') || t.includes('plex')) return 'Two to Four Family';
-        if (t.includes('mixed')) return 'Mixed Use';
-        return 'Single Family';
+        if (t.includes('single')) return 'single-family';
+        if (t.includes('condo')) return 'condominium';
+        if (t.includes('duplex') || t.includes('fourplex') || t.includes('triplex') || t.includes('plex')) return 'two-to-four-family';
+        if (t.includes('mixed')) return 'mixed-use';
+        if (t.includes('town')) return 'townhouse';
+        if (t.includes('multi')) return 'multi-family';
+        return 'single-family';
       };
       const mapOccupancy = (s?: string) => {
         const t = (s || '').toLowerCase();
