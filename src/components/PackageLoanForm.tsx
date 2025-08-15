@@ -1030,10 +1030,12 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       return;
     }
 
-    if (!uploadedDataTapeFile) {
+    // Check if we have data (either from upload or from previous page)
+    const hasPropertyData = properties.length > 0 && properties.some(p => p.fullPropertyAddress);
+    if (!uploadedDataTapeFile && !hasPropertyData) {
       toast({
-        title: "Data Tape Required",
-        description: "Please upload your Excel/CSV data tape before continuing.",
+        title: "Data Required",
+        description: "Please upload your Excel/CSV data tape or add property data before continuing.",
         variant: "destructive",
       });
       return;
