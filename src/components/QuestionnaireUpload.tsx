@@ -27,6 +27,7 @@ const QuestionnaireUpload = ({
   const [dataTapeDragActive, setDataTapeDragActive] = useState(false);
   const [showDataTapeDialog, setShowDataTapeDialog] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [isProcessingDataTape, setIsProcessingDataTape] = useState(false);
   const navigate = useNavigate();
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -62,6 +63,7 @@ const QuestionnaireUpload = ({
   }, []);
 
   const processDataTapeForPackage = async (file: File) => {
+    setIsProcessingDataTape(true);
     try {
       // Send to n8n to parse and normalize the portfolio
       const fd = new FormData();
@@ -152,6 +154,8 @@ const QuestionnaireUpload = ({
     } catch (error) {
       console.error('Error processing data tape:', error);
       alert('Error processing data tape file. Please check the file format and try again.');
+    } finally {
+      setIsProcessingDataTape(false);
     }
   };
   const handleDataTapeSelection = (file: File) => {
@@ -194,12 +198,19 @@ const QuestionnaireUpload = ({
       handleDataTapeSelection(e.target.files[0]);
     }
   };
-  if (isLoading) {
+  if (isLoading || isProcessingDataTape) {
     return <Card className="max-w-2xl mx-auto">
         <CardContent className="p-12 text-center">
           <Loader2 className="h-12 w-12 animate-spin text-dominion-blue mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-dominion-blue mb-2">Processing Your Questionnaire</h3>
-          <p className="text-dominion-gray">Our AI is extracting data from your document. This may take a few moments...</p>
+          <h3 className="text-lg font-semibold text-dominion-blue mb-2">
+            {isProcessingDataTape ? 'Processing Your Data Tape' : 'Processing Your Questionnaire'}
+          </h3>
+          <p className="text-dominion-gray">
+            {isProcessingDataTape 
+              ? 'Our system is normalizing your portfolio data. This may take a few moments...'
+              : 'Our AI is extracting data from your document. This may take a few moments...'
+            }
+          </p>
         </CardContent>
       </Card>;
   }
