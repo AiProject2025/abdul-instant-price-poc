@@ -451,7 +451,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     return {
       id: `property-${Date.now()}-${idx}`,
       fullPropertyAddress: item.full_property_address || '',
-      countyName: item.county_name || '',
+      countyName: item.county_name || item.propertyCounty || '',
       structureType: mapStructureType(item.structure_type),
       numberOfUnits: undefined,
       squareFootage: 0,
