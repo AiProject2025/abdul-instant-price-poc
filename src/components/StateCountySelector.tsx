@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { statesAndCounties, statesWithAbbreviations, stateAbbreviations } from '@/utils/locationData';
@@ -57,7 +57,18 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
   };
 
   const fullStateName = selectedState ? getStateNameFromAbbreviation(selectedState) : '';
-  const counties = fullStateName ? statesAndCounties[fullStateName] || [] : [];
+  
+  // Dynamically build county list including any selected county that might not be in the predefined list
+  const counties = useMemo(() => {
+    const baseCounties = fullStateName ? statesAndCounties[fullStateName] || [] : [];
+    
+    // If there's a selected county that's not in the base list, add it
+    if (selectedCounty && !baseCounties.includes(selectedCounty)) {
+      return [...baseCounties, selectedCounty].sort();
+    }
+    
+    return baseCounties;
+  }, [fullStateName, selectedCounty]);
 
   const handleStateChange = (value: string) => {
     console.log('State changed to:', value);
