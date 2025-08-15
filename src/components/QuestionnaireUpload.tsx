@@ -13,13 +13,15 @@ interface QuestionnaireUploadProps {
   onClientSelect?: (client: ClientWithProperties) => void;
   onDataTapeUpload: (file: File) => void;
   isLoading: boolean;
+  skipDataTapeDialog?: boolean;
 }
 const QuestionnaireUpload = ({
   onFileUpload,
   onManualEntry,
   onClientSelect,
   onDataTapeUpload,
-  isLoading
+  isLoading,
+  skipDataTapeDialog = false
 }: QuestionnaireUploadProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [dataTapeDragActive, setDataTapeDragActive] = useState(false);
@@ -153,8 +155,13 @@ const QuestionnaireUpload = ({
     }
   };
   const handleDataTapeSelection = (file: File) => {
-    setPendingFile(file);
-    setShowDataTapeDialog(true);
+    if (skipDataTapeDialog) {
+      // If we're on quote page, directly process for package loan
+      processDataTapeForPackage(file);
+    } else {
+      setPendingFile(file);
+      setShowDataTapeDialog(true);
+    }
   };
 
   const handlePackageLoanChoice = () => {

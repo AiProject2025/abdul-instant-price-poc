@@ -595,6 +595,7 @@ const Quote = () => {
                   setCurrentStep('questionnaire');
                 }}
                 isLoading={isProcessing}
+                skipDataTapeDialog={true}
               />
 
               {/* Quote Tracker on Upload Screen */}
