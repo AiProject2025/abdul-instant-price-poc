@@ -175,6 +175,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     if (initialData) {
       const updatedData = { ...initialData };
       
+      // Map propertiesAmount to numberOfProperties
+      if (updatedData.propertiesAmount) {
+        updatedData.numberOfProperties = updatedData.propertiesAmount;
+        console.log('Mapping propertiesAmount to numberOfProperties:', updatedData.propertiesAmount);
+      }
+      
       // Auto-sync numberOfLeasedUnits when numberOfUnits is provided in initial data
       if (updatedData.numberOfUnits && !updatedData.numberOfLeasedUnits) {
         updatedData.numberOfLeasedUnits = updatedData.numberOfUnits;
