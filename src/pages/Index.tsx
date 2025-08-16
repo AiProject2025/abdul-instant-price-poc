@@ -3,58 +3,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
+import ModernNavigation from "@/components/ModernNavigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Calculator, FileText, TrendingUp, Shield, Clock, DollarSign, Zap, Brain, LogOut } from "lucide-react";
 const Index = () => {
   const { signOut } = useAuth();
 
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      {/* ... keep existing code (animated background elements, header, hero section, features section, footer) */}
-      
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200/30 to-indigo-300/30 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-200/30 to-blue-300/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <div className="relative">
-                <img src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" alt="Dominion Financial" className="h-10 mr-3 drop-shadow-lg" />
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-transparent rounded blur-sm"></div>
-              </div>
-            </div>
-            <nav className="flex space-x-8 items-center">
-              <Link to="/quote" className="text-dominion-blue hover:text-dominion-green font-medium transition-all duration-300 hover:drop-shadow-sm">
-                Get Quote
-              </Link>
-              <Button
-                onClick={signOut}
-                variant="outline"
-                size="sm"
-                className="text-dominion-blue border-dominion-blue hover:bg-dominion-blue hover:text-white"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </nav>
-          </div>
-        </div>
-        
-        {/* Enhanced Bond Display */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+      {/* Modern Navigation Header */}
+      <ModernNavigation />
+      
+      {/* Bond Display Section - positioned after navigation */}
+      <div className="pt-20 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="relative">
             <BondDisplay />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none shimmer"></div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Hero Section */}
-      <section className="py-16 relative z-10">
+      <section className="py-8 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="relative">
             <h1 className="text-5xl font-extrabold text-dominion-blue sm:text-6xl lg:text-7xl leading-tight">
