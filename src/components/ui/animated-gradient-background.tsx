@@ -84,7 +84,7 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
    ],
    gradientStops = [20, 40, 60, 80, 100],
    animationSpeed = 0.02,
-   breathingRange = 5,
+   breathingRange = 2,
    containerStyle = {},
    topOffset = 0,
    containerClassName = "",
