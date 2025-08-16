@@ -27,12 +27,12 @@ function Hero() {
         <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
           <div>
             <Button variant="secondary" size="sm" className="gap-4">
-              ✨ AI-Powered Commercial Lending Platform <MoveRight className="w-4 h-4" />
+              Revolutionizing Commercial Lending <MoveRight className="w-4 h-4" />
             </Button>
           </div>
           <div className="flex gap-4 flex-col">
             <h1 className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular">
-              <span className="text-foreground">AI-Powered</span>
+              <span className="text-foreground">Experience</span>
               <span className="relative flex w-full justify-center overflow-hidden text-center md:pb-4 md:pt-1">
                 &nbsp;
                 {titles.map((title, index) => (
@@ -57,17 +57,21 @@ function Hero() {
                   </motion.span>
                 ))}
               </span>
-              <span className="text-foreground">Investment Property Lending</span>
+              <span className="text-foreground">Lending</span>
             </h1>
 
             <p className="text-lg md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-3xl text-center">
-              Leverage advanced AI algorithms and machine learning to secure the best DSCR loan rates. 
-              Fast, intelligent, and data-driven financing solutions for your investment properties.
+              Transform your commercial lending process with our AI-powered platform. 
+              Get instant quotes, automated underwriting, and comprehensive loan packaging 
+              that streamlines everything from application to approval.
             </p>
           </div>
           <div className="flex flex-row gap-3">
+            <Button size="lg" className="gap-4" variant="outline">
+              Schedule Demo <PhoneCall className="w-4 h-4" />
+            </Button>
             <Button size="lg" className="gap-4 bg-[hsl(var(--dominion-blue))] hover:bg-[hsl(var(--dominion-blue))]/90">
-              Get AI-Powered Quote <MoveRight className="w-4 h-4" />
+              Get Started <MoveRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
