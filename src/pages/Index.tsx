@@ -18,17 +18,8 @@ const Index = () => {
       <section className="relative h-screen overflow-hidden">
         <AnimatedGradientBackground 
           Breathing={true}
-          breathingRange={2}
-          animationSpeed={0.005}
-          startingGap={90}
-          gradientColors={[
-            "hsl(var(--background))",
-            "hsl(var(--dominion-blue))/20",
-            "hsl(var(--background))",
-            "hsl(var(--dominion-green))/15",
-            "hsl(var(--background))",
-          ]}
-          gradientStops={[20, 40, 60, 80, 100]}
+          breathingRange={3}
+          animationSpeed={0.01}
         />
         <div className="relative z-10 flex items-center justify-center h-full pt-20">
           <Hero />
