@@ -23,7 +23,7 @@ const Index = () => {
       <div className="pt-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="relative">
-            <BondDisplay />
+            
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none shimmer"></div>
           </div>
         </div>
