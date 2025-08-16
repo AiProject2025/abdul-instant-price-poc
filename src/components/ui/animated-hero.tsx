@@ -67,9 +67,6 @@ function Hero() {
             </p>
           </div>
           <div className="flex flex-row gap-3">
-            <Button size="lg" className="gap-4" variant="outline">
-              Schedule Demo <PhoneCall className="w-4 h-4" />
-            </Button>
             <Button size="lg" className="gap-4 bg-[hsl(var(--dominion-blue))] hover:bg-[hsl(var(--dominion-blue))]/90">
               Get Started <MoveRight className="w-4 h-4" />
             </Button>
