@@ -354,10 +354,8 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     };
     
     setShowConfirmDialog(false);
-    onSubmit({
-      formData: updatedFormState,
-      isLoading: true
-    });
+    // Call onSubmit with the actual form data to trigger the pricing API call
+    onSubmit(updatedFormState);
   };
 
   const renderRentalIncomeFields = () => {
