@@ -78,7 +78,6 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
    gradientColors = [
       "hsl(var(--background))",
       "hsl(var(--dominion-blue))",
-      "hsl(var(--dominion-green))",
       "hsl(var(--dominion-blue))",
       "hsl(var(--background))",
    ],
