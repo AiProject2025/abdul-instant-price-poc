@@ -141,7 +141,8 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     propertyType: 'Property Type',
     numberOfUnits: 'Number of Units',
     desiredLTV: 'Desired LTV',
-    creditScore: 'Credit Score'
+    creditScore: 'Credit Score',
+    prePaymentPenaltyTerm: 'Prepayment Penalty Term'
   };
 
   // Check if a field is required and empty
@@ -179,6 +180,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
       if (updatedData.propertiesAmount) {
         updatedData.numberOfProperties = updatedData.propertiesAmount;
         console.log('Mapping propertiesAmount to numberOfProperties:', updatedData.propertiesAmount);
+      }
+      
+      // Map pre_payment_penalty_term to prePaymentPenaltyTerm
+      if (updatedData.pre_payment_penalty_term) {
+        updatedData.prePaymentPenaltyTerm = updatedData.pre_payment_penalty_term;
+        console.log('Mapping pre_payment_penalty_term to prePaymentPenaltyTerm:', updatedData.pre_payment_penalty_term);
       }
       
       // Auto-sync numberOfLeasedUnits when numberOfUnits is provided in initial data
@@ -1584,10 +1591,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                       placeholder="$0" 
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Pre Payment Penalty Term *</label>
+                  <div className="space-y-2">
+                    <label className={`block text-sm font-medium ${isFieldInvalid('prePaymentPenaltyTerm') ? 'text-red-600' : 'text-foreground'} mb-2`}>
+                      Pre Payment Penalty Term *
+                    </label>
                     <Select value={formState.prePaymentPenaltyTerm} onValueChange={value => handleInputChange('prePaymentPenaltyTerm', value)}>
-                      <SelectTrigger>
+                      <SelectTrigger className={isFieldInvalid('prePaymentPenaltyTerm') ? 'border-red-500 focus:border-red-500' : ''}>
                         <SelectValue placeholder="Select prepayment penalty term" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1601,6 +1610,12 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
                         <SelectItem value="7-year">7 Year</SelectItem>
                       </SelectContent>
                     </Select>
+                    {getFieldError('prePaymentPenaltyTerm') && (
+                      <div className="flex items-center gap-1 text-red-600 text-xs">
+                        <AlertTriangle className="h-3 w-3" />
+                        {getFieldError('prePaymentPenaltyTerm')}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
