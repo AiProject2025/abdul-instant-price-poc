@@ -334,14 +334,8 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if form is valid before showing confirmation dialog
-    const missingFields = validateForm();
-    if (missingFields.length > 0) {
-      // Form has errors, don't show dialog
-      return;
-    }
-    
-    // Show confirmation dialog instead of directly submitting
+    // Always show confirmation dialog - let user proceed even with missing fields
+    // The API will handle validation on the backend
     setShowConfirmDialog(true);
   };
 
