@@ -1,61 +1,28 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
 import ModernNavigation from "@/components/ModernNavigation";
+import { Hero } from "@/components/ui/animated-hero";
+import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 import { useAuth } from "@/hooks/useAuth";
 import { Calculator, FileText, TrendingUp, Shield, Clock, DollarSign, Zap, Brain, LogOut } from "lucide-react";
 const Index = () => {
   const { signOut } = useAuth();
 
-  return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200/30 to-indigo-300/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-200/30 to-blue-300/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-
+  return <div className="min-h-screen bg-background">
       {/* Modern Navigation Header */}
       <ModernNavigation />
       
-      {/* Bond Display Section - positioned after navigation */}
-      <div className="pt-20 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="relative">
-            
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none shimmer"></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Hero Section */}
-      <section className="py-8 relative z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="relative">
-            <h1 className="text-5xl font-extrabold text-dominion-blue sm:text-6xl lg:text-7xl leading-tight">
-              <span className="bg-gradient-to-r from-dominion-blue via-blue-700 to-dominion-green bg-clip-text text-transparent">
-                AI-Powered Investment
-              </span>
-              <br />
-              <span className="relative">
-                Property Lending
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-green-500/20 blur-2xl -z-10"></div>
-              </span>
-            </h1>
-            <p className="mt-6 text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              Leverage advanced AI algorithms and machine learning to secure the best DSCR loan rates. 
-              Fast, intelligent, and data-driven financing solutions.
-            </p>
-            <div className="mt-10 flex justify-center">
-              <Button asChild className="bg-gradient-to-r from-dominion-blue to-blue-700 hover:from-blue-700 hover:to-dominion-blue text-white px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105">
-                <Link to="/quote">
-                  <Brain className="mr-2 h-5 w-5" />
-                  Get AI-Powered Quote
-                </Link>
-              </Button>
-            </div>
-          </div>
+      {/* Hero Section - Full Height */}
+      <section className="relative h-screen overflow-hidden">
+        <AnimatedGradientBackground 
+          Breathing={true}
+          breathingRange={3}
+          animationSpeed={0.01}
+        />
+        <div className="relative z-10 flex items-center justify-center h-full pt-20">
+          <Hero />
         </div>
       </section>
 

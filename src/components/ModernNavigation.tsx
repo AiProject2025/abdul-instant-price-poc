@@ -248,7 +248,7 @@ const ModernNavigation = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs px-3 py-2 h-8"
+                  className="text-xs px-3 py-2 h-8 bg-[hsl(var(--dominion-blue))]/10 text-[hsl(var(--dominion-blue))] hover:bg-[hsl(var(--dominion-blue))]/20"
                 >
                   <Calculator className="h-3 w-3 mr-1" />
                   Quick Quote
@@ -256,10 +256,8 @@ const ModernNavigation = () => {
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 rounded-lg group">
-                      <div className="bg-primary/10 text-primary font-bold text-xs h-8 w-8 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        {userInitials}
-                      </div>
+                    <Button variant="ghost" size="sm" className="h-8 px-3 rounded-lg group text-foreground font-medium text-xs">
+                      {userInitials}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
