@@ -76,19 +76,23 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
    startingGap = 125,
    Breathing = false,
    gradientColors = [
-      "hsl(var(--background))",
-      "hsl(var(--dominion-blue))/20",
-      "hsl(var(--dominion-green))/15", 
-      "hsl(var(--dominion-blue))/10",
-      "hsl(var(--background))",
+      "#0A0A0A",
+      "#2979FF",
+      "#FF80AB",
+      "#FF6D00",
+      "#FFD600",
+      "#00E676",
+      "#3D5AFE"
    ],
-   gradientStops = [40, 70, 80, 90, 100],
+   gradientStops = [35, 50, 60, 70, 80, 90, 100],
    animationSpeed = 0.02,
    breathingRange = 5,
    containerStyle = {},
    topOffset = 0,
    containerClassName = "",
 }) => {
+
+
 
    // Validation: Ensure gradientStops and gradientColors lengths match
    if (gradientColors.length !== gradientStops.length) {
@@ -117,7 +121,7 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
             .map((stop, index) => `${gradientColors[index]} ${stop}%`)
             .join(", ");
 
-         const gradient = `radial-gradient(${width}% ${width+topOffset}% at 50% 50%, ${gradientStopsString})`;
+         const gradient = `radial-gradient(${width}% ${width+topOffset}% at 50% 20%, ${gradientStopsString})`;
 
          if (containerRef.current) {
             containerRef.current.style.background = gradient;
