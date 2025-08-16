@@ -20,15 +20,6 @@ const Index = () => {
           Breathing={true}
           breathingRange={3}
           animationSpeed={0.01}
-          gradientColors={[
-            "hsl(var(--background))",
-            "hsl(var(--background))",
-            "hsl(var(--dominion-blue))/20",
-            "hsl(var(--dominion-green))/15",
-            "hsl(var(--background))"
-          ]}
-          gradientStops={[60, 75, 85, 95, 100]}
-          startingGap={80}
         />
         <div className="relative z-10 flex items-center justify-center h-full pt-20">
           <Hero />
