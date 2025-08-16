@@ -529,6 +529,27 @@ DSCR Loan System`;
         </p>
       </div>
 
+      {/* Quick Action Buttons */}
+      <div className="flex justify-center gap-4 mb-6">
+        <Button
+          onClick={onBackToForm}
+          className="bg-dominion-blue hover:bg-dominion-blue/90 text-white px-6 py-3 text-base"
+          size="lg"
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          Edit Details & Re-Quote
+        </Button>
+        <Button
+          onClick={() => onGenerateLoanQuote()}
+          variant="outline"
+          className="border-dominion-blue text-dominion-blue hover:bg-dominion-blue/10 px-6 py-3 text-base"
+          size="lg"
+        >
+          <FileText className="mr-2 h-4 w-4" />
+          Generate Best Quote
+        </Button>
+      </div>
+
       <Tabs defaultValue="results" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="results">Current Results ({results.length})</TabsTrigger>

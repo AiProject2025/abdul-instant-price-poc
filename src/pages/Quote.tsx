@@ -489,78 +489,118 @@ const Quote = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200">
+      {/* Enhanced Navigation */}
+      <nav className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
               <img
                 src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png"
                 alt="Dominion Financial"
-                className="h-8 mr-3"
+                className="h-8"
               />
 
               {/* Property and Client Info */}
               {lastSubmittedFormData && (
-                <div className="ml-4 text-sm text-gray-600">
+                <div className="text-sm text-gray-600 border-l pl-4">
                   <div className="font-medium text-gray-900">
                     {lastSubmittedFormData.firstName} {lastSubmittedFormData.lastName}
                   </div>
-                  <div>
+                  <div className="text-xs text-gray-500">
                     {lastSubmittedFormData.streetAddress} {lastSubmittedFormData.city}, {lastSubmittedFormData.propertyState}
                   </div>
                 </div>
               )}
-
-              {/* Back Button */}
-              {currentStep !== "upload" && (
-                <Button
-                  variant="ghost"
-                  onClick={handleNavigationBack}
-                  className="ml-4 text-dominion-blue hover:bg-blue-50"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  {currentStep === "results" ? "Back to Form" : "Back to Upload"}
-                </Button>
-              )}
             </div>
 
-            {/* View Selection Buttons */}
-            {currentStep !== "upload" && currentStep !== "results" && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={currentStep === "questionnaire" ? "default" : "outline"}
-                  onClick={() => setCurrentStep("questionnaire")}
-                  className="text-sm"
-                >
-                  DSCR Questionnaire
-                </Button>
-                <Button
-                  variant={currentStep === "loanpass" ? "default" : "outline"}
-                  onClick={() => setCurrentStep("loanpass")}
-                  className="text-sm"
-                >
-                  Loan Pass View
-                </Button>
-              </div>
-            )}
-
-            {/* Scenarios Button - Always visible when not on upload */}
+            {/* Step Navigation - Always visible when past upload */}
             {currentStep !== "upload" && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-2">
+                {/* Start Over */}
                 <Button
-                  variant={currentStep === "scenarios" ? "default" : "outline"}
-                  onClick={() => setCurrentStep("scenarios")}
-                  className="text-sm"
+                  variant="ghost"
+                  onClick={handleBackToUpload}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                  size="sm"
                 >
-                  <History className="w-4 h-4 mr-2" />
-                  Saved Scenarios
+                  <ArrowLeft className="h-3 w-3 mr-1" />
+                  Start Over
                 </Button>
+
+                {/* Step Buttons */}
+                <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
+                  <Button
+                    variant={currentStep === "questionnaire" ? "default" : "ghost"}
+                    onClick={() => setCurrentStep("questionnaire")}
+                    className="text-xs px-3 py-1 h-8"
+                    size="sm"
+                  >
+                    Edit Details
+                  </Button>
+                  
+                  {(pricingResults.length > 0 || currentStep === "results") && (
+                    <Button
+                      variant={currentStep === "results" ? "default" : "ghost"}
+                      onClick={() => setCurrentStep("results")}
+                      className="text-xs px-3 py-1 h-8"
+                      size="sm"
+                    >
+                      View Results
+                    </Button>
+                  )}
+
+                  <Button
+                    variant={currentStep === "scenarios" ? "default" : "ghost"}
+                    onClick={() => setCurrentStep("scenarios")}
+                    className="text-xs px-3 py-1 h-8"
+                    size="sm"
+                  >
+                    <History className="w-3 h-3 mr-1" />
+                    Saved
+                  </Button>
+
+                  <Button
+                    variant={currentStep === "loanpass" ? "default" : "ghost"}
+                    onClick={() => setCurrentStep("loanpass")}
+                    className="text-xs px-3 py-1 h-8"
+                    size="sm"
+                  >
+                    Loan Pass
+                  </Button>
+                </div>
               </div>
             )}
           </div>
         </div>
       </nav>
+
+      {/* Process Breadcrumb - Show current step */}
+      {currentStep !== "upload" && (
+        <div className="bg-gray-50 border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="text-gray-500">Process:</span>
+              <div className="flex items-center space-x-2">
+                <span className={`px-2 py-1 rounded ${currentStep === "questionnaire" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
+                  1. Details
+                </span>
+                <span className="text-gray-400">→</span>
+                <span className={`px-2 py-1 rounded ${currentStep === "results" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
+                  2. Results
+                </span>
+                <span className="text-gray-400">→</span>
+                <span className={`px-2 py-1 rounded ${currentStep === "scenarios" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
+                  3. Saved
+                </span>
+                <span className="text-gray-400">•</span>
+                <span className={`px-2 py-1 rounded ${currentStep === "loanpass" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
+                  Loan Pass
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bond Display - Visible on all screens */}
       <div className="bg-white border-b border-gray-200">
