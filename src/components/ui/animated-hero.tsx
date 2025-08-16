@@ -60,7 +60,7 @@ function Hero() {
               <span className="text-foreground">Lending</span>
             </h1>
 
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-3xl text-center">
+            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-white max-w-3xl text-center">
               Transform your commercial lending process with our AI-powered platform. 
               Get instant quotes, automated underwriting, and comprehensive loan packaging 
               that streamlines everything from application to approval.
