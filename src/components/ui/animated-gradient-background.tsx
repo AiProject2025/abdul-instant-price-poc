@@ -73,7 +73,7 @@ interface AnimatedGradientBackgroundProps {
  * @returns JSX.Element
  */
 const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
-   startingGap = 125,
+   startingGap = 300,
    Breathing = false,
    gradientColors = [
       "hsl(var(--background))",
@@ -82,7 +82,7 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
       "hsl(var(--dominion-blue))",
       "hsl(var(--background))",
    ],
-   gradientStops = [20, 100],
+   gradientStops = [20, 40, 60, 80, 100],
    animationSpeed = 0.02,
    breathingRange = 2,
    containerStyle = {},
