@@ -167,10 +167,10 @@ const ModernNavigation = () => {
             </div>
           ) : (
             // Desktop Three Island Layout
-            <div className="flex items-center justify-between space-x-6">
+            <div className="flex items-center justify-center space-x-3">
               {/* Island 1: Logo */}
               <div className={cn(
-                "flex items-center p-4 rounded-2xl transition-all duration-300",
+                "flex items-center px-4 py-3 h-14 rounded-2xl transition-all duration-300",
                 isScrolled 
                   ? "bg-background/95 backdrop-blur-xl shadow-xl border border-border/50" 
                   : "bg-background/80 backdrop-blur-md shadow-lg"
@@ -180,10 +180,7 @@ const ModernNavigation = () => {
                     <img 
                       src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" 
                       alt="Dominion Financial" 
-                      className={cn(
-                        "transition-all duration-300 drop-shadow-lg",
-                        isScrolled ? "h-8" : "h-10"
-                      )}
+                      className="h-8 transition-all duration-300 drop-shadow-lg"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
@@ -200,13 +197,13 @@ const ModernNavigation = () => {
 
               {/* Island 2: Bond Display */}
               <div className={cn(
-                "flex items-center px-6 py-4 rounded-2xl transition-all duration-300 min-w-fit",
+                "flex items-center px-8 py-3 h-14 rounded-2xl transition-all duration-300 min-w-[400px]",
                 isScrolled 
                   ? "bg-[hsl(var(--dominion-blue))] shadow-xl border border-border/50" 
                   : "bg-[hsl(var(--dominion-blue))] shadow-lg",
                 "text-white"
               )}>
-                <div className="flex items-center space-x-6 text-sm">
+                <div className="flex items-center space-x-6 text-sm w-full">
                   <div className="flex items-center space-x-2">
                     <span className="font-medium">10Y:</span>
                     <span className="font-bold">
@@ -235,28 +232,34 @@ const ModernNavigation = () => {
                     )}
                   </div>
                   
-                  <div className="text-xs opacity-75">
+                  <div className="text-xs opacity-75 ml-auto">
                     {bondData.tenYear?.lastUpdate || new Date().toLocaleTimeString('en-US', { hour12: false })}
                   </div>
                 </div>
               </div>
 
-              {/* Island 3: User Avatar & Actions */}
+              {/* Island 3: User Actions */}
               <div className={cn(
-                "flex items-center space-x-4 p-4 rounded-2xl transition-all duration-300",
+                "flex items-center space-x-2 px-4 py-3 h-14 rounded-2xl transition-all duration-300",
                 isScrolled 
                   ? "bg-background/95 backdrop-blur-xl shadow-xl border border-border/50" 
                   : "bg-background/80 backdrop-blur-md shadow-lg"
               )}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs px-3 py-2 h-8"
+                >
+                  <Calculator className="h-3 w-3 mr-1" />
+                  Quick Quote
+                </Button>
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full group">
-                      <Avatar className="h-10 w-10 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
-                        <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {userInitials}
-                        </AvatarFallback>
-                      </Avatar>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 rounded-lg group">
+                      <div className="bg-primary/10 text-primary font-bold text-xs h-8 w-8 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        {userInitials}
+                      </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
