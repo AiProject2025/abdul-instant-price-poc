@@ -386,7 +386,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   const [showPropertyGrid, setShowPropertyGrid] = useState(false);
   const [packageSplits, setPackageSplits] = useState<PackageSplit[]>([]);
   const [showPackageSplitter, setShowPackageSplitter] = useState(false);
-  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+  const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
   const [displayedProperties, setDisplayedProperties] = useState<Property[]>([]);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -904,9 +904,9 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
 
   const deletePackage = (packageId: string) => {
     setPackageSplits(packageSplits.filter(split => split.id !== packageId));
-    if (selectedPackageId === packageId) {
-      setSelectedPackageId(null);
-      setDisplayedProperties([]);
+    if (selectedPackageIds.includes(packageId)) {
+      setSelectedPackageIds(selectedPackageIds.filter(id => id !== packageId));
+      updateDisplayedProperties(selectedPackageIds.filter(id => id !== packageId));
     }
     toast({
       title: "Package Deleted",
@@ -914,31 +914,59 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     });
   };
 
-  const viewPackage = (packageId: string) => {
-    const selectedPackage = packageSplits.find(split => split.id === packageId);
-    if (selectedPackage) {
-      setSelectedPackageId(packageId);
-      setDisplayedProperties(selectedPackage.properties);
+  const togglePackageSelection = (packageId: string) => {
+    const newSelectedIds = selectedPackageIds.includes(packageId)
+      ? selectedPackageIds.filter(id => id !== packageId)
+      : [...selectedPackageIds, packageId];
+    
+    setSelectedPackageIds(newSelectedIds);
+    updateDisplayedProperties(newSelectedIds);
+  };
+
+  const updateDisplayedProperties = (packageIds: string[]) => {
+    const allSelectedProperties = packageIds.flatMap(id => {
+      const pkg = packageSplits.find(split => split.id === id);
+      return pkg ? pkg.properties : [];
+    });
+    setDisplayedProperties(allSelectedProperties);
+    
+    if (packageIds.length > 0) {
       toast({
-        title: "Package Selected",
-        description: `Viewing ${selectedPackage.properties.length} properties in data tape`,
+        title: "Packages Selected",
+        description: `Viewing ${allSelectedProperties.length} properties from ${packageIds.length} package(s)`,
       });
     }
   };
 
-  const submitPackage = (packageId: string) => {
-    const selectedPackage = packageSplits.find(split => split.id === packageId);
-    if (selectedPackage) {
-      const packageData = {
-        loanPurpose,
-        properties: selectedPackage.properties,
-        packageType: "package-split",
-        packageName: selectedPackage.name,
-        creditScore,
-        dataTapeFile: uploadedDataTapeFile,
-      };
-      onSubmit(packageData);
+  const submitSelectedPackages = () => {
+    if (selectedPackageIds.length === 0) {
+      toast({
+        title: "No Packages Selected",
+        description: "Please select at least one package to continue.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    const allSelectedProperties = selectedPackageIds.flatMap(id => {
+      const pkg = packageSplits.find(split => split.id === id);
+      return pkg ? pkg.properties : [];
+    });
+
+    const packageNames = selectedPackageIds.map(id => {
+      const pkg = packageSplits.find(split => split.id === id);
+      return pkg ? pkg.name : '';
+    }).filter(Boolean);
+
+    const packageData = {
+      loanPurpose,
+      properties: allSelectedProperties,
+      packageType: "multi-package",
+      packageNames: packageNames,
+      creditScore,
+      dataTapeFile: uploadedDataTapeFile,
+    };
+    onSubmit(packageData);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1012,19 +1040,10 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       });
       return;
     }
-    if (!selectedPackageId) {
+    if (selectedPackageIds.length === 0) {
       toast({
-        title: "Select a Package",
-        description: "Choose a package from the analysis results before continuing.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const selectedSplit = packageSplits.find(p => p.id === selectedPackageId);
-    if (!selectedSplit) {
-      toast({
-        title: "Invalid Selection",
-        description: "The selected package could not be found. Please reselect.",
+        title: "Select Packages",
+        description: "Choose one or more packages from the analysis results before continuing.",
         variant: "destructive",
       });
       return;
@@ -1052,7 +1071,12 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       return isNaN(n) ? 0 : n;
     };
 
-    const propertiesPayload = selectedSplit.properties.map((p) => ({
+    const allSelectedProperties = selectedPackageIds.flatMap(id => {
+      const pkg = packageSplits.find(split => split.id === id);
+      return pkg ? pkg.properties : [];
+    });
+
+    const propertiesPayload = allSelectedProperties.map((p) => ({
       annual_property_taxes: p.annualPropertyTaxes || 0,
       borrower_credit_score: Number(p.borrowersCreditScore) || Number(creditScore) || 0,
       condo: (p.condo || '').toLowerCase() === 'yes',
@@ -1078,12 +1102,17 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       strategy_for_property: p.strategyForProperty || '',
     }));
 
+    const packageNames = selectedPackageIds.map(id => {
+      const pkg = packageSplits.find(split => split.id === id);
+      return pkg ? pkg.name : '';
+    }).filter(Boolean);
+
     const requestPayload = {
-      packageName: selectedSplit.name,
-      packageId: selectedSplit.id,
+      packageNames: packageNames,
+      packageIds: selectedPackageIds,
       loanPurpose,
       creditScore,
-      totalProperties: selectedSplit.properties.length,
+      totalProperties: allSelectedProperties.length,
       properties: propertiesPayload,
     };
 
@@ -1102,12 +1131,17 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       const webhookOutput = await res.json();
 
       // Pass to parent so it can merge and navigate to /quote with prefill
+      const packageNames = selectedPackageIds.map(id => {
+        const pkg = packageSplits.find(split => split.id === id);
+        return pkg ? pkg.name : '';
+      }).filter(Boolean);
+
       onSubmit({
         loanPurpose,
         creditScore,
-        packageType: 'package-split',
-        packageName: selectedSplit.name,
-        properties: selectedSplit.properties,
+        packageType: 'multi-package',
+        packageNames: packageNames,
+        properties: allSelectedProperties,
         webhookOutput,
       });
     } catch (error) {
@@ -1201,7 +1235,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                     setShowPropertyGrid(false);
                     setPackageSplits([]);
                     setShowPackageSplitter(false);
-                    setSelectedPackageId(null);
+                    setSelectedPackageIds([]);
                     setUploadedDataTapeFile(null);
                     toast({
                       title: "Data Cleared",
@@ -1567,20 +1601,20 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                 </Card>
 
                 {/* Package Grid */}
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-4">
                     {packageSplits.map((split, index) => {
                         return (
                             <Card
                                 key={split.id}
-                                className={`transition-all duration-300 cursor-pointer transform hover:scale-[1.02] animate-fade-in ${split.color} ${
-                                  selectedPackageId === split.id 
+                                className={`w-full transition-all duration-300 cursor-pointer animate-fade-in ${split.color} ${
+                                  selectedPackageIds.includes(split.id)
                                     ? 'ring-4 ring-primary/30 shadow-lg border-2' 
                                     : 'hover:shadow-md border-2'
                                 }`}
-                                onClick={() => setSelectedPackageId(selectedPackageId === split.id ? null : split.id)}
+                                onClick={() => togglePackageSelection(split.id)}
                                 style={{
                                   animationDelay: `${index * 150}ms`,
-                                  transform: selectedPackageId === split.id ? 'translateY(-4px)' : 'translateY(0)',
+                                  transform: selectedPackageIds.includes(split.id) ? 'translateY(-4px)' : 'translateY(0)',
                                 }}
                             >
 
@@ -1590,8 +1624,8 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                                         <div className="flex items-start gap-4 flex-1">
                                             <div className="flex items-center gap-3">
                                                 <Checkbox
-                                                    checked={selectedPackageId === split.id}
-                                                    onCheckedChange={() => selectedPackageId === split.id ? setSelectedPackageId(null) : viewPackage(split.id)}
+                                                    checked={selectedPackageIds.includes(split.id)}
+                                                    onCheckedChange={() => togglePackageSelection(split.id)}
                                                     className="w-5 h-5"
                                                 />
                                                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -1611,16 +1645,10 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
 
                                         <div className="flex items-center gap-2">
                                             <Button
-                                                onClick={() => viewPackage(split.id)}
-                                                variant="outline"
-                                                size="sm"
-                                                className="border-gray-300 text-gray-700"
-                                            >
-                                                <Eye className="w-4 h-4 mr-2" />
-                                                View
-                                            </Button>
-                                            <Button
-                                                onClick={() => deletePackage(split.id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deletePackage(split.id);
+                                                }}
                                                 variant="outline"
                                                 size="sm"
                                                 className="border-gray-300 text-gray-700"
@@ -1634,7 +1662,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                                 {/* Financial Summary */}
                                 <div className="p-6">
                                     <h4 className="text-base font-semibold text-gray-900 mb-4">Financial Overview</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         {/* Total Portfolio Value */}
                                         <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
                                             <div className="text-lg font-semibold text-gray-900 mb-1">
@@ -1702,26 +1730,18 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                                         </div>
                                     </div>
 
-                                    {/* Action Button */}
-                                    <div className="mt-6 flex justify-end">
-                                        <Button
-                                            onClick={() => {
-                                              setSelectedPackageId(split.id);
-                                              setDisplayedProperties(split.properties);
-                                              toast({
-                                                title: "Package Selected",
-                                                description: `Selected "${split.name}". Now click Get Package Loan Quote.`,
-                                              });
-                                            }}
-                                            variant={selectedPackageId === split.id ? "secondary" : "default"}
-                                            className={`${selectedPackageId === split.id ? "" : "bg-dominion-blue hover:bg-blue-700 text-white"}`}
-                                        >
-                                            {selectedPackageId === split.id ? (
-                                              <span className="flex items-center"><Check className="w-4 h-4 mr-2" /> Selected</span>
+                                     {/* Selection Status */}
+                                    <div className="mt-6 flex justify-between items-center">
+                                        <div className="text-sm text-gray-600">
+                                            {selectedPackageIds.includes(split.id) ? (
+                                                <span className="flex items-center text-green-600">
+                                                    <Check className="w-4 h-4 mr-2" /> 
+                                                    Selected for submission
+                                                </span>
                                             ) : (
-                                              "Select this"
+                                                "Click to select this package"
                                             )}
-                                        </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </Card>
@@ -1732,21 +1752,31 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         )}
 
       {/* Property Grid */}
-      {showPropertyGrid && (selectedPackageId ? displayedProperties.length > 0 : properties.length > 0) && (
+      {showPropertyGrid && (selectedPackageIds.length > 0 ? displayedProperties.length > 0 : properties.length > 0) && (
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <div className="bg-dominion-blue text-white p-6 text-center">
             <h2 className="text-2xl font-semibold mb-2">
-              {selectedPackageId 
-                ? `${packageSplits.find(p => p.id === selectedPackageId)?.name || 'Package'} Properties` 
+              {selectedPackageIds.length > 0
+                ? `Selected Package${selectedPackageIds.length > 1 ? 's' : ''} Properties` 
                 : 'Property Portfolio Overview'
               }
             </h2>
-            <p className="opacity-90">
-              {selectedPackageId 
-                ? `Viewing ${displayedProperties.length} properties in selected package`
-                : `Manage all ${properties.length} properties`
-              }
-            </p>
+             <p className="opacity-90">
+               {selectedPackageIds.length > 0
+                 ? `Viewing ${displayedProperties.length} properties from ${selectedPackageIds.length} selected package(s)`
+                 : `Manage all ${properties.length} properties`
+               }
+             </p>
+             <div className="mt-2 flex justify-end">
+               <Button 
+                 onClick={runPackageAnalysis}
+                 variant="outline" 
+                 size="sm"
+                 className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+               >
+                 Reanalyze Packages
+               </Button>
+             </div>
           </div>
           
           <div className="overflow-auto max-h-[600px]">
@@ -1782,13 +1812,13 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                   </tr>
                 </thead>
                  <tbody>
-                   {(selectedPackageId ? displayedProperties : properties).map((property, index) => (
+                   {(selectedPackageIds.length > 0 ? displayedProperties : properties).map((property, index) => (
                      <PropertyTableRow 
                        key={property.id} 
                        property={property} 
                        index={index} 
-                       onUpdate={selectedPackageId ? (updatedProps) => {
-                         // When viewing a package, update both displayedProperties and the main properties array
+                       onUpdate={selectedPackageIds.length > 0 ? (updatedProps) => {
+                         // When viewing selected packages, update both displayedProperties and the main properties array
                          setDisplayedProperties(updatedProps);
                          const updatedMainProperties = properties.map(p => {
                            const updatedProp = updatedProps.find(up => up.id === p.id);
@@ -1796,7 +1826,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                          });
                          setProperties(updatedMainProperties);
                        } : handlePropertiesChange} 
-                       properties={selectedPackageId ? displayedProperties : properties} 
+                       properties={selectedPackageIds.length > 0 ? displayedProperties : properties} 
                      />
                    ))}
                  </tbody>
@@ -1813,27 +1843,27 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                <Button variant="secondary" onClick={generateTestData}>
                  Generate Test Data
                </Button>
-               {selectedPackageId && (
-                 <Button 
-                   variant="outline" 
-                   onClick={() => {
-                     setSelectedPackageId(null);
-                     setDisplayedProperties([]);
-                   }}
-                 >
-                   Show All Properties
-                 </Button>
-               )}
-               <div className="text-sm text-muted-foreground flex items-center">
-                 Total Properties: <span className="font-semibold ml-1">
-                   {selectedPackageId ? displayedProperties.length : properties.length}
+                {selectedPackageIds.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSelectedPackageIds([]);
+                      setDisplayedProperties([]);
+                    }}
+                  >
+                    Show All Properties
+                  </Button>
+                )}
+                <div className="text-sm text-muted-foreground flex items-center">
+                  Total Properties: <span className="font-semibold ml-1">
+                    {selectedPackageIds.length > 0 ? displayedProperties.length : properties.length}
                  </span>
                </div>
              </div>
             
             <Button
               onClick={handleSubmit}
-              disabled={isLoading || isSubmitting || !(showPackageSplitter && packageSplits.length > 0 && selectedPackageId)}
+              disabled={isLoading || isSubmitting || !(showPackageSplitter && packageSplits.length > 0 && selectedPackageIds.length > 0)}
               className="bg-dominion-blue hover:bg-blue-700 text-white"
             >
               {isSubmitting ? (
