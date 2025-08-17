@@ -1,11 +1,23 @@
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, Loader2, FileSpreadsheet, Calculator } from "lucide-react";
+import { Upload, FileText, Loader2, FileSpreadsheet, Calculator, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import ClientSearch from "./ClientSearch";
 import { ClientWithProperties } from "@/hooks/useClients";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
+
+const loadingStates = [
+  { text: "Analyzing questionnaire data..." },
+  { text: "Extracting loan parameters..." },
+  { text: "Validating property information..." },
+  { text: "Processing borrower details..." },
+  { text: "Calculating risk factors..." },
+  { text: "Generating pricing scenarios..." },
+  { text: "Finalizing quote structure..." },
+  { text: "Almost ready..." }
+];
 
 interface QuestionnaireUploadProps {
   onFileUpload: (file: File) => void;
@@ -199,20 +211,25 @@ const QuestionnaireUpload = ({
     }
   };
   if (isLoading || isProcessingDataTape) {
-    return <Card className="max-w-2xl mx-auto">
-        <CardContent className="p-12 text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-dominion-blue mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-dominion-blue mb-2">
-            {isProcessingDataTape ? 'Processing Your Data Tape' : 'Processing Your Questionnaire'}
-          </h3>
-          <p className="text-dominion-gray">
-            {isProcessingDataTape 
-              ? 'Our system is normalizing your portfolio data. This may take a few moments...'
-              : 'Our AI is extracting data from your document. This may take a few moments...'
-            }
-          </p>
-        </CardContent>
-      </Card>;
+    return (
+      <>
+        <MultiStepLoader 
+          loadingStates={loadingStates} 
+          loading={isLoading || isProcessingDataTape} 
+          duration={1500} 
+          loop={false} 
+        />
+        
+        {(isLoading || isProcessingDataTape) && (
+          <button
+            className="fixed top-4 right-4 text-black dark:text-white z-[120]"
+            onClick={() => window.location.reload()}
+          >
+            <X className="h-10 w-10" />
+          </button>
+        )}
+      </>
+    );
   }
   const handleClientSelect = (client: ClientWithProperties) => {
     if (onClientSelect) {
