@@ -499,7 +499,7 @@ const Quote = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Modern Navigation Header */}
       <ModernNavigation />
       
@@ -544,8 +544,8 @@ const Quote = () => {
               </div>
 
               {/* Search Bar - ChatGPT style with client functionality */}
-              <div className="w-full max-w-4xl mx-auto">
-                <div className="relative">
+              <div className="w-full px-4 sm:px-6 lg:px-8">
+                <div className="relative max-w-6xl mx-auto">
                   <input
                     type="text"
                     placeholder="Search clients, properties, or previous quotes..."
@@ -562,11 +562,10 @@ const Quote = () => {
                         setShowClientResults(true);
                       }
                     }}
-                    className="w-full px-8 py-6 text-lg border border-border rounded-2xl bg-background shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all duration-200 placeholder:text-muted-foreground"
+                    className="w-full pl-8 pr-4 py-6 text-lg border-2 border-gray-200 rounded-2xl bg-white shadow-lg focus:border-blue-900 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-200 placeholder:text-gray-500"
                   />
                   <Button 
-                    size="sm" 
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 rounded-xl"
+                    className="absolute right-2 top-2 bottom-2 px-8 bg-blue-900 hover:bg-blue-800 text-white rounded-xl flex items-center justify-center"
                     onClick={async () => {
                       if (searchQuery.trim()) {
                         await searchClients(searchQuery);
@@ -575,7 +574,8 @@ const Quote = () => {
                     }}
                     disabled={clientsLoading}
                   >
-                    <Search className="h-4 w-4" />
+                    <Search className="h-4 w-4 mr-2" />
+                    Search
                   </Button>
                 </div>
 
@@ -734,13 +734,11 @@ const Quote = () => {
       </main>
 
       {/* Footer - consistent with home page */}
-      <footer className="bg-primary text-primary-foreground py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-sm opacity-90">
-              &copy; {new Date().getFullYear()} Dominion Financial. All rights reserved.
-            </p>
-          </div>
+      <footer className="bg-blue-900 text-white py-2 mt-auto">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-xs opacity-90">
+            &copy; {new Date().getFullYear()} Dominion Financial. All rights reserved.
+          </p>
         </div>
       </footer>
 

@@ -221,111 +221,115 @@ const QuestionnaireUpload = ({
   };
 
   return <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upload Questionnaire Option */}
-        <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-primary/50">
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-all">
-                <Upload className="h-8 w-8 text-primary-foreground" />
+        <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-blue-900/20 bg-white">
+          <div className="bg-blue-900 text-white p-4 rounded-t-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <Upload className="h-5 w-5 text-white" />
               </div>
-              
               <div>
-                <h3 className="text-xl font-bold text-primary mb-2">Upload Questionnaire</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Upload your completed DSCR questionnaire for instant data extraction
-                </p>
+                <h3 className="text-lg font-bold">Upload Questionnaire</h3>
+                <p className="text-blue-100 text-sm">Instant data extraction from documents</p>
               </div>
-
-              <div className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 ${dragActive ? "border-primary bg-primary/10" : "border-border hover:border-primary/50 hover:bg-muted/30"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
-                <input type="file" id="file-upload" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleFileInput} />
-                <label htmlFor="file-upload" className="cursor-pointer block">
-                  <FileText className="h-10 w-10 text-primary mx-auto mb-3" />
-                  <p className="text-sm text-foreground mb-1 font-medium">
-                    Drop file here or <span className="text-primary underline">browse</span>
+            </div>
+          </div>
+          <CardContent className="p-0">
+            <div className={`h-64 border-2 border-dashed rounded-b-lg transition-all duration-300 cursor-pointer ${dragActive ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-blue-900/50 hover:bg-blue-50/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
+              <input type="file" id="file-upload" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleFileInput} />
+              <label htmlFor="file-upload" className="cursor-pointer h-full flex flex-col items-center justify-center text-center space-y-4">
+                <FileText className="h-12 w-12 text-blue-900" />
+                <div>
+                  <p className="text-blue-900 font-medium mb-1">
+                    Drop file here or <span className="underline">browse</span>
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    PDF, DOC, DOCX, TXT
+                  <p className="text-gray-500 text-sm">
+                    PDF, DOC, DOCX, TXT supported
                   </p>
-                </label>
-              </div>
+                </div>
+              </label>
             </div>
           </CardContent>
         </Card>
 
         {/* Upload Data Tape Option */}
-        <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-primary/50">
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-all">
-                <FileSpreadsheet className="h-8 w-8 text-primary-foreground" />
+        <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-blue-900/20 bg-white">
+          <div className="bg-blue-900 text-white p-4 rounded-t-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <FileSpreadsheet className="h-5 w-5 text-white" />
               </div>
-              
               <div>
-                <h3 className="text-xl font-bold text-primary mb-2">Upload Data Tape</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Batch process multiple properties from your portfolio data
-                </p>
+                <h3 className="text-lg font-bold">Upload Data Tape</h3>
+                <p className="text-blue-100 text-sm">Batch process portfolio data</p>
               </div>
-
-              <div className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 ${dataTapeDragActive ? "border-primary bg-primary/10" : "border-border hover:border-primary/50 hover:bg-muted/30"}`} onDragEnter={handleDataTapeDrag} onDragLeave={handleDataTapeDrag} onDragOver={handleDataTapeDrag} onDrop={handleDataTapeDrop}>
-                <input type="file" id="data-tape-upload" className="hidden" accept=".csv,.xls,.xlsx" onChange={handleDataTapeInput} />
-                <label htmlFor="data-tape-upload" className="cursor-pointer block">
-                  <FileSpreadsheet className="h-10 w-10 text-primary mx-auto mb-3" />
-                  <p className="text-sm text-foreground mb-1 font-medium">
-                    Drop file here or <span className="text-primary underline">browse</span>
+            </div>
+          </div>
+          <CardContent className="p-0">
+            <div className={`h-64 border-2 border-dashed rounded-b-lg transition-all duration-300 cursor-pointer ${dataTapeDragActive ? "border-blue-900 bg-blue-50" : "border-gray-300 hover:border-blue-900/50 hover:bg-blue-50/50"}`} onDragEnter={handleDataTapeDrag} onDragLeave={handleDataTapeDrag} onDragOver={handleDataTapeDrag} onDrop={handleDataTapeDrop}>
+              <input type="file" id="data-tape-upload" className="hidden" accept=".csv,.xls,.xlsx" onChange={handleDataTapeInput} />
+              <label htmlFor="data-tape-upload" className="cursor-pointer h-full flex flex-col items-center justify-center text-center space-y-4">
+                <FileSpreadsheet className="h-12 w-12 text-blue-900" />
+                <div>
+                  <p className="text-blue-900 font-medium mb-1">
+                    Drop file here or <span className="underline">browse</span>
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    CSV, XLS, XLSX
+                  <p className="text-gray-500 text-sm">
+                    CSV, XLS, XLSX supported
                   </p>
-                </label>
-              </div>
+                </div>
+              </label>
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Manual Entry Option */}
-        <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-primary/50">
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-all">
-                <Calculator className="h-8 w-8 text-primary-foreground" />
+      {/* Manual Entry Option - Full Width */}
+      <div className="max-w-6xl mx-auto">
+        <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-blue-900/20 bg-white">
+          <div className="bg-blue-900 text-white p-4 rounded-t-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <Calculator className="h-5 w-5 text-white" />
               </div>
-              
               <div>
-                <h3 className="text-xl font-bold text-primary mb-2">Manual Entry</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Fill out our guided form step-by-step
-                </p>
+                <h3 className="text-lg font-bold">Manual Entry</h3>
+                <p className="text-blue-100 text-sm">Fill out our guided form step-by-step</p>
               </div>
-
+            </div>
+          </div>
+          <CardContent className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="space-y-4">
-                <div className="bg-muted/30 border p-4 rounded-xl text-left">
-                  <h4 className="font-semibold text-primary mb-3 text-sm">Required Information:</h4>
-                  <ul className="text-xs text-muted-foreground space-y-2">
+                <div className="bg-blue-50 border border-blue-200 p-6 rounded-xl">
+                  <h4 className="font-semibold text-blue-900 mb-4">Required Information:</h4>
+                  <ul className="text-sm text-blue-800 space-y-3">
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
+                      <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                       Borrower information
                     </li>
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
+                      <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                       Property details
                     </li>
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
+                      <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                       Loan requirements
                     </li>
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
+                      <div className="w-2 h-2 bg-blue-900 rounded-full mr-3"></div>
                       Financial information
                     </li>
                   </ul>
                 </div>
+              </div>
+              <div className="flex flex-col items-center justify-center">
                 <Button 
                   onClick={onManualEntry} 
-                  className="w-full font-medium py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+                  className="w-full max-w-sm bg-blue-900 hover:bg-blue-800 text-white font-medium py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all"
                 >
-                  <Calculator className="h-4 w-4 mr-2" />
+                  <Calculator className="h-5 w-5 mr-3" />
                   Start Manual Entry
                 </Button>
               </div>
