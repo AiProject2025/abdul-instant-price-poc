@@ -13,7 +13,7 @@ export function GlowingFeaturesGrid() {
           <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200">
             Coming Soon
           </Badge>
-          <h2 className="text-4xl font-bold text-blue-600">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
             Next-Generation Lending Platform
           </h2>
         </div>
