@@ -31,9 +31,9 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-blue-600 text-white py-4 relative z-10">
+      <footer className="bg-blue-900 text-white py-2 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm">
+          <p className="text-xs opacity-90">
             &copy; {new Date().getFullYear()} Dominion Financial. All rights reserved.
           </p>
         </div>
