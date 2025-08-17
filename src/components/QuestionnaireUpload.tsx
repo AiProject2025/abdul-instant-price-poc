@@ -300,38 +300,110 @@ const QuestionnaireUpload = ({
             </div>
           </div>
           <CardContent className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column - Information */}
+              <div className="lg:col-span-2 space-y-6">
                 <div className="bg-blue-50 border border-blue-200 p-6 rounded-xl">
-                  <h4 className="font-semibold text-[hsl(215,100%,15%)] mb-4">Required Information:</h4>
-                  <ul className="text-sm text-blue-800 space-y-3">
-                    <li className="flex items-center">
-                      <div className="w-2 h-2 bg-[hsl(215,100%,15%)] rounded-full mr-3"></div>
-                      Borrower information
-                    </li>
-                    <li className="flex items-center">
-                      <div className="w-2 h-2 bg-[hsl(215,100%,15%)] rounded-full mr-3"></div>
-                      Property details
-                    </li>
-                    <li className="flex items-center">
-                      <div className="w-2 h-2 bg-[hsl(215,100%,15%)] rounded-full mr-3"></div>
-                      Loan requirements
-                    </li>
-                    <li className="flex items-center">
-                      <div className="w-2 h-2 bg-[hsl(215,100%,15%)] rounded-full mr-3"></div>
-                      Financial information
-                    </li>
-                  </ul>
+                  <h4 className="font-semibold text-[hsl(215,100%,15%)] mb-4 flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Required Information
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-medium text-[hsl(215,100%,15%)] mb-2">Borrower Details</h5>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Full name & contact info
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Credit score
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Income documentation
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-[hsl(215,100%,15%)] mb-2">Property Details</h5>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Property address & type
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Market value & condition
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Rental income details
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-[hsl(215,100%,15%)] mb-2">Loan Requirements</h5>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Loan purpose & amount
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Down payment details
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Desired loan terms
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-[hsl(215,100%,15%)] mb-2">Financial Information</h5>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Property taxes & insurance
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Operating expenses
+                        </li>
+                        <li className="flex items-center">
+                          <div className="w-1.5 h-1.5 bg-[hsl(215,100%,15%)] rounded-full mr-2"></div>
+                          Existing debt information
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 border border-green-200 p-4 rounded-xl">
+                  <div className="flex items-center mb-2">
+                    <div className="w-2 h-2 bg-green-600 rounded-full mr-2"></div>
+                    <span className="text-sm font-medium text-green-800">Estimated completion time: 5-8 minutes</span>
+                  </div>
+                  <p className="text-xs text-green-700">Our guided form will walk you through each section step by step.</p>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center">
+
+              {/* Right Column - Action Button */}
+              <div className="flex flex-col justify-center items-center space-y-4">
+                <div className="w-20 h-20 bg-[hsl(215,100%,15%)] rounded-full flex items-center justify-center mb-4">
+                  <Calculator className="h-10 w-10 text-white" />
+                </div>
                 <Button 
                   onClick={onManualEntry} 
-                  className="w-full max-w-sm bg-[hsl(215,100%,15%)] hover:bg-[hsl(215,100%,25%)] text-white font-medium py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all"
+                  className="w-full bg-[hsl(215,100%,15%)] hover:bg-[hsl(215,100%,25%)] text-white font-medium py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
                 >
-                  <Calculator className="h-5 w-5 mr-3" />
+                  <Calculator className="h-5 w-5 mr-2" />
                   Start Manual Entry
                 </Button>
+                <p className="text-center text-xs text-gray-500 mt-2">
+                  Complete the form at your own pace with our step-by-step guidance
+                </p>
               </div>
             </div>
           </CardContent>

@@ -502,27 +502,6 @@ const Quote = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Modern Navigation Header */}
       <ModernNavigation />
-      
-      {/* Breadcrumb Navigation - below navbar, subtle */}
-      <div className="bg-muted/30 border-b border-border py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
-                    <Home className="h-4 w-4" />
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-primary font-medium">Get Quote</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </div>
 
       <main className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
@@ -565,7 +544,7 @@ const Quote = () => {
                     className="w-full pl-8 pr-32 py-6 text-lg border-2 border-gray-200 rounded-2xl bg-white shadow-lg focus:border-[hsl(215,100%,15%)] focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-200 placeholder:text-gray-500"
                   />
                   <Button 
-                    className="absolute right-1 top-1 bottom-1 px-8 bg-[hsl(215,100%,15%)] hover:bg-[hsl(215,100%,25%)] text-white rounded-xl flex items-center justify-center border-0"
+                    className="absolute inset-y-0 right-0 px-8 bg-[hsl(215,100%,15%)] hover:bg-[hsl(215,100%,25%)] text-white rounded-r-2xl flex items-center justify-center border-0"
                     onClick={async () => {
                       if (searchQuery.trim()) {
                         await searchClients(searchQuery);
