@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PackageLoanForm from "@/components/PackageLoanForm";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home, LogOut } from "lucide-react";
 import PricingResults from "@/components/PricingResults";
-import { transformFormDataForAPI } from "@/utils/pricingPayload";
+import ModernNavigation from "@/components/ModernNavigation";
 
 const PackageLoan = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -114,20 +112,6 @@ const PackageLoan = () => {
         try {
             const props = data.properties || [];
             if (!props.length) throw new Error("No properties in selected package");
-
-            // Validate: Same State Requirement
-            // const states = props.map((p: any) => extractAddressParts(p.fullPropertyAddress).state).filter(Boolean);
-            // console.log('states test',states)
-            // const uniqueStates = Array.from(new Set(states));
-            //
-            // if (uniqueStates.length !== 1) {
-            //   toast({
-            //     title: "Package Invalid",
-            //     description: "All properties in a portfolio must be in the same state.",
-            //     variant: "destructive",
-            //   });
-            //   return;
-            // }
 
             // Primary property by lowest street number
             const primary = getPrimaryProperty(props);
@@ -334,78 +318,26 @@ const PackageLoan = () => {
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-200/20 to-blue-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
             </div>
 
-            {/* Modern Navigation Header */}
-            <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20 relative z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-6">
-                        <div className="flex items-center space-x-6">
-                            <Link to="/" className="flex items-center text-dominion-blue hover:text-dominion-green font-medium transition-all duration-300 hover:drop-shadow-sm group">
-                                <div className="p-2 bg-gradient-to-r from-blue-500/10 to-blue-600/10 rounded-lg mr-3 group-hover:from-blue-500/20 group-hover:to-blue-600/20 transition-all duration-300">
-                                    <ArrowLeft className="h-4 w-4" />
-                                </div>
-                                Back to Home
-                            </Link>
-                            <div className="h-8 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
-                            <div className="flex items-center">
-                                <div className="relative">
-                                    <img src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png" alt="Dominion Financial" className="h-10 mr-3 drop-shadow-lg" />
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent rounded blur-sm"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <nav className="flex space-x-4 items-center">
-                            <Link to="/" className="flex items-center text-dominion-blue hover:text-dominion-green font-medium transition-all duration-300 hover:drop-shadow-sm px-3 py-2 rounded-lg hover:bg-white/30">
-                                <Home className="h-4 w-4 mr-2" />
-                                Home
-                            </Link>
-                            <Link to="/quote" className="flex items-center text-dominion-blue hover:text-dominion-green font-medium transition-all duration-300 hover:drop-shadow-sm px-3 py-2 rounded-lg hover:bg-white/30">
-                                Single Quote
-                            </Link>
-                            <Button
-                                onClick={signOut}
-                                variant="outline"
-                                size="sm"
-                                className="text-dominion-blue border-dominion-blue/30 bg-white/50 backdrop-blur-sm hover:bg-dominion-blue hover:text-white transition-all duration-300"
-                            >
-                                <LogOut className="h-4 w-4 mr-2" />
-                                Logout
-                            </Button>
-                        </nav>
-                    </div>
-                </div>
-            </header>
+            {/* Modern Navigation - Using consistent ModernNavigation component */}
+            <ModernNavigation />
 
-            {/* Content */}
-            <div className="relative z-10 py-8">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
-                        {currentStep === 'form' && (
-                            <>
-                                <div className="mb-8">
-                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                        Package Loan Application
-                                    </h1>
-                                    <p className="text-gray-600">
-                                        Process multiple properties for comprehensive loan analysis
-                                    </p>
-                                </div>
-                                <PackageLoanForm onSubmit={handlePackageSubmit} isLoading={isLoading} />
-                            </>
-                        )}
-
-                        {currentStep === 'results' && (
-                            <PricingResults
-                                results={pricingResults}
-                                flags={flags}
-                                ineligibleBuyers={ineligibleBuyers}
-                                onGenerateLoanQuote={() => {}}
-                                onBackToForm={() => setCurrentStep('form')}
-                                lastSubmittedFormData={lastSubmittedFormData}
-                            />
-                        )}
-                    </div>
-                </div>
-            </div>
+            {/* Main Content */}
+            <main className="relative z-10 flex-1 pt-20">
+                {currentStep === "form" ? (
+                    <PackageLoanForm 
+                        onSubmit={handlePackageSubmit} 
+                        isLoading={isLoading}
+                    />
+                ) : (
+                    <PricingResults 
+                        results={pricingResults}
+                        flags={flags}
+                        ineligibleBuyers={ineligibleBuyers}
+                        onGenerateLoanQuote={() => {}}
+                        onBackToForm={() => setCurrentStep("form")}
+                    />
+                )}
+            </main>
         </div>
     );
 };
