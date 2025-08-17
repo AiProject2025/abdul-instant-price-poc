@@ -38,7 +38,7 @@ function Hero() {
                 {titles.map((title, index) => (
                   <motion.span
                     key={index}
-                    className="absolute font-bold text-blue-600"
+                    className="absolute font-bold gradient-text"
                     initial={{ opacity: 0, y: "-100" }}
                     transition={{ type: "spring", stiffness: 50 }}
                     animate={
@@ -57,7 +57,7 @@ function Hero() {
                   </motion.span>
                 ))}
               </span>
-              <span className="text-white">Commercial Lending</span>
+              <span className="text-blue-900">Commercial Lending</span>
             </h1>
 
             <p className="text-lg md:text-xl leading-relaxed tracking-tight text-white/90 max-w-3xl text-center">
