@@ -565,7 +565,7 @@ const Quote = () => {
                     className="w-full pl-8 pr-32 py-6 text-lg border-2 border-gray-200 rounded-2xl bg-white shadow-lg focus:border-[hsl(215,100%,15%)] focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-200 placeholder:text-gray-500"
                   />
                   <Button 
-                    className="absolute right-2 top-2 bottom-2 px-8 bg-[hsl(215,100%,15%)] hover:bg-[hsl(215,100%,25%)] text-white rounded-xl flex items-center justify-center border-0"
+                    className="absolute right-1 top-1 bottom-1 px-8 bg-[hsl(215,100%,15%)] hover:bg-[hsl(215,100%,25%)] text-white rounded-xl flex items-center justify-center border-0"
                     onClick={async () => {
                       if (searchQuery.trim()) {
                         await searchClients(searchQuery);
