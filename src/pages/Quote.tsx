@@ -544,7 +544,7 @@ const Quote = () => {
               </div>
 
               {/* Search Bar - ChatGPT style with client functionality */}
-              <div className="w-full px-4 sm:px-6 lg:px-8">
+              <div className="w-full px-4 sm:px-6 lg:px-8 mb-8">
                 <div className="relative max-w-6xl mx-auto">
                   <input
                     type="text"
@@ -562,10 +562,10 @@ const Quote = () => {
                         setShowClientResults(true);
                       }
                     }}
-                    className="w-full pl-8 pr-4 py-6 text-lg border-2 border-gray-200 rounded-2xl bg-white shadow-lg focus:border-blue-900 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-200 placeholder:text-gray-500"
+                    className="w-full pl-8 pr-32 py-6 text-lg border-2 border-gray-200 rounded-2xl bg-white shadow-lg focus:border-[hsl(215,100%,15%)] focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-200 placeholder:text-gray-500"
                   />
                   <Button 
-                    className="absolute right-2 top-2 bottom-2 px-8 bg-blue-900 hover:bg-blue-800 text-white rounded-xl flex items-center justify-center"
+                    className="absolute right-2 top-2 bottom-2 px-8 bg-[hsl(215,100%,15%)] hover:bg-[hsl(215,100%,25%)] text-white rounded-xl flex items-center justify-center border-0"
                     onClick={async () => {
                       if (searchQuery.trim()) {
                         await searchClients(searchQuery);
@@ -734,7 +734,7 @@ const Quote = () => {
       </main>
 
       {/* Footer - consistent with home page */}
-      <footer className="bg-blue-900 text-white py-2 mt-auto">
+      <footer className="bg-[hsl(215,100%,15%)] text-white py-2 mt-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-xs opacity-90">
             &copy; {new Date().getFullYear()} Dominion Financial. All rights reserved.
