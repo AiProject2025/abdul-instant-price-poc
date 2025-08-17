@@ -6,9 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Plus, Trash2, Eye, X, Check, RotateCcw } from "lucide-react";
+import { Upload, Plus, Trash2, Eye, X, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import * as XLSX from 'xlsx';
 
 interface Property {
   id: string;
@@ -19,7 +18,7 @@ interface Property {
   squareFootage?: number;
   sqfType?: string;
   condo: string;
-  legalNonConforming?: string;
+  legalNonConforming: string;
   isRural?: string;
   borrowersCreditScore: string;
   purposeOfLoan: string;
@@ -119,9 +118,56 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           <SelectContent>
             <SelectItem value="Yes">Yes</SelectItem>
             <SelectItem value="No">No</SelectItem>
-            <SelectItem value="Non-Warrantable">Non-Warrantable</SelectItem>
           </SelectContent>
         </Select>
+      </td>
+      
+      {/* Legal Non-Conforming */}
+      <td className="p-2">
+        <Select value={property.legalNonConforming} onValueChange={(value) => updateProperty('legalNonConforming', value)}>
+          <SelectTrigger className="min-w-[80px] h-8 text-sm">
+            <SelectValue placeholder="Legal" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Yes">Yes</SelectItem>
+            <SelectItem value="No">No</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Borrower's Credit Score */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.borrowersCreditScore}
+          onChange={(e) => updateProperty('borrowersCreditScore', e.target.value)}
+          placeholder="Credit"
+          className="min-w-[80px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Purpose of Loan */}
+      <td className="p-2">
+        <Select value={property.purposeOfLoan} onValueChange={(value) => updateProperty('purposeOfLoan', value)}>
+          <SelectTrigger className="min-w-[100px] h-8 text-sm">
+            <SelectValue placeholder="Purpose" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Purchase">Purchase</SelectItem>
+            <SelectItem value="Refinance">Refinance</SelectItem>
+            <SelectItem value="Cash-Out">Cash-Out</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Purchase Date */}
+      <td className="p-2">
+        <Input
+          type="date"
+          value={property.purchaseDate}
+          onChange={(e) => updateProperty('purchaseDate', e.target.value)}
+          className="min-w-[120px] h-8 text-sm"
+        />
       </td>
       
       {/* Purchase Price */}
@@ -132,6 +178,17 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           onChange={(e) => updateProperty('purchasePrice', parseFloat(e.target.value) || 0)}
           placeholder="0"
           className="min-w-[120px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Rehab Costs */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.rehabCosts || ''}
+          onChange={(e) => updateProperty('rehabCosts', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
         />
       </td>
       
@@ -146,12 +203,25 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
         />
       </td>
       
-      {/* Market Rent */}
+      {/* Existing Mortgage Balance */}
       <td className="p-2">
         <Input
-          value={property.marketRent}
-          onChange={(e) => updateProperty('marketRent', e.target.value)}
-          placeholder="$0/mo"
+          type="number"
+          value={property.existingMortgageBalance || ''}
+          onChange={(e) => updateProperty('existingMortgageBalance', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[120px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Current Mortgage Rate */}
+      <td className="p-2">
+        <Input
+          type="number"
+          step="0.01"
+          value={property.currentMortgageRate || ''}
+          onChange={(e) => updateProperty('currentMortgageRate', parseFloat(e.target.value) || 0)}
+          placeholder="0.00%"
           className="min-w-[100px] h-8 text-sm"
         />
       </td>
@@ -165,12 +235,130 @@ const PropertyTableRow = ({ property, index, onUpdate, properties }: PropertyTab
           <SelectContent>
             <SelectItem value="Leased">Leased</SelectItem>
             <SelectItem value="Vacant">Vacant</SelectItem>
+            <SelectItem value="MTM">MTM</SelectItem>
             <SelectItem value="Owner Occupied">Owner Occupied</SelectItem>
           </SelectContent>
         </Select>
       </td>
       
-      {/* Remove Button */}
+      {/* Market Rent */}
+      <td className="p-2">
+        <Input
+          value={property.marketRent}
+          onChange={(e) => updateProperty('marketRent', e.target.value)}
+          placeholder="$0/mo"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Current Lease Amount */}
+      <td className="p-2">
+        <Input
+          value={property.currentLeaseAmount}
+          onChange={(e) => updateProperty('currentLeaseAmount', e.target.value)}
+          placeholder="$0/mo"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual Property Taxes */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualPropertyTaxes || ''}
+          onChange={(e) => updateProperty('annualPropertyTaxes', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual Hazard Insurance */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualHazardInsurance || ''}
+          onChange={(e) => updateProperty('annualHazardInsurance', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual Flood Insurance */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualFloodInsurance || ''}
+          onChange={(e) => updateProperty('annualFloodInsurance', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Annual HOA Fees */}
+      <td className="p-2">
+        <Input
+          type="number"
+          value={property.annualHomeOwnersAssociation || ''}
+          onChange={(e) => updateProperty('annualHomeOwnersAssociation', parseFloat(e.target.value) || 0)}
+          placeholder="0"
+          className="min-w-[100px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Current Condition */}
+      <td className="p-2">
+        <Select value={property.currentCondition} onValueChange={(value) => updateProperty('currentCondition', value)}>
+          <SelectTrigger className="min-w-[100px] h-8 text-sm">
+            <SelectValue placeholder="Condition" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="New">New</SelectItem>
+            <SelectItem value="Excellent">Excellent</SelectItem>
+            <SelectItem value="Good">Good</SelectItem>
+            <SelectItem value="Average">Average</SelectItem>
+            <SelectItem value="Fair">Fair</SelectItem>
+            <SelectItem value="Poor">Poor</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Strategy for Property */}
+      <td className="p-2">
+        <Select value={property.strategyForProperty} onValueChange={(value) => updateProperty('strategyForProperty', value)}>
+          <SelectTrigger className="min-w-[120px] h-8 text-sm">
+            <SelectValue placeholder="Strategy" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Rent and Hold">Rent and Hold</SelectItem>
+            <SelectItem value="Rent and hold">Rent and hold</SelectItem>
+            <SelectItem value="Fix and Flip">Fix and Flip</SelectItem>
+            <SelectItem value="Buy and Hold">Buy and Hold</SelectItem>
+            <SelectItem value="Short-term Rental">Short-term Rental</SelectItem>
+          </SelectContent>
+        </Select>
+      </td>
+      
+      {/* Entity Name */}
+      <td className="p-2">
+        <Input
+          value={property.entityName}
+          onChange={(e) => updateProperty('entityName', e.target.value)}
+          placeholder="Entity"
+          className="min-w-[120px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Notes */}
+      <td className="p-2">
+        <Input
+          value={property.notes}
+          onChange={(e) => updateProperty('notes', e.target.value)}
+          placeholder="Notes"
+          className="min-w-[150px] h-8 text-sm"
+        />
+      </td>
+      
+      {/* Actions */}
       <td className="p-2 text-center">
         <Button
           variant="outline"
@@ -198,114 +386,67 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   const [showPropertyGrid, setShowPropertyGrid] = useState(false);
   const [packageSplits, setPackageSplits] = useState<PackageSplit[]>([]);
   const [showPackageSplitter, setShowPackageSplitter] = useState(false);
-  const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [displayedProperties, setDisplayedProperties] = useState<Property[]>([]);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedDataTapeFile, setUploadedDataTapeFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  // Check for persisted data on component mount
   useEffect(() => {
-    const savedData = localStorage.getItem('dominionDataTape');
-    if (savedData) {
+    const storedData = localStorage.getItem('dominionDataTape');
+    if (storedData) {
       try {
-        const parsed = JSON.parse(savedData);
-        console.log("Restored from localStorage:", parsed);
-        
-        setLoanPurpose(parsed.loanPurpose || "");
-        setCreditScore(parsed.creditScore || "");
-        setNumberOfProperties((parsed.numberOfProperties || 0).toString());
-        setProperties(parsed.properties || []);
-        
-        if (parsed.properties && parsed.properties.length > 0) {
-          setShowPropertyGrid(true);
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.loanPurpose) {
+          setLoanPurpose(parsedData.loanPurpose);
         }
+        if (parsedData.creditScore) {
+          setCreditScore(parsedData.creditScore.toString());
+        }
+        setNumberOfProperties(parsedData.numberOfProperties.toString());
+        setProperties(parsedData.properties);
+        setShowPropertyGrid(true);
+        
+        toast({
+          title: "Data Restored",
+          description: `Restored ${parsedData.numberOfProperties} properties from previous upload`,
+        });
       } catch (error) {
-        console.error('Error parsing saved data:', error);
+        console.error('Error restoring data tape:', error);
+        localStorage.removeItem('dominionDataTape');
       }
     }
-  }, []);
+  }, [toast]);
 
-  const parseMoney = (value: string): number => {
-    if (!value) return 0;
-    return parseFloat(value.replace(/[$,]/g, '')) || 0;
-  };
-
-  const getAddress = (fullAddress: string) => {
-    if (!fullAddress) return { address: '', city: '', state: '', zipCode: '' };
-    const parts = fullAddress.split(',').map(p => p.trim());
-    
-    if (parts.length >= 3) {
-      const address = parts[0];
-      const city = parts[1];
-      const stateZip = parts[2].split(' ');
-      const state = stateZip[0] || '';
-      const zipCode = stateZip[1] || '';
-      
-      return { address, city, state, zipCode };
-    } else if (parts.length === 2) {
-      const address = parts[0];
-      const stateZip = parts[1].split(' ');
-      const state = stateZip[0] || '';
-      const zipCode = stateZip.slice(1).join(' ') || '';
-      
-      return { address, city: '', state, zipCode };
-    } else {
-      return { address: fullAddress, city: '', state: '', zipCode: '' };
-    }
-  };
-
-  const getPrimaryProperty = (props: Property[]) => {
-    if (props.length === 0) return null;
-    return props.reduce((highest, current) => 
-      (current.currentMarketValue || 0) > (highest.currentMarketValue || 0) ? current : highest
-    );
-  };
-
-  const getMostCommonString = (values: string[]): string => {
-    const frequency: Record<string, number> = {};
-    values.filter(v => v && v.trim()).forEach(value => {
-      frequency[value] = (frequency[value] || 0) + 1;
-    });
-    
-    return Object.keys(frequency).reduce((a, b) => 
-      frequency[a] > frequency[b] ? a : b, ''
-    );
-  };
-
-  const mapPropertyType = (structureType: string): string => {
-    const mapping: Record<string, string> = {
-      'Single Family': 'SFR',
-      'Townhome': 'Townhouse',
-      'Condo': 'Condo',
-      'Multi-Family': 'Multi-Family',
-      'Duplex': 'Duplex'
-    };
-    return mapping[structureType] || structureType;
-  };
-
-  const dollars = (num: any) => {
-    if (num === null || num === undefined || num === '') return '';
-    const n = parseFloat(num.toString().replace(/[^0-9.-]+/g, ''));
-    return isNaN(n) ? '' : `$${Math.round(n).toLocaleString()}`;
-  };
-
-  const mapOccupancy = (status: string) => {
-    const mapping: Record<string, string> = {
-      'Leased': 'Tenant Occupied',
-      'Vacant': 'Vacant',
-      'Owner Occupied': 'Owner Occupied'
-    };
-    return mapping[status] || status;
-  };
-
-  const mapStructureType = (type: string) => {
-    if (!type) return '';
-    return type;
-  };
-
+  // Map n8n API output item to internal Property shape
   const mapN8nOutputToProperty = (item: any, idx: number): Property => {
-    console.log(`Processing item ${idx}:`, item);
+    const mapStructureType = (s?: string) => {
+      const t = (s || '').toLowerCase();
+      if (t.includes('single')) return 'Single Family';
+      if (t.includes('duplex')) return 'Duplex';
+      if (t.includes('triplex') || t.includes('fourplex') || t.includes('plex')) return 'Multi-Family';
+      if (t.includes('condo')) return 'Condo';
+      if (t.includes('town')) return 'Townhome';
+      if (t.includes('manufactured') || t.includes('mobile')) return 'Single Family';
+      return s || '';
+    };
+
+    const mapOccupancy = (s?: string) => {
+      const t = (s || '').toLowerCase();
+      if (t.includes('tenant')) return 'Leased';
+      if (t.includes('owner')) return 'Owner Occupied';
+      if (t.includes('vacant')) return 'Vacant';
+      if (t.includes('mtm') || t.includes('month')) return 'MTM';
+      return '';
+    };
+
+    const dollars = (n: any) => {
+      const v = Number(n) || 0;
+      return v > 0 ? `$${Math.round(v).toLocaleString()}` : '';
+    };
 
     return {
       id: `property-${Date.now()}-${idx}`,
@@ -407,72 +548,6 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessingFile(true);
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      
-      console.log("Parsed Excel data:", jsonData);
-      
-      if (jsonData.length < 2) {
-        throw new Error("File must contain at least a header row and one data row");
-      }
-
-      const headers = jsonData[0] as string[];
-      const rows = jsonData.slice(1);
-
-      const mappedProperties = rows.map((row: any[], index) => {
-        const rowObject: any = {};
-        headers.forEach((header, i) => {
-          rowObject[header] = row[i];
-        });
-        return mapN8nOutputToProperty(rowObject, index);
-      });
-
-      const inferredPurpose = deriveLoanPurposeFromOutput(rows.map(row => ({ purpose_of_loan: row[headers.indexOf('purpose_of_loan')] || '' })));
-      const inferredScore = (rows[0]?.[headers.indexOf('borrower_credit_score')] ?? '').toString();
-
-      setLoanPurpose(inferredPurpose);
-      setCreditScore(inferredScore);
-      setNumberOfProperties(mappedProperties.length.toString());
-      setProperties(mappedProperties);
-      setShowPropertyGrid(true);
-
-      const persisted = {
-        loanPurpose: inferredPurpose,
-        creditScore: inferredScore,
-        numberOfProperties: mappedProperties.length,
-        properties: mappedProperties,
-      };
-      localStorage.setItem('dominionDataTape', JSON.stringify(persisted));
-
-      toast({
-        title: "File Uploaded Successfully",
-        description: `Loaded ${mappedProperties.length} properties from Excel file`,
-      });
-
-    } catch (error) {
-      console.error('Error processing file:', error);
-      toast({
-        title: "Upload Error", 
-        description: error instanceof Error ? error.message : "Failed to process the uploaded file",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingFile(false);
-      if (event.target) {
-        event.target.value = '';
-      }
-    }
-  };
-
   const addEmptyProperty = () => {
     const newProperty: Property = {
       id: `property-${Date.now()}`,
@@ -506,6 +581,199 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       notes: "",
     };
     setProperties([...properties, newProperty]);
+  };
+
+  const generateTestData = () => {
+    const testProperties: Property[] = [
+      {
+        id: "test-1",
+        fullPropertyAddress: "123 Oak Street, Houston, TX 77001",
+        countyName: "Harris County",
+        structureType: "Single Family",
+        numberOfUnits: 1,
+        squareFootage: 2000,
+        sqfType: "Heated",
+        condo: "No",
+        legalNonConforming: "No",
+        isRural: "no",
+        borrowersCreditScore: "740",
+        purposeOfLoan: "Purchase",
+        purchaseDate: "2024-01-15",
+        purchasePrice: 300000,
+        rehabCosts: 15000,
+        currentMarketValue: 350000,
+        existingMortgageBalance: 280000,
+        currentMortgageRate: 7.5,
+        currentOccupancyStatus: "Leased",
+        marketRent: "$2800",
+        currentLeaseAmount: "$2750",
+        annualPropertyTaxes: 4200,
+        annualHazardInsurance: 1800,
+        annualFloodInsurance: 0,
+        annualHomeOwnersAssociation: 0,
+        currentCondition: "Good",
+        strategyForProperty: "Buy and Hold",
+        entityName: "Investment LLC",
+        notes: "Standard rental property"
+      },
+      {
+        id: "test-2",
+        fullPropertyAddress: "456 Pine Avenue, Dallas, TX 75201",
+        countyName: "Dallas County",
+        structureType: "Townhome",
+        numberOfUnits: 1,
+        squareFootage: 1800,
+        sqfType: "Heated",
+        condo: "No",
+        legalNonConforming: "No",
+        isRural: "no",
+        borrowersCreditScore: "720",
+        purposeOfLoan: "Refinance",
+        purchaseDate: "2023-08-10",
+        purchasePrice: 275000,
+        rehabCosts: 8000,
+        currentMarketValue: 320000,
+        existingMortgageBalance: 240000,
+        currentMortgageRate: 6.8,
+        currentOccupancyStatus: "Leased",
+        marketRent: "$2600",
+        currentLeaseAmount: "$2550",
+        annualPropertyTaxes: 3800,
+        annualHazardInsurance: 1600,
+        annualFloodInsurance: 0,
+        annualHomeOwnersAssociation: 1200,
+        currentCondition: "Excellent",
+        strategyForProperty: "Long-term rental",
+        entityName: "Investment LLC",
+        notes: "Recently renovated"
+      },
+      {
+        id: "test-3",
+        fullPropertyAddress: "789 Elm Street, Austin, TX 78701",
+        countyName: "Travis County",
+        structureType: "Condo",
+        numberOfUnits: 1,
+        squareFootage: 1200,
+        sqfType: "Heated",
+        condo: "Yes",
+        legalNonConforming: "No",
+        isRural: "no",
+        borrowersCreditScore: "760",
+        purposeOfLoan: "Purchase",
+        purchaseDate: "2024-02-20",
+        purchasePrice: 400000,
+        rehabCosts: 5000,
+        currentMarketValue: 420000,
+        existingMortgageBalance: 350000,
+        currentMortgageRate: 7.2,
+        currentOccupancyStatus: "Leased",
+        marketRent: "$3200",
+        currentLeaseAmount: "$3100",
+        annualPropertyTaxes: 5200,
+        annualHazardInsurance: 2000,
+        annualFloodInsurance: 500,
+        annualHomeOwnersAssociation: 2400,
+        currentCondition: "Good",
+        strategyForProperty: "Short-term Rental",
+        entityName: "Investment LLC",
+        notes: "Downtown condo with STR potential"
+      },
+      {
+        id: "test-4",
+        fullPropertyAddress: "321 Rural Road, Fredericksburg, TX 78624",
+        countyName: "Gillespie County",
+        structureType: "Single Family",
+        numberOfUnits: 1,
+        squareFootage: 1600,
+        sqfType: "Heated",
+        condo: "No",
+        legalNonConforming: "No",
+        isRural: "yes",
+        borrowersCreditScore: "700",
+        purposeOfLoan: "Purchase",
+        purchaseDate: "2024-03-15",
+        purchasePrice: 250000,
+        rehabCosts: 20000,
+        currentMarketValue: 280000,
+        existingMortgageBalance: 200000,
+        currentMortgageRate: 8.0,
+        currentOccupancyStatus: "Vacant",
+        marketRent: "$2200",
+        currentLeaseAmount: "",
+        annualPropertyTaxes: 3200,
+        annualHazardInsurance: 1400,
+        annualFloodInsurance: 0,
+        annualHomeOwnersAssociation: 0,
+        currentCondition: "Fair",
+        strategyForProperty: "Buy and Hold",
+        entityName: "Rural Properties LLC",
+        notes: "Rural property requiring separate package"
+      },
+      {
+        id: "test-5",
+        fullPropertyAddress: "654 Multi Street, San Antonio, TX 78201",
+        countyName: "Bexar County",
+        structureType: "Multi-Family",
+        numberOfUnits: 8,
+        squareFootage: 6000,
+        sqfType: "Heated",
+        condo: "No",
+        legalNonConforming: "No",
+        isRural: "no",
+        borrowersCreditScore: "780",
+        purposeOfLoan: "Refinance",
+        purchaseDate: "2023-05-10",
+        purchasePrice: 800000,
+        rehabCosts: 50000,
+        currentMarketValue: 900000,
+        existingMortgageBalance: 650000,
+        currentMortgageRate: 6.5,
+        currentOccupancyStatus: "Leased",
+        marketRent: "$8000",
+        currentLeaseAmount: "$7800",
+        annualPropertyTaxes: 12000,
+        annualHazardInsurance: 4000,
+        annualFloodInsurance: 0,
+        annualHomeOwnersAssociation: 0,
+        currentCondition: "Good",
+        strategyForProperty: "Buy and Hold",
+        entityName: "Multi Family Holdings LLC",
+        notes: "8-unit property - exceeds 5 unit limit"
+      }
+    ];
+    
+    console.log("Generated test data with", testProperties.length, "properties");
+    setProperties(testProperties);
+    toast({
+      title: "Test Data Generated",
+      description: `Created ${testProperties.length} test properties with different package requirements`,
+    });
+  };
+
+  const validatePackageEligibility = (properties: Property[]): { isValid: boolean; issues: string[] } => {
+    const issues: string[] = [];
+    
+    // Check for properties with over 5 units
+    const highUnitProperties = properties.filter(p => (p.numberOfUnits || 0) > 5);
+    if (highUnitProperties.length > 0) {
+      issues.push(`${highUnitProperties.length} properties have more than 5 units and cannot be packaged`);
+    }
+
+    // Check for mixed warrantability in condos
+    const condos = properties.filter(p => p.structureType === "Condo");
+    if (condos.length > 1) {
+      const warrantable = condos.filter(p => p.condo !== "Non-Warrantable");
+      const nonWarrantable = condos.filter(p => p.condo === "Non-Warrantable");
+      
+      if (warrantable.length > 0 && nonWarrantable.length > 0) {
+        issues.push("Cannot mix warrantable and non-warrantable condos in the same package");
+      }
+    }
+
+    return {
+      isValid: issues.length === 0,
+      issues
+    };
   };
 
   const analyzeProperties = (): PackageSplit[] => {
@@ -610,132 +878,237 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
 
   const runPackageAnalysis = () => {
     // First validate the properties
-    const invalidProperties = properties.filter(p => 
-      !p.fullPropertyAddress || 
-      !p.structureType || 
-      !p.currentMarketValue ||
-      p.currentMarketValue === 0
-    );
-
-    if (invalidProperties.length > 0) {
+    const validation = validatePackageEligibility(properties);
+    
+    if (!validation.isValid) {
       toast({
-        title: "Incomplete Property Data",
-        description: `Please complete all required fields for ${invalidProperties.length} properties before analysis`,
-        variant: "destructive",
+        title: "Package Analysis Issues",
+        description: validation.issues.join(". "),
+        variant: "destructive"
       });
-      return;
     }
-
+    
+    // Run the analysis regardless to show how properties would be split
     const analysis = analyzeProperties();
     setPackageSplits(analysis);
     setShowPackageSplitter(true);
-    setSelectedPackageIds([]);
-
-    toast({
-      title: "Package Analysis Complete",
-      description: `Found ${analysis.length} optimal package groupings based on loan program requirements`,
-    });
+    
+    // Show success message if valid
+    if (validation.isValid) {
+      toast({
+        title: "Package Analysis Complete",
+        description: `Properties split into ${analysis.length} compatible packages`,
+      });
+    }
   };
 
   const deletePackage = (packageId: string) => {
-    setPackageSplits(prev => prev.filter(p => p.id !== packageId));
-    setSelectedPackageIds(prev => prev.filter(id => id !== packageId));
-    
+    setPackageSplits(packageSplits.filter(split => split.id !== packageId));
+    if (selectedPackageId === packageId) {
+      setSelectedPackageId(null);
+      setDisplayedProperties([]);
+    }
     toast({
       title: "Package Deleted",
       description: "Package removed from analysis results",
     });
   };
 
-  const togglePackageSelection = (packageId: string) => {
-    setSelectedPackageIds(prev => {
-      if (prev.includes(packageId)) {
-        return prev.filter(id => id !== packageId);
-      } else {
-        return [...prev, packageId];
-      }
-    });
+  const viewPackage = (packageId: string) => {
+    const selectedPackage = packageSplits.find(split => split.id === packageId);
+    if (selectedPackage) {
+      setSelectedPackageId(packageId);
+      setDisplayedProperties(selectedPackage.properties);
+      toast({
+        title: "Package Selected",
+        description: `Viewing ${selectedPackage.properties.length} properties in data tape`,
+      });
+    }
   };
 
-  const getSelectedProperties = () => {
-    if (selectedPackageIds.length === 0) return [];
-    return packageSplits
-      .filter(split => selectedPackageIds.includes(split.id))
-      .flatMap(split => split.properties);
+  const submitPackage = (packageId: string) => {
+    const selectedPackage = packageSplits.find(split => split.id === packageId);
+    if (selectedPackage) {
+      const packageData = {
+        loanPurpose,
+        properties: selectedPackage.properties,
+        packageType: "package-split",
+        packageName: selectedPackage.name,
+        creditScore,
+        dataTapeFile: uploadedDataTapeFile,
+      };
+      onSubmit(packageData);
+    }
   };
 
-  const clearAllData = () => {
-    localStorage.removeItem('dominionDataTape');
-    setProperties([]);
-    setLoanPurpose("");
-    setCreditScore("");
-    setNumberOfProperties("");
-    setShowPropertyGrid(false);
-    setPackageSplits([]);
-    setShowPackageSplitter(false);
-    setSelectedPackageIds([]);
-    setDisplayedProperties([]);
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     
-    toast({
-      title: "Data Cleared",
-      description: "All property data has been cleared",
-    });
+    if (!validExtensions.includes(fileExtension)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload an Excel (.xlsx, .xls) or CSV (.csv) file.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessingFile(true);
+    setUploadedDataTapeFile(file);
+
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+
+      // Call n8n to parse the data sheet and return normalized portfolio data
+      const res = await fetch('https://n8n-prod.onrender.com/webhook/b86054ef-0fd4-43b2-8099-1f2269c7946a', {
+        method: 'POST',
+        body: fd,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Data parsing failed with status: ${res.status}`);
+      }
+
+      const payload = await res.json();
+      console.log('n8n package data:', payload);
+
+      // Map response to our internal state (fills the grid automatically)
+      mapN8nResponseToState(payload);
+
+      toast({
+        title: 'Data Tape Processed Successfully',
+        description: `Imported ${(payload?.output || payload || []).length} properties from ${file.name}`,
+      });
+
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error processing data tape via API:', error);
+      toast({
+        title: 'Processing Error',
+        description: error instanceof Error ? error.message : 'Failed to process data tape file.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessingFile(false);
+    }
   };
 
   const handleSubmit = async () => {
-    if (!loanPurpose) {
+    // Require compatibility analysis and package selection
+    if (!(showPackageSplitter && packageSplits.length > 0)) {
       toast({
-        title: 'Missing Information',
-        description: 'Please select loan purpose',
-        variant: 'destructive',
+        title: "Analyze Compatibility First",
+        description: "Please run Analyze Compatibility to generate packages.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!selectedPackageId) {
+      toast({
+        title: "Select a Package",
+        description: "Choose a package from the analysis results before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const selectedSplit = packageSplits.find(p => p.id === selectedPackageId);
+    if (!selectedSplit) {
+      toast({
+        title: "Invalid Selection",
+        description: "The selected package could not be found. Please reselect.",
+        variant: "destructive",
       });
       return;
     }
 
-    if (selectedPackageIds.length === 0) {
+    // Check if we have data (either from upload or from previous page)
+    const hasPropertyData = properties.length > 0 && properties.some(p => p.fullPropertyAddress);
+    if (!uploadedDataTapeFile && !hasPropertyData) {
       toast({
-        title: 'No Package Selected',
-        description: 'Please select at least one package to submit',
-        variant: 'destructive',
+        title: "Data Required",
+        description: "Please upload your Excel/CSV data tape or add property data before continuing.",
+        variant: "destructive",
       });
       return;
     }
+
+    // Build payload for webhook using selected package
+    const num = (v: any) => {
+      if (typeof v === 'number') return isNaN(v) ? 0 : v;
+      if (typeof v === 'string') {
+        const n = parseFloat(v.replace(/[^0-9.-]/g, ''));
+        return isNaN(n) ? 0 : n;
+      }
+      const n = Number(v);
+      return isNaN(n) ? 0 : n;
+    };
+
+    const propertiesPayload = selectedSplit.properties.map((p) => ({
+      annual_property_taxes: p.annualPropertyTaxes || 0,
+      borrower_credit_score: Number(p.borrowersCreditScore) || Number(creditScore) || 0,
+      condo: (p.condo || '').toLowerCase() === 'yes',
+      county_name: p.countyName || '',
+      current_market_value: p.currentMarketValue || 0,
+      current_occupancy_status: p.currentOccupancyStatus || '',
+      existing_mortgage_balance: p.existingMortgageBalance || 0,
+      full_property_address: p.fullPropertyAddress || '',
+      purchase_date: p.purchaseDate || '',
+      purchase_price: p.purchasePrice || 0,
+      purpose_of_loan: p.purposeOfLoan || loanPurpose,
+      structure_type: p.structureType || '',
+      annual_flood_insurance_premium: p.annualFloodInsurance || 0,
+      annual_hazard_insurance_premium: p.annualHazardInsurance || 0,
+      annual_home_owner_association_fees: p.annualHomeOwnersAssociation || 0,
+      current_condition: p.currentCondition || '',
+      current_lease_amount: num(p.currentLeaseAmount),
+      current_mortgage_rate: p.currentMortgageRate || 0,
+      entity_name: p.entityName || '',
+      market_rent: num(p.marketRent),
+      notes: p.notes || '',
+      rehab_costs: p.rehabCosts || 0,
+      strategy_for_property: p.strategyForProperty || '',
+    }));
+
+    const requestPayload = {
+      packageName: selectedSplit.name,
+      packageId: selectedSplit.id,
+      loanPurpose,
+      creditScore,
+      totalProperties: selectedSplit.properties.length,
+      properties: propertiesPayload,
+    };
 
     setIsSubmitting(true);
     try {
-      const selectedProperties = getSelectedProperties();
-      const selectedSplits = packageSplits.filter(split => selectedPackageIds.includes(split.id));
+      const res = await fetch('https://n8n-prod.onrender.com/webhook/e4a0c723-904a-4514-8c37-c6a7d7f29ce2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestPayload),
+      });
 
-      // Call webhook for each selected package
-      const webhookResults = await Promise.all(
-        selectedSplits.map(async (split) => {
-          const res = await fetch('https://covenantcapitalgroup.n8n.cloud/webhook/package-loan-data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              properties: split.properties,
-              loanPurpose,
-              creditScore 
-            }),
-          });
+      if (!res.ok) {
+        throw new Error(`Webhook failed with status: ${res.status}`);
+      }
 
-          if (!res.ok) {
-            throw new Error(`Failed to fetch data for ${split.name}`);
-          }
-
-          const webhookOutput = await res.json();
-          return { split, webhookOutput };
-        })
-      );
+      const webhookOutput = await res.json();
 
       // Pass to parent so it can merge and navigate to /quote with prefill
       onSubmit({
         loanPurpose,
         creditScore,
-        packageType: 'multi-package',
-        selectedPackages: selectedSplits,
-        properties: selectedProperties,
-        webhookResults,
+        packageType: 'package-split',
+        packageName: selectedSplit.name,
+        properties: selectedSplit.properties,
+        webhookOutput,
       });
     } catch (error) {
       console.error('Error calling package loan data webhook:', error);
@@ -819,8 +1192,23 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={clearAllData}
-                  className="text-red-600 border-red-300 hover:bg-red-50"
+                  onClick={() => {
+                    localStorage.removeItem('dominionDataTape');
+                    setProperties([]);
+                    setLoanPurpose("");
+                    setCreditScore("");
+                    setNumberOfProperties("");
+                    setShowPropertyGrid(false);
+                    setPackageSplits([]);
+                    setShowPackageSplitter(false);
+                    setSelectedPackageId(null);
+                    setUploadedDataTapeFile(null);
+                    toast({
+                      title: "Data Cleared",
+                      description: "Upload a new data tape file to start over",
+                    });
+                  }}
+                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Clear All
@@ -831,28 +1219,45 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
         </Card>
       )}
 
-      {/* Loan Purpose and Credit Score */}
-      {properties.length > 0 && (
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader>
-            <CardTitle>Loan Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label>Loan Purpose</Label>
-                <RadioGroup value={loanPurpose} onValueChange={setLoanPurpose}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="purchase" id="purchase" />
-                    <Label htmlFor="purchase">Purchase</Label>
+      {/* Enhanced Package Loan Details */}
+      <Card className="bg-gradient-to-br from-white to-indigo-50/30 border-indigo-200/50 shadow-xl backdrop-blur-sm">
+        <CardHeader className="pb-6">
+          <CardTitle className="flex items-center gap-3 text-xl text-dominion-blue">
+            <div className="p-2 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg">
+              <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            Package Loan Configuration
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Loan Purpose</Label>
+              <RadioGroup value={loanPurpose} onValueChange={setLoanPurpose} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50 ${loanPurpose === 'purchase' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200'}`}>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="purchase" id="purchase" className="w-5 h-5" />
+                    <div className="flex-1">
+                      <Label htmlFor="purchase" className="font-semibold text-base cursor-pointer">Purchase</Label>
+                      <p className="text-sm text-gray-600 mt-1">Financing for property acquisition</p>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="refinance" id="refinance" />
-                    <Label htmlFor="refinance">Refinance</Label>
+                </div>
+                <div className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-green-300 hover:bg-green-50 ${loanPurpose === 'refinance' ? 'border-green-500 bg-green-50 ring-2 ring-green-200' : 'border-gray-200'}`}>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="refinance" id="refinance" className="w-5 h-5" />
+                    <div className="flex-1">
+                      <Label htmlFor="refinance" className="font-semibold text-base cursor-pointer">Refinance</Label>
+                      <p className="text-sm text-gray-600 mt-1">Replacing existing mortgage</p>
+                    </div>
                   </div>
-                </RadioGroup>
-              </div>
+                </div>
+              </RadioGroup>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="creditScore">Credit Score</Label>
                 <Input
@@ -860,376 +1265,585 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                   value={creditScore}
                   onChange={(e) => setCreditScore(e.target.value)}
                   placeholder="Enter credit score"
-                  className="w-full"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="numberOfProperties">Number of Properties</Label>
+                <Select value={numberOfProperties} onValueChange={setNumberOfProperties}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select number" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 20 }, (_, i) => i + 2).map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Property Entry */}
+      {loanPurpose && numberOfProperties && !showPropertyGrid && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Property Data Entry</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              variant="outline" 
+              onClick={initializeEmptyProperties}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Start Manual Entry ({numberOfProperties} properties)
+            </Button>
           </CardContent>
         </Card>
       )}
 
       {/* Portfolio Summary */}
       {showPropertyGrid && properties.length > 0 && (
-        <Card className="border-gray-200 shadow-sm">
+        <Card>
           <CardHeader>
             <CardTitle>Portfolio Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{properties.length}</div>
-                <div className="text-sm text-muted-foreground">Properties</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  ${properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+            {/* Overall Portfolio Stats */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold mb-6 text-gray-800">Portfolio Overview</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Properties Count Card */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-blue-700">{properties.length}</div>
+                      <div className="text-sm font-medium text-blue-600 mt-1">Total Properties</div>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m8 7V3a2 2 0 012-2h4a2 2 0 012 2v4" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Total Value</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  ${properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+
+                {/* Total Value Card */}
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-green-700">
+                        ${properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-sm font-medium text-green-600 mt-1">Portfolio Value</div>
+                    </div>
+                    <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Mortgage Balance</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}
+
+                {/* Mortgage Balance Card */}
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-orange-700">
+                        ${properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-sm font-medium text-orange-600 mt-1">Mortgage Balance</div>
+                    </div>
+                    <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">Annual Taxes</div>
+              </div>
+
+              {/* Annual Expenses Section - Enhanced */}
+              <div className="mt-6">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-purple-800">Annual Expenses Breakdown</h4>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-purple-700">
+                        ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
+                      </div>
+                      <div className="text-sm font-medium text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">Property Taxes</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">Hazard Insurance</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualHazardInsurance || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">Flood Insurance</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualFloodInsurance || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/70 p-4 rounded-lg border border-purple-200/50">
+                      <div className="text-xs text-purple-600 font-medium mb-1">HOA Fees</div>
+                      <div className="text-lg font-bold text-purple-800">
+                        ${properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">
+                        ${Math.round(properties.reduce((sum, p) => sum + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Package Breakdown (if packages exist) */}
+            {packageSplits.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Package Breakdown</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {packageSplits.map((split, index) => (
+                    <div key={split.id} className="p-4 rounded-lg border border-gray-200 bg-white">
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-sm text-gray-900">Package {index + 1}</h4>
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">
+                            {split.properties.length} properties
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600">{split.name}</p>
+                      </div>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Total Value:</span>
+                          <span className="font-semibold text-gray-900">
+                            ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Mortgage:</span>
+                          <span className="font-semibold text-gray-900">
+                            ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                        <div className="flex justify-between pt-2 border-t border-gray-100">
+                          <span className="text-gray-600">Annual Expenses:</span>
+                          <div className="text-right">
+                            <div className="font-semibold text-gray-900">
+                              ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {/* Package Analysis */}
+      {/* Enhanced Smart Package Analysis */}
       {showPropertyGrid && properties.length > 0 && !showPackageSplitter && (
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader>
+        <Card className="bg-gradient-to-br from-amber-50 to-orange-50/30 border-amber-200/50 shadow-xl backdrop-blur-sm">
+          <CardHeader className="pb-6">
             <CardTitle className="flex items-center justify-between">
-              <span>Smart Package Analysis</span>
-              <Button onClick={runPackageAnalysis} variant="outline">
-                Analyze Package Compatibility
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg">
+                  <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-xl text-amber-800">Smart Package Analysis</div>
+                  <div className="text-sm text-amber-600">AI-Powered Compatibility Detection</div>
+                </div>
+              </div>
+              <Button 
+                onClick={runPackageAnalysis}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-orange-500 hover:to-amber-500 text-white px-6 py-3 shadow-lg hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105"
+              >
+                <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Analyze Compatibility
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">
-              Our AI will analyze your properties and suggest optimal package groupings based on loan program requirements and note buyer preferences.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Package Split Results */}
-      {showPackageSplitter && packageSplits.length > 0 && (
-        <>
-          <Card className="border-gray-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Package Analysis Results</span>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={runPackageAnalysis}
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-300 text-gray-700"
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Reanalyze
-                  </Button>
-                  <Button
-                    onClick={() => setShowPackageSplitter(false)}
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-300 text-gray-700"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+            <div className="p-6 bg-white/70 rounded-xl border border-amber-100">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+                  <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-              </CardTitle>
-            </CardHeader>
-          </Card>
+                <div>
+                  <h4 className="font-semibold text-amber-800 mb-2">Intelligent Portfolio Analysis</h4>
+                  <p className="text-amber-700 leading-relaxed">
+                    Our advanced algorithm automatically analyzes your properties for incompatible combinations, 
+                    geographic restrictions, and lending guidelines that could impact loan approval. Get optimized 
+                    package recommendations in seconds.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Package Cards - Column Layout */}
-          <div className="space-y-6">
-            {packageSplits.map((split, index) => {
-              const isSelected = selectedPackageIds.includes(split.id);
-              return (
-                <Card
-                  key={split.id}
-                  className={`transition-all duration-300 cursor-pointer animate-fade-in ${split.color} ${
-                    isSelected
-                      ? 'ring-4 ring-primary/30 shadow-lg border-2 transform -translate-y-1' 
-                      : 'hover:shadow-md border-2 hover:transform hover:-translate-y-0.5'
-                  }`}
-                  onClick={() => togglePackageSelection(split.id)}
-                  style={{
-                    animationDelay: `${index * 150}ms`,
-                  }}
-                >
-                  {/* Package Header */}
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="flex items-center gap-3">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={() => togglePackageSelection(split.id)}
-                            className="w-5 h-5"
-                          />
-                          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <span className="font-semibold text-gray-700">{index + 1}</span>
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">{split.name}</h3>
-                          <p className="text-sm text-gray-600 leading-relaxed">{split.reason}</p>
-                          <div className="mt-3">
-                            <span className="text-sm font-medium text-gray-700">
-                              {split.properties.length} Properties
-                            </span>
-                          </div>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Add view functionality if needed
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="border-gray-300 text-gray-700"
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View
-                        </Button>
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deletePackage(split.id);
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="border-gray-300 text-gray-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Financial Summary */}
-                  <div className="p-6">
-                    <h4 className="text-base font-semibold text-gray-900 mb-4">Financial Overview</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      {/* Total Portfolio Value */}
-                      <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
-                        <div className="text-lg font-semibold text-gray-900 mb-1">
-                          ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
-                        </div>
-                        <div className="text-sm text-blue-600">Portfolio Value</div>
-                      </div>
-
-                      {/* Mortgage Balance */}
-                      <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
-                        <div className="text-lg font-semibold text-gray-900 mb-1">
-                          ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
-                        </div>
-                        <div className="text-sm text-blue-600">Mortgage Balance</div>
-                      </div>
-
-                      {/* LTV Calculation */}
-                      <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
-                        <div className="text-lg font-semibold text-gray-900 mb-1">
-                          {split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0) > 0
-                            ? Math.round((split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0) / split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0)) * 100)
-                            : 0}%
-                        </div>
-                        <div className="text-sm text-blue-600">Loan-to-Value</div>
-                      </div>
-
-                      {/* Annual Expenses */}
-                      <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
-                        <div className="text-lg font-semibold text-gray-900 mb-1">
-                          ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
-                        </div>
-                        <div className="text-sm text-blue-600">
-                          ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr total
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Property List */}
-                    <div className="mt-6">
-                      <h5 className="text-sm font-semibold text-gray-900 mb-3">Properties in this Package</h5>
-                      <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {split.properties.map((property, propIndex) => (
-                          <div key={property.id} className="bg-white p-3 rounded-lg border border-gray-200">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="font-medium text-gray-900 text-sm">
-                                  {property.fullPropertyAddress || `Property ${propIndex + 1} - Address not entered`}
-                                </div>
-                                <div className="text-xs text-gray-600 mt-1">
-                                  {property.structureType && property.countyName
-                                    ? `${property.structureType} • ${property.countyName}`
-                                    : property.structureType || property.countyName || 'Details not entered'
-                                  }
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-sm font-semibold text-gray-900">
-                                  ${(property.currentMarketValue || 0).toLocaleString()}
-                                </div>
-                                <div className="text-xs text-gray-500">Market Value</div>
-                              </div>
+        {/* Package Results */}
+        {showPackageSplitter && packageSplits.length > 0 && (
+            <div className="space-y-6">
+                {/* Header Section */}
+                <Card className="border border-gray-200">
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-semibold text-gray-900">Package Analysis Results</h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {packageSplits.length} packages identified
+                                </p>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                            <div className="flex space-x-2">
+                                <Button
+                                    onClick={runPackageAnalysis}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-gray-300 text-gray-700"
+                                >
+                                    Reanalyze
+                                </Button>
+                                <Button
+                                    onClick={() => setShowPackageSplitter(false)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-gray-300 text-gray-700"
+                                >
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </CardTitle>
+                    </CardHeader>
                 </Card>
-              );
-            })}
+
+                {/* Package Grid */}
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {packageSplits.map((split, index) => {
+                        return (
+                            <Card
+                                key={split.id}
+                                className={`transition-all duration-300 cursor-pointer transform hover:scale-[1.02] animate-fade-in ${split.color} ${
+                                  selectedPackageId === split.id 
+                                    ? 'ring-4 ring-primary/30 shadow-lg border-2' 
+                                    : 'hover:shadow-md border-2'
+                                }`}
+                                onClick={() => setSelectedPackageId(selectedPackageId === split.id ? null : split.id)}
+                                style={{
+                                  animationDelay: `${index * 150}ms`,
+                                  transform: selectedPackageId === split.id ? 'translateY(-4px)' : 'translateY(0)',
+                                }}
+                            >
+
+                                {/* Package Header */}
+                                <div className="p-6 border-b border-gray-200">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-start gap-4 flex-1">
+                                            <div className="flex items-center gap-3">
+                                                <Checkbox
+                                                    checked={selectedPackageId === split.id}
+                                                    onCheckedChange={() => selectedPackageId === split.id ? setSelectedPackageId(null) : viewPackage(split.id)}
+                                                    className="w-5 h-5"
+                                                />
+                                                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                    <span className="font-semibold text-gray-700">{index + 1}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-semibold text-gray-900 mb-2">{split.name}</h3>
+                                                <p className="text-sm text-gray-600 leading-relaxed">{split.reason}</p>
+                                                <div className="mt-3">
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        {split.properties.length} Properties
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                onClick={() => viewPackage(split.id)}
+                                                variant="outline"
+                                                size="sm"
+                                                className="border-gray-300 text-gray-700"
+                                            >
+                                                <Eye className="w-4 h-4 mr-2" />
+                                                View
+                                            </Button>
+                                            <Button
+                                                onClick={() => deletePackage(split.id)}
+                                                variant="outline"
+                                                size="sm"
+                                                className="border-gray-300 text-gray-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Financial Summary */}
+                                <div className="p-6">
+                                    <h4 className="text-base font-semibold text-gray-900 mb-4">Financial Overview</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        {/* Total Portfolio Value */}
+                                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                ${split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0).toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-blue-600">Portfolio Value</div>
+                                        </div>
+
+                                        {/* Mortgage Balance */}
+                                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                ${split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0).toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-blue-600">Mortgage Balance</div>
+                                        </div>
+
+                                        {/* LTV Calculation */}
+                                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                {split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0) > 0
+                                                    ? Math.round((split.properties.reduce((sum, p) => sum + (p.existingMortgageBalance || 0), 0) / split.properties.reduce((sum, p) => sum + (p.currentMarketValue || 0), 0)) * 100)
+                                                    : 0}%
+                                            </div>
+                                            <div className="text-sm text-blue-600">Loan-to-Value</div>
+                                        </div>
+
+                                        {/* Annual Expenses */}
+                                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/60">
+                                            <div className="text-lg font-semibold text-gray-900 mb-1">
+                                                ${Math.round(split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0) / 12).toLocaleString()}/mo
+                                            </div>
+                                            <div className="text-sm text-blue-600">
+                                                ${split.properties.reduce((sum, p) => sum + (p.annualPropertyTaxes || 0) + (p.annualHazardInsurance || 0) + (p.annualFloodInsurance || 0) + (p.annualHomeOwnersAssociation || 0), 0).toLocaleString()}/yr total
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Property List */}
+                                    <div className="mt-6">
+                                        <h5 className="text-sm font-semibold text-gray-900 mb-3">Properties in this Package</h5>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                                            {split.properties.map((property, propIndex) => (
+                                                <div key={property.id} className="bg-white p-3 rounded-lg border border-gray-200">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex-1">
+                                                            <div className="font-medium text-gray-900 text-sm">
+                                                                {property.fullPropertyAddress || `Property ${propIndex + 1} - Address not entered`}
+                                                            </div>
+                                                            <div className="text-xs text-gray-600 mt-1">
+                                                                {property.structureType && property.countyName
+                                                                    ? `${property.structureType} • ${property.countyName}`
+                                                                    : property.structureType || property.countyName || 'Details not entered'
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-sm font-semibold text-gray-900">
+                                                                ${(property.currentMarketValue || 0).toLocaleString()}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">Market Value</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Button */}
+                                    <div className="mt-6 flex justify-end">
+                                        <Button
+                                            onClick={() => {
+                                              setSelectedPackageId(split.id);
+                                              setDisplayedProperties(split.properties);
+                                              toast({
+                                                title: "Package Selected",
+                                                description: `Selected "${split.name}". Now click Get Package Loan Quote.`,
+                                              });
+                                            }}
+                                            variant={selectedPackageId === split.id ? "secondary" : "default"}
+                                            className={`${selectedPackageId === split.id ? "" : "bg-dominion-blue hover:bg-blue-700 text-white"}`}
+                                        >
+                                            {selectedPackageId === split.id ? (
+                                              <span className="flex items-center"><Check className="w-4 h-4 mr-2" /> Selected</span>
+                                            ) : (
+                                              "Select this"
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+                        );
+                    })}
+                </div>
+            </div>
+        )}
+
+      {/* Property Grid */}
+      {showPropertyGrid && (selectedPackageId ? displayedProperties.length > 0 : properties.length > 0) && (
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="bg-dominion-blue text-white p-6 text-center">
+            <h2 className="text-2xl font-semibold mb-2">
+              {selectedPackageId 
+                ? `${packageSplits.find(p => p.id === selectedPackageId)?.name || 'Package'} Properties` 
+                : 'Property Portfolio Overview'
+              }
+            </h2>
+            <p className="opacity-90">
+              {selectedPackageId 
+                ? `Viewing ${displayedProperties.length} properties in selected package`
+                : `Manage all ${properties.length} properties`
+              }
+            </p>
           </div>
-        </>
-      )}
-
-      {/* Combined Selected Packages Table */}
-      {selectedPackageIds.length > 0 && (
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Selected Packages Properties ({getSelectedProperties().length} properties)</span>
-              <div className="flex gap-2">
-                <Button
-                  onClick={runPackageAnalysis}
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-300 text-gray-700"
-                >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Reanalyze
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+          
+          <div className="overflow-auto max-h-[600px]">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-border">
-                <thead>
-                  <tr className="bg-muted">
-                    <th className="sticky left-0 bg-muted p-3 text-left font-medium border-b border-border z-10">
-                      Property Address
-                    </th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">Package</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">County</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">Type</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">Purchase Price</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">Market Value</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[100px]">Market Rent</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[100px]">Occupancy</th>
+              <table className="w-full min-w-[1200px] border-collapse">
+                <thead className="bg-muted sticky top-0 z-10">
+                  <tr>
+                    <th className="sticky left-0 bg-muted border-r border-border p-3 text-left font-medium z-20 shadow-md">Address</th>
+                    <th className="p-3 text-left font-medium">County</th>
+                    <th className="p-3 text-left font-medium">Structure Type</th>
+                    <th className="p-3 text-left font-medium">Condo</th>
+                    <th className="p-3 text-left font-medium">Legal Non-Conforming</th>
+                    <th className="p-3 text-left font-medium">Credit Score</th>
+                    <th className="p-3 text-left font-medium">Purpose</th>
+                    <th className="p-3 text-left font-medium">Purchase Date</th>
+                    <th className="p-3 text-left font-medium">Purchase Price</th>
+                    <th className="p-3 text-left font-medium">Rehab Costs</th>
+                    <th className="p-3 text-left font-medium">Current Value</th>
+                    <th className="p-3 text-left font-medium">Mortgage Balance</th>
+                    <th className="p-3 text-left font-medium">Mortgage Rate</th>
+                    <th className="p-3 text-left font-medium">Occupancy</th>
+                    <th className="p-3 text-left font-medium">Market Rent</th>
+                    <th className="p-3 text-left font-medium">Lease Amount</th>
+                    <th className="p-3 text-left font-medium">Property Taxes</th>
+                    <th className="p-3 text-left font-medium">Hazard Insurance</th>
+                    <th className="p-3 text-left font-medium">Flood Insurance</th>
+                    <th className="p-3 text-left font-medium">HOA Fees</th>
+                    <th className="p-3 text-left font-medium">Condition</th>
+                    <th className="p-3 text-left font-medium">Strategy</th>
+                    <th className="p-3 text-left font-medium">Entity Name</th>
+                    <th className="p-3 text-left font-medium">Notes</th>
+                    <th className="p-3 text-center font-medium">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {getSelectedProperties().map((property, index) => {
-                    const packageSplit = packageSplits.find(split => 
-                      selectedPackageIds.includes(split.id) && split.properties.some(p => p.id === property.id)
-                    );
-                    return (
-                      <tr key={property.id} className="hover:bg-muted/50 border-b border-border">
-                        <td className="sticky left-0 bg-background border-r border-border p-2 max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap font-medium z-10 shadow-md">
-                          {property.fullPropertyAddress || `Property ${index + 1}`}
-                        </td>
-                        <td className="p-2">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${packageSplit?.color || 'bg-gray-100'}`}>
-                            {packageSplit?.name || 'Unknown'}
-                          </span>
-                        </td>
-                        <td className="p-2">{property.countyName}</td>
-                        <td className="p-2">{property.structureType}</td>
-                        <td className="p-2">${(property.purchasePrice || 0).toLocaleString()}</td>
-                        <td className="p-2">${(property.currentMarketValue || 0).toLocaleString()}</td>
-                        <td className="p-2">{property.marketRent}</td>
-                        <td className="p-2">{property.currentOccupancyStatus}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
+                 <tbody>
+                   {(selectedPackageId ? displayedProperties : properties).map((property, index) => (
+                     <PropertyTableRow 
+                       key={property.id} 
+                       property={property} 
+                       index={index} 
+                       onUpdate={selectedPackageId ? (updatedProps) => {
+                         // When viewing a package, update both displayedProperties and the main properties array
+                         setDisplayedProperties(updatedProps);
+                         const updatedMainProperties = properties.map(p => {
+                           const updatedProp = updatedProps.find(up => up.id === p.id);
+                           return updatedProp || p;
+                         });
+                         setProperties(updatedMainProperties);
+                       } : handlePropertiesChange} 
+                       properties={selectedPackageId ? displayedProperties : properties} 
+                     />
+                   ))}
+                 </tbody>
               </table>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Submit Button */}
-      {showPackageSplitter && packageSplits.length > 0 && (
-        <Card className="border-gray-200 shadow-sm">
-          <CardContent className="pt-6">
-            <Button 
-              onClick={handleSubmit} 
-              className="w-full" 
-              size="lg"
-              disabled={isLoading || isSubmitting || selectedPackageIds.length === 0}
+          </div>
+          
+           <div className="flex justify-between items-center p-6 border-t bg-gray-50">
+             <div className="flex gap-4">
+               <Button variant="outline" onClick={addEmptyProperty}>
+                 <Plus className="w-4 h-4 mr-2" />
+                 Add Property
+               </Button>
+               <Button variant="secondary" onClick={generateTestData}>
+                 Generate Test Data
+               </Button>
+               {selectedPackageId && (
+                 <Button 
+                   variant="outline" 
+                   onClick={() => {
+                     setSelectedPackageId(null);
+                     setDisplayedProperties([]);
+                   }}
+                 >
+                   Show All Properties
+                 </Button>
+               )}
+               <div className="text-sm text-muted-foreground flex items-center">
+                 Total Properties: <span className="font-semibold ml-1">
+                   {selectedPackageId ? displayedProperties.length : properties.length}
+                 </span>
+               </div>
+             </div>
+            
+            <Button
+              onClick={handleSubmit}
+              disabled={isLoading || isSubmitting || !(showPackageSplitter && packageSplits.length > 0 && selectedPackageId)}
+              className="bg-dominion-blue hover:bg-blue-700 text-white"
             >
-              {isSubmitting ? "Processing..." : selectedPackageIds.length > 0 ? `Submit ${selectedPackageIds.length} Package${selectedPackageIds.length > 1 ? 's' : ''} for Quote` : "Select Package(s) to Submit"}
+              {isSubmitting ? (
+                <span className="flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</span>
+              ) : (
+                'Get Package Loan Data'
+              )}
             </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Property Data Table */}
-      {showPropertyGrid && properties.length > 0 && (
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>All Properties ({properties.length})</span>
-              <div className="flex space-x-2">
-                <Button onClick={addEmptyProperty} variant="outline" size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Property
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-border">
-                <thead>
-                  <tr className="bg-muted">
-                    <th className="sticky left-0 bg-muted p-3 text-left font-medium border-b border-border z-10">
-                      Property Address
-                    </th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">County</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">Type</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[80px]">Condo</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">Purchase Price</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[120px]">Market Value</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[100px]">Market Rent</th>
-                    <th className="p-3 text-left font-medium border-b border-border min-w-[100px]">Occupancy</th>
-                    <th className="p-3 text-center font-medium border-b border-border">Remove</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {properties.map((property, index) => (
-                    <PropertyTableRow
-                      key={property.id}
-                      property={property}
-                      index={index}
-                      onUpdate={handlePropertiesChange}
-                      properties={properties}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
