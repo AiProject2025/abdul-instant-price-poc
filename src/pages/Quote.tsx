@@ -6,15 +6,19 @@ import PricingResults from "@/components/PricingResults";
 import BondDisplay from "@/components/BondDisplay";
 import { LoganChatbot } from "@/components/LoganChatbot";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import QuoteTracker from "@/components/QuoteTracker";
 import ScenarioGrid from "@/components/ScenarioGrid";
+import ModernNavigation from "@/components/ModernNavigation";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { saveQuote } from "@/services/quoteTracker";
 import { generateLoanQuote, generateComparisonGrid } from "@/utils/documentGenerator";
-import { ArrowLeft, History } from "lucide-react";
+import { ArrowLeft, History, Home } from "lucide-react";
 import { useScenarios, Scenario } from "@/hooks/useScenarios";
 import { useToast } from "@/hooks/use-toast";
 import { transformFormDataForAPI } from "@/utils/pricingPayload";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 const Quote = () => {
   const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results" | "scenarios">("upload");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -488,131 +492,50 @@ const Quote = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Enhanced Navigation */}
-      <nav className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <img
-                src="/lovable-uploads/87eaaf76-9665-4138-b3ce-aefec128e3db.png"
-                alt="Dominion Financial"
-                className="h-8"
-              />
-
-              {/* Property and Client Info */}
-              {lastSubmittedFormData && (
-                <div className="text-sm text-gray-600 border-l pl-4">
-                  <div className="font-medium text-gray-900">
-                    {lastSubmittedFormData.firstName} {lastSubmittedFormData.lastName}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {lastSubmittedFormData.streetAddress} {lastSubmittedFormData.city}, {lastSubmittedFormData.propertyState}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Step Navigation - Always visible when past upload */}
-            {currentStep !== "upload" && (
-              <div className="flex items-center space-x-2">
-                {/* Start Over */}
-                <Button
-                  variant="ghost"
-                  onClick={handleBackToUpload}
-                  className="text-xs text-gray-500 hover:text-gray-700"
-                  size="sm"
-                >
-                  <ArrowLeft className="h-3 w-3 mr-1" />
-                  Start Over
-                </Button>
-
-                {/* Step Buttons */}
-                <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
-                  <Button
-                    variant={currentStep === "questionnaire" ? "default" : "ghost"}
-                    onClick={() => setCurrentStep("questionnaire")}
-                    className="text-xs px-3 py-1 h-8"
-                    size="sm"
-                  >
-                    Edit Details
-                  </Button>
-                  
-                  {(pricingResults.length > 0 || currentStep === "results") && (
-                    <Button
-                      variant={currentStep === "results" ? "default" : "ghost"}
-                      onClick={() => setCurrentStep("results")}
-                      className="text-xs px-3 py-1 h-8"
-                      size="sm"
-                    >
-                      View Results
-                    </Button>
-                  )}
-
-                  <Button
-                    variant={currentStep === "scenarios" ? "default" : "ghost"}
-                    onClick={() => setCurrentStep("scenarios")}
-                    className="text-xs px-3 py-1 h-8"
-                    size="sm"
-                  >
-                    <History className="w-3 h-3 mr-1" />
-                    Saved
-                  </Button>
-
-                  <Button
-                    variant={currentStep === "loanpass" ? "default" : "ghost"}
-                    onClick={() => setCurrentStep("loanpass")}
-                    className="text-xs px-3 py-1 h-8"
-                    size="sm"
-                  >
-                    Loan Pass
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {/* Process Breadcrumb - Show current step */}
-      {currentStep !== "upload" && (
-        <div className="bg-gray-50 border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center space-x-2 text-sm">
-              <span className="text-gray-500">Process:</span>
-              <div className="flex items-center space-x-2">
-                <span className={`px-2 py-1 rounded ${currentStep === "questionnaire" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
-                  1. Details
-                </span>
-                <span className="text-gray-400">→</span>
-                <span className={`px-2 py-1 rounded ${currentStep === "results" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
-                  2. Results
-                </span>
-                <span className="text-gray-400">→</span>
-                <span className={`px-2 py-1 rounded ${currentStep === "scenarios" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
-                  3. Saved
-                </span>
-                <span className="text-gray-400">•</span>
-                <span className={`px-2 py-1 rounded ${currentStep === "loanpass" ? "bg-dominion-blue text-white" : "bg-gray-200 text-gray-600"}`}>
-                  Loan Pass
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bond Display - Visible on all screens */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          <BondDisplay />
+    <div className="min-h-screen bg-background">
+      {/* Modern Navigation Header */}
+      <ModernNavigation />
+      
+      {/* Breadcrumb Navigation */}
+      <div className="bg-white border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/" className="flex items-center">
+                    <Home className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Get Quote</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </div>
 
-      <main className="py-12 px-4">
-        <div className="max-w-4xl mx-auto">
+      <main className="py-8 px-4">
+        <div className="max-w-7xl mx-auto">
           {currentStep === "upload" && (
             <div className="space-y-8">
+              {/* Quote Tracker Dashboard - Styled better */}
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-900">Quote Tracking Dashboard</h3>
+                      <p className="text-sm text-blue-700 mt-1">Access and manage your saved quotes</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                      Coming Soon
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
               <QuestionnaireUpload
                 onFileUpload={handleFileUpload}
                 onManualEntry={handleManualEntry}
@@ -640,8 +563,10 @@ const Quote = () => {
                 skipDataTapeDialog={true}
               />
 
-              {/* Quote Tracker on Upload Screen */}
-              <QuoteTracker onQuoteSelect={handleQuoteSelect} />
+              {/* Hidden Quote Tracker - moved to dashboard card above */}
+              <div className="hidden">
+                <QuoteTracker onQuoteSelect={handleQuoteSelect} />
+              </div>
             </div>
           )}
 
@@ -681,6 +606,17 @@ const Quote = () => {
           )}
         </div>
       </main>
+
+      {/* Footer - consistent with home page */}
+      <footer className="bg-blue-900 text-white py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-sm opacity-90">
+              &copy; {new Date().getFullYear()} Dominion Financial. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Logan Chatbot - Available on all Quote screens */}
       <LoganChatbot />

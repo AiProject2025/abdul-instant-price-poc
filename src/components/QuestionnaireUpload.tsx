@@ -221,12 +221,12 @@ const QuestionnaireUpload = ({
   };
 
   return <div className="space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-dominion-blue mb-4">
-          DSCR Loan Quote System
+      <div className="text-center max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold text-blue-900 mb-4">
+          Get Your DSCR Quote
         </h1>
-        <p className="text-lg text-dominion-gray max-w-2xl mx-auto">
-          Search for existing clients or create a new quote by uploading a questionnaire or entering information manually.
+        <p className="text-lg text-muted-foreground">
+          Choose how you'd like to get started with your commercial real estate loan quote
         </p>
       </div>
 
@@ -234,114 +234,117 @@ const QuestionnaireUpload = ({
         onClientSelect={handleClientSelect}
       />
 
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold text-dominion-blue mb-4">
-          Create New Quote
-        </h2>
-        <p className="text-dominion-gray max-w-2xl mx-auto">
-          Upload your completed DSCR questionnaire and let our AI extract the data automatically,
-          or enter the information manually using our form.
-        </p>
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Upload Questionnaire Option */}
+        <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200">
+          <CardContent className="p-8">
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto group-hover:bg-blue-200 transition-colors">
+                <Upload className="h-8 w-8 text-blue-600" />
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-blue-900 mb-2">Upload Questionnaire</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Upload your completed DSCR questionnaire for instant data extraction
+                </p>
+              </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* File Upload Option */}
-        <Card className="relative">
-          <CardHeader className="text-center">
-            <Upload className="h-12 w-12 text-dominion-green mx-auto mb-4" />
-            <CardTitle className="text-dominion-blue">Upload Questionnaire</CardTitle>
-            <CardDescription>
-              Drag and drop your DSCR questionnaire or click to browse
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive ? "border-dominion-green bg-green-50" : "border-gray-300 hover:border-dominion-green hover:bg-gray-50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
-              <input type="file" id="file-upload" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleFileInput} />
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-2">
-                  Drop your file here or <span className="text-dominion-blue font-medium">browse</span>
-                </p>
-                <p className="text-xs text-gray-400">
-                  Supports PDF, DOC, DOCX, TXT files
-                </p>
-              </label>
+              <div className={`border-2 border-dashed rounded-xl p-6 transition-all duration-300 ${dragActive ? "border-blue-400 bg-blue-50" : "border-border hover:border-blue-300 hover:bg-blue-50/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
+                <input type="file" id="file-upload" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleFileInput} />
+                <label htmlFor="file-upload" className="cursor-pointer block">
+                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Drop file here or <span className="text-blue-600 font-medium">browse</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PDF, DOC, DOCX, TXT
+                  </p>
+                </label>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Upload Data Tape Option */}
-        <Card className="relative">
-          <CardHeader className="text-center">
-            <Upload className="h-12 w-12 text-dominion-blue mx-auto mb-4" />
-            <CardTitle className="text-dominion-blue">Upload Data Tape</CardTitle>
-            <CardDescription>
-              Upload your data tape for batch processing multiple properties
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dataTapeDragActive ? "border-dominion-blue bg-blue-50" : "border-gray-300 hover:border-dominion-blue hover:bg-gray-50"}`} onDragEnter={handleDataTapeDrag} onDragLeave={handleDataTapeDrag} onDragOver={handleDataTapeDrag} onDrop={handleDataTapeDrop}>
-              <input type="file" id="data-tape-upload" className="hidden" accept=".csv,.xls,.xlsx" onChange={handleDataTapeInput} />
-              <label htmlFor="data-tape-upload" className="cursor-pointer">
-                <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-2">
-                  Drop your data tape here or <span className="text-dominion-blue font-medium">browse</span>
+        <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-purple-200">
+          <CardContent className="p-8">
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto group-hover:bg-purple-200 transition-colors">
+                <FileSpreadsheet className="h-8 w-8 text-purple-600" />
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-blue-900 mb-2">Upload Data Tape</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Batch process multiple properties from your portfolio data
                 </p>
-                <p className="text-xs text-gray-400">
-                  Supports CSV, XLS, XLSX files
-                </p>
-              </label>
+              </div>
+
+              <div className={`border-2 border-dashed rounded-xl p-6 transition-all duration-300 ${dataTapeDragActive ? "border-purple-400 bg-purple-50" : "border-border hover:border-purple-300 hover:bg-purple-50/50"}`} onDragEnter={handleDataTapeDrag} onDragLeave={handleDataTapeDrag} onDragOver={handleDataTapeDrag} onDrop={handleDataTapeDrop}>
+                <input type="file" id="data-tape-upload" className="hidden" accept=".csv,.xls,.xlsx" onChange={handleDataTapeInput} />
+                <label htmlFor="data-tape-upload" className="cursor-pointer block">
+                  <FileSpreadsheet className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Drop file here or <span className="text-purple-600 font-medium">browse</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    CSV, XLS, XLSX
+                  </p>
+                </label>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Manual Entry Option */}
-        <Card>
-          <CardHeader className="text-center">
-            <FileText className="h-12 w-12 text-dominion-blue mx-auto mb-4" />
-            <CardTitle className="text-dominion-blue">Manual Entry</CardTitle>
-            <CardDescription>
-              Fill out the DSCR information manually using our guided form
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-dominion-blue mb-2">What you'll need:</h4>
-                <ul className="text-sm text-dominion-gray space-y-1">
-                  <li>• Borrower information</li>
-                  <li>• Property details</li>
-                  <li>• Loan requirements</li>
-                  <li>• Financial information</li>
-                </ul>
+        <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-green-200">
+          <CardContent className="p-8">
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto group-hover:bg-green-200 transition-colors">
+                <FileText className="h-8 w-8 text-green-600" />
               </div>
-              <Button onClick={onManualEntry} className="w-full bg-dominion-blue hover:bg-dominion-blue/90 text-white">
-                Start Manual Entry
-              </Button>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-blue-900 mb-2">Manual Entry</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Fill out our guided form step-by-step
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-muted p-4 rounded-lg text-left">
+                  <h4 className="font-medium text-blue-900 mb-3">Required Information:</h4>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      Borrower information
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      Property details
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      Loan requirements
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      Financial information
+                    </li>
+                  </ul>
+                </div>
+                <Button 
+                  onClick={onManualEntry} 
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Start Manual Entry
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Benefits Section */}
-      <Card className="bg-gradient-to-r from-dominion-blue to-dominion-green text-white">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div>
-              <h4 className="font-semibold mb-2">AI-Powered Extraction</h4>
-              <p className="text-sm opacity-90">Advanced OCR and NLP technology</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">99.9% Accuracy</h4>
-              <p className="text-sm opacity-90">Human-reviewed data validation</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Instant Pricing</h4>
-              <p className="text-sm opacity-90">Results in under 60 seconds</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Beautiful Data Tape Choice Dialog */}
       <AlertDialog open={showDataTapeDialog} onOpenChange={setShowDataTapeDialog}>
