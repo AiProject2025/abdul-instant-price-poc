@@ -1127,7 +1127,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
   };
 
   return (
-    <div className="max-w-full mx-auto space-y-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
       {/* Clean Data Tape Upload Section */}
       {properties.length === 0 && (
         <Card className="border-gray-200 shadow-sm">
@@ -1567,12 +1567,21 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
                 </Card>
 
                 {/* Package Grid */}
-                <div className="grid gap-4">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {packageSplits.map((split, index) => {
                         return (
                             <Card
                                 key={split.id}
-                                className={`border ${selectedPackageId === split.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'}`}
+                                className={`transition-all duration-300 cursor-pointer transform hover:scale-[1.02] animate-fade-in ${split.color} ${
+                                  selectedPackageId === split.id 
+                                    ? 'ring-4 ring-primary/30 shadow-lg border-2' 
+                                    : 'hover:shadow-md border-2'
+                                }`}
+                                onClick={() => setSelectedPackageId(selectedPackageId === split.id ? null : split.id)}
+                                style={{
+                                  animationDelay: `${index * 150}ms`,
+                                  transform: selectedPackageId === split.id ? 'translateY(-4px)' : 'translateY(0)',
+                                }}
                             >
 
                                 {/* Package Header */}
