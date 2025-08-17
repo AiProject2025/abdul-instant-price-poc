@@ -32,13 +32,13 @@ function Hero() {
           </div>
           <div className="flex gap-4 flex-col">
             <h1 className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular">
-              <span className="text-foreground">Experience</span>
+              <span className="text-white">The Future of</span>
               <span className="relative flex w-full justify-center overflow-hidden text-center md:pb-4 md:pt-1">
                 &nbsp;
                 {titles.map((title, index) => (
                   <motion.span
                     key={index}
-                    className="absolute font-semibold text-[hsl(var(--dominion-blue))]"
+                    className="absolute font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent"
                     initial={{ opacity: 0, y: "-100" }}
                     transition={{ type: "spring", stiffness: 50 }}
                     animate={
@@ -57,21 +57,18 @@ function Hero() {
                   </motion.span>
                 ))}
               </span>
-              <span className="text-foreground">Lending</span>
+              <span className="text-white">Commercial Lending</span>
             </h1>
 
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-white max-w-3xl text-center">
-              Transform your commercial lending process with our AI-powered platform. 
-              Get instant quotes, automated underwriting, and comprehensive loan packaging 
-              that streamlines everything from application to approval.
+            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-white/90 max-w-3xl text-center">
+              Experience lightning-fast commercial loan approvals with our revolutionary AI platform. 
+              From instant DSCR calculations to comprehensive loan packaging - 
+              we're transforming how commercial real estate gets financed.
             </p>
           </div>
           <div className="flex flex-row gap-3">
-            <Button size="lg" className="gap-4" variant="outline">
-              Schedule Demo <PhoneCall className="w-4 h-4" />
-            </Button>
-            <Button size="lg" className="gap-4 bg-[hsl(var(--dominion-blue))] hover:bg-[hsl(var(--dominion-blue))]/90">
-              Get Started <MoveRight className="w-4 h-4" />
+            <Button size="lg" className="gap-4 bg-[hsl(var(--dominion-blue))] hover:bg-[hsl(var(--dominion-blue))]/90" asChild>
+              <a href="/quote">Get Started <MoveRight className="w-4 h-4" /></a>
             </Button>
           </div>
         </div>
