@@ -221,10 +221,6 @@ const QuestionnaireUpload = ({
   };
 
   return <div className="space-y-8">
-      <ClientSearch
-        onClientSelect={handleClientSelect}
-      />
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {/* Upload Questionnaire Option */}
         <Card className="group hover:shadow-xl transition-all duration-300 border hover:border-primary/50">

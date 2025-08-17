@@ -14,11 +14,13 @@ import ModernNavigation from "@/components/ModernNavigation";
 import Breadcrumb, { BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { saveQuote } from "@/services/quoteTracker";
 import { generateLoanQuote, generateComparisonGrid } from "@/utils/documentGenerator";
-import { ArrowLeft, History, Home } from "lucide-react";
+import { ArrowLeft, History, Home, Search, User, MapPin } from "lucide-react";
 import { useScenarios, Scenario } from "@/hooks/useScenarios";
 import { useToast } from "@/hooks/use-toast";
 import { transformFormDataForAPI } from "@/utils/pricingPayload";
 import { useLocation, Link } from "react-router-dom";
+import { useClients, ClientWithProperties } from "@/hooks/useClients";
+import { Input } from "@/components/ui/input";
 const Quote = () => {
   const [currentStep, setCurrentStep] = useState<"upload" | "questionnaire" | "loanpass" | "results" | "scenarios">("upload");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -31,6 +33,9 @@ const Quote = () => {
   const [flags, setFlags] = useState<string[]>([]);
   const [showQuoteTracker, setShowQuoteTracker] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showClientResults, setShowClientResults] = useState(false);
+
+  const { clients, loading: clientsLoading, error: clientsError, searchClients } = useClients();
 
   const { saveScenarioResults } = useScenarios();
   const { toast } = useToast();
@@ -538,23 +543,128 @@ const Quote = () => {
                 </Button>
               </div>
 
-              {/* Search Bar - ChatGPT style */}
+              {/* Search Bar - ChatGPT style with client functionality */}
               <div className="w-full max-w-4xl mx-auto">
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="Search clients, properties, or previous quotes..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      if (!e.target.value.trim()) {
+                        setShowClientResults(false);
+                      }
+                    }}
+                    onKeyPress={async (e) => {
+                      if (e.key === 'Enter' && searchQuery.trim()) {
+                        await searchClients(searchQuery);
+                        setShowClientResults(true);
+                      }
+                    }}
                     className="w-full px-8 py-6 text-lg border border-border rounded-2xl bg-background shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all duration-200 placeholder:text-muted-foreground"
                   />
                   <Button 
                     size="sm" 
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 rounded-xl"
+                    onClick={async () => {
+                      if (searchQuery.trim()) {
+                        await searchClients(searchQuery);
+                        setShowClientResults(true);
+                      }
+                    }}
+                    disabled={clientsLoading}
                   >
-                    Search
+                    <Search className="h-4 w-4" />
                   </Button>
                 </div>
+
+                {/* Client Search Results */}
+                {showClientResults && clients.length > 0 && (
+                  <div className="mt-4 space-y-2 max-h-60 overflow-y-auto bg-background border border-border rounded-xl p-4">
+                    <h4 className="font-medium text-primary mb-3">Found Clients:</h4>
+                    {clients.map((client) => (
+                      <div
+                        key={client.id}
+                        className="border border-border rounded-lg p-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          console.log('Client selected:', client);
+                          // Pre-populate form with client data
+                          const clientData = {
+                            borrowerName: client.name,
+                            email: client.email,
+                            phone: client.phone,
+                            // If client has properties, use the first one as default
+                            ...(client.properties.length > 0 && {
+                              propertyAddress: client.properties[0].address,
+                              city: client.properties[0].city,
+                              propertyState: client.properties[0].state,
+                              zipCode: client.properties[0].zip_code,
+                              propertyType: client.properties[0].property_type
+                            })
+                          };
+                          setLastSubmittedFormData(clientData);
+                          setExtractedData(clientData);
+                          setCurrentStep('questionnaire');
+                          setShowClientResults(false);
+                          setSearchQuery('');
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <User className="h-4 w-4 text-primary" />
+                              <span className="font-medium text-primary">{client.name}</span>
+                            </div>
+                            
+                            {client.properties.length > 0 && (
+                              <div className="space-y-1 mb-2">
+                                {client.properties.map((property) => (
+                                  <div key={property.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <MapPin className="h-3 w-3" />
+                                    <span>{property.address}</span>
+                                    {property.property_type && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {property.property_type}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            <div className="flex gap-2">
+                              {client.lastQuoteDate && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Last quote: {new Date(client.lastQuoteDate).toLocaleDateString()}
+                                </Badge>
+                              )}
+                              {client.totalQuotes > 0 && (
+                                <Badge variant="outline" className="text-xs">
+                                  {client.totalQuotes} quote{client.totalQuotes !== 1 ? 's' : ''}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* No results message */}
+                {showClientResults && searchQuery && clients.length === 0 && !clientsLoading && (
+                  <div className="mt-4 text-center py-4 text-muted-foreground bg-background border border-border rounded-xl">
+                    No clients found matching "{searchQuery}"
+                  </div>
+                )}
+
+                {/* Error message */}
+                {clientsError && (
+                  <div className="mt-4 text-center py-4 text-destructive bg-background border border-border rounded-xl">
+                    Error: {clientsError}
+                  </div>
+                )}
               </div>
 
               {/* Quote Tracker - Show/Hide */}
@@ -580,25 +690,6 @@ const Quote = () => {
                 onFileUpload={handleFileUpload}
                 onManualEntry={handleManualEntry}
                 onDataTapeUpload={handleDataTapeUpload}
-                onClientSelect={(client) => {
-                  console.log('Client selected:', client);
-                  // Pre-populate form with client data
-                  const clientData = {
-                    borrowerName: client.name,
-                    email: client.email,
-                    phone: client.phone,
-                    // If client has properties, use the first one as default
-                    ...(client.properties.length > 0 && {
-                      propertyAddress: client.properties[0].address,
-                      city: client.properties[0].city,
-                      propertyState: client.properties[0].state,
-                      zipCode: client.properties[0].zip_code,
-                      propertyType: client.properties[0].property_type
-                    })
-                  };
-                  setLastSubmittedFormData(clientData);
-                  setCurrentStep('questionnaire');
-                }}
                 isLoading={isProcessing}
                 skipDataTapeDialog={true}
               />
