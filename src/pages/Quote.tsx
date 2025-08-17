@@ -29,6 +29,8 @@ const Quote = () => {
   const [ineligibleBuyers, setIneligibleBuyers] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [flags, setFlags] = useState<string[]>([]);
+  const [showQuoteTracker, setShowQuoteTracker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { saveScenarioResults } = useScenarios();
   const { toast } = useToast();
@@ -496,21 +498,21 @@ const Quote = () => {
       {/* Modern Navigation Header */}
       <ModernNavigation />
       
-      {/* Breadcrumb Navigation */}
-      <div className="bg-white border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      {/* Breadcrumb Navigation - below navbar, subtle blue */}
+      <div className="bg-gradient-to-r from-blue-50/50 to-white border-b border-blue-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/" className="flex items-center">
+                  <Link to="/" className="flex items-center text-blue-600 hover:text-blue-800">
                     <Home className="h-4 w-4" />
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
+              <BreadcrumbSeparator className="text-blue-400" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Get Quote</BreadcrumbPage>
+                <BreadcrumbPage className="text-blue-900 font-medium">Get Quote</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -521,20 +523,60 @@ const Quote = () => {
         <div className="max-w-7xl mx-auto">
           {currentStep === "upload" && (
             <div className="space-y-8">
-              {/* Quote Tracker Dashboard - Styled better */}
-              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+              {/* Header with Quote Tracker Button */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-blue-900 mb-2">Get Your Quote</h1>
+                  <p className="text-lg text-gray-600">Choose how you'd like to start your loan application</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowQuoteTracker(!showQuoteTracker)}
+                  className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                >
+                  <History className="h-4 w-4 mr-2" />
+                  Quote History
+                </Button>
+              </div>
+
+              {/* Search Bar - ChatGPT style */}
+              <div className="w-full max-w-4xl mx-auto">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search clients, properties, or previous quotes..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full px-6 py-4 text-lg border-2 border-blue-200 rounded-full bg-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all duration-200 placeholder:text-gray-400"
+                  />
+                  <Button 
+                    size="sm" 
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    Search
+                  </Button>
+                </div>
+              </div>
+
+              {/* Quote Tracker - Show/Hide */}
+              {showQuoteTracker && (
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-blue-900">Quote Tracking Dashboard</h3>
-                      <p className="text-sm text-blue-700 mt-1">Access and manage your saved quotes</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowQuoteTracker(false)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        Hide
+                      </Button>
                     </div>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                      Coming Soon
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
+                    <QuoteTracker onQuoteSelect={handleQuoteSelect} />
+                  </CardContent>
+                </Card>
+              )}
 
               <QuestionnaireUpload
                 onFileUpload={handleFileUpload}
@@ -562,11 +604,6 @@ const Quote = () => {
                 isLoading={isProcessing}
                 skipDataTapeDialog={true}
               />
-
-              {/* Hidden Quote Tracker - moved to dashboard card above */}
-              <div className="hidden">
-                <QuoteTracker onQuoteSelect={handleQuoteSelect} />
-              </div>
             </div>
           )}
 

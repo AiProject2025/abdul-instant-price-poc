@@ -221,43 +221,34 @@ const QuestionnaireUpload = ({
   };
 
   return <div className="space-y-8">
-      <div className="text-center max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-blue-900 mb-4">
-          Get Your DSCR Quote
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Choose how you'd like to get started with your commercial real estate loan quote
-        </p>
-      </div>
-
       <ClientSearch
         onClientSelect={handleClientSelect}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {/* Upload Questionnaire Option */}
-        <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200">
-          <CardContent className="p-8">
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto group-hover:bg-blue-200 transition-colors">
-                <Upload className="h-8 w-8 text-blue-600" />
+        <Card className="group hover:shadow-xl transition-all duration-300 border-2 border-blue-100 hover:border-blue-300 bg-gradient-to-br from-white to-blue-50/30">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-all">
+                <Upload className="h-8 w-8 text-white" />
               </div>
               
               <div>
-                <h3 className="text-xl font-semibold text-blue-900 mb-2">Upload Questionnaire</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <h3 className="text-xl font-bold text-blue-900 mb-2">Upload Questionnaire</h3>
+                <p className="text-sm text-gray-600 mb-4">
                   Upload your completed DSCR questionnaire for instant data extraction
                 </p>
               </div>
 
-              <div className={`border-2 border-dashed rounded-xl p-6 transition-all duration-300 ${dragActive ? "border-blue-400 bg-blue-50" : "border-border hover:border-blue-300 hover:bg-blue-50/50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
+              <div className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 ${dragActive ? "border-blue-500 bg-blue-100" : "border-blue-200 hover:border-blue-400 hover:bg-blue-50"}`} onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
                 <input type="file" id="file-upload" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleFileInput} />
                 <label htmlFor="file-upload" className="cursor-pointer block">
-                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Drop file here or <span className="text-blue-600 font-medium">browse</span>
+                  <FileText className="h-10 w-10 text-blue-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 mb-1 font-medium">
+                    Drop file here or <span className="text-blue-600 underline">browse</span>
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500">
                     PDF, DOC, DOCX, TXT
                   </p>
                 </label>
@@ -267,28 +258,28 @@ const QuestionnaireUpload = ({
         </Card>
 
         {/* Upload Data Tape Option */}
-        <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-purple-200">
-          <CardContent className="p-8">
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto group-hover:bg-purple-200 transition-colors">
-                <FileSpreadsheet className="h-8 w-8 text-purple-600" />
+        <Card className="group hover:shadow-xl transition-all duration-300 border-2 border-blue-100 hover:border-blue-300 bg-gradient-to-br from-white to-blue-50/30">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-all">
+                <FileSpreadsheet className="h-8 w-8 text-white" />
               </div>
               
               <div>
-                <h3 className="text-xl font-semibold text-blue-900 mb-2">Upload Data Tape</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <h3 className="text-xl font-bold text-blue-900 mb-2">Upload Data Tape</h3>
+                <p className="text-sm text-gray-600 mb-4">
                   Batch process multiple properties from your portfolio data
                 </p>
               </div>
 
-              <div className={`border-2 border-dashed rounded-xl p-6 transition-all duration-300 ${dataTapeDragActive ? "border-purple-400 bg-purple-50" : "border-border hover:border-purple-300 hover:bg-purple-50/50"}`} onDragEnter={handleDataTapeDrag} onDragLeave={handleDataTapeDrag} onDragOver={handleDataTapeDrag} onDrop={handleDataTapeDrop}>
+              <div className={`border-2 border-dashed rounded-2xl p-6 transition-all duration-300 ${dataTapeDragActive ? "border-blue-500 bg-blue-100" : "border-blue-200 hover:border-blue-400 hover:bg-blue-50"}`} onDragEnter={handleDataTapeDrag} onDragLeave={handleDataTapeDrag} onDragOver={handleDataTapeDrag} onDrop={handleDataTapeDrop}>
                 <input type="file" id="data-tape-upload" className="hidden" accept=".csv,.xls,.xlsx" onChange={handleDataTapeInput} />
                 <label htmlFor="data-tape-upload" className="cursor-pointer block">
-                  <FileSpreadsheet className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Drop file here or <span className="text-purple-600 font-medium">browse</span>
+                  <FileSpreadsheet className="h-10 w-10 text-blue-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 mb-1 font-medium">
+                    Drop file here or <span className="text-blue-600 underline">browse</span>
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500">
                     CSV, XLS, XLSX
                   </p>
                 </label>
@@ -298,46 +289,47 @@ const QuestionnaireUpload = ({
         </Card>
 
         {/* Manual Entry Option */}
-        <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-green-200">
-          <CardContent className="p-8">
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto group-hover:bg-green-200 transition-colors">
-                <FileText className="h-8 w-8 text-green-600" />
+        <Card className="group hover:shadow-xl transition-all duration-300 border-2 border-blue-100 hover:border-blue-300 bg-gradient-to-br from-white to-blue-50/30">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-all">
+                <Calculator className="h-8 w-8 text-white" />
               </div>
               
               <div>
-                <h3 className="text-xl font-semibold text-blue-900 mb-2">Manual Entry</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <h3 className="text-xl font-bold text-blue-900 mb-2">Manual Entry</h3>
+                <p className="text-sm text-gray-600 mb-4">
                   Fill out our guided form step-by-step
                 </p>
               </div>
 
               <div className="space-y-4">
-                <div className="bg-muted p-4 rounded-lg text-left">
-                  <h4 className="font-medium text-blue-900 mb-3">Required Information:</h4>
-                  <ul className="text-sm text-muted-foreground space-y-2">
+                <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl text-left">
+                  <h4 className="font-semibold text-blue-900 mb-3 text-sm">Required Information:</h4>
+                  <ul className="text-xs text-gray-600 space-y-2">
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></div>
                       Borrower information
                     </li>
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></div>
                       Property details
                     </li>
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></div>
                       Loan requirements
                     </li>
                     <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></div>
                       Financial information
                     </li>
                   </ul>
                 </div>
                 <Button 
                   onClick={onManualEntry} 
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
                 >
+                  <Calculator className="h-4 w-4 mr-2" />
                   Start Manual Entry
                 </Button>
               </div>
