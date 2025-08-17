@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import QuoteTracker from "@/components/QuoteTracker";
 import ScenarioGrid from "@/components/ScenarioGrid";
 import ModernNavigation from "@/components/ModernNavigation";
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import Breadcrumb, { BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { saveQuote } from "@/services/quoteTracker";
 import { generateLoanQuote, generateComparisonGrid } from "@/utils/documentGenerator";
 import { ArrowLeft, History, Home } from "lucide-react";
@@ -498,21 +498,21 @@ const Quote = () => {
       {/* Modern Navigation Header */}
       <ModernNavigation />
       
-      {/* Breadcrumb Navigation - below navbar, subtle blue */}
-      <div className="bg-gradient-to-r from-blue-50/50 to-white border-b border-blue-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      {/* Breadcrumb Navigation - below navbar, subtle */}
+      <div className="bg-muted/30 border-b border-border py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/" className="flex items-center text-blue-600 hover:text-blue-800">
+                  <Link to="/" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
                     <Home className="h-4 w-4" />
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-blue-400" />
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-blue-900 font-medium">Get Quote</BreadcrumbPage>
+                <BreadcrumbPage className="text-primary font-medium">Get Quote</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -526,13 +526,12 @@ const Quote = () => {
               {/* Header with Quote Tracker Button */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-blue-900 mb-2">Get Your Quote</h1>
-                  <p className="text-lg text-gray-600">Choose how you'd like to start your loan application</p>
+                  <h1 className="text-3xl font-bold text-primary mb-2">Get Your Quote</h1>
+                  <p className="text-lg text-muted-foreground">Choose how you'd like to start your loan application</p>
                 </div>
                 <Button 
                   variant="outline" 
                   onClick={() => setShowQuoteTracker(!showQuoteTracker)}
-                  className="border-blue-200 text-blue-700 hover:bg-blue-50"
                 >
                   <History className="h-4 w-4 mr-2" />
                   Quote History
@@ -547,11 +546,11 @@ const Quote = () => {
                     placeholder="Search clients, properties, or previous quotes..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-6 py-4 text-lg border-2 border-blue-200 rounded-full bg-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all duration-200 placeholder:text-gray-400"
+                    className="w-full px-8 py-6 text-lg border border-border rounded-2xl bg-background shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all duration-200 placeholder:text-muted-foreground"
                   />
                   <Button 
                     size="sm" 
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full bg-blue-600 hover:bg-blue-700"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 rounded-xl"
                   >
                     Search
                   </Button>
@@ -560,15 +559,14 @@ const Quote = () => {
 
               {/* Quote Tracker - Show/Hide */}
               {showQuoteTracker && (
-                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                <Card className="bg-muted/30 border">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-blue-900">Quote Tracking Dashboard</h3>
+                      <h3 className="text-lg font-semibold text-primary">Quote Tracking Dashboard</h3>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowQuoteTracker(false)}
-                        className="text-blue-600 hover:text-blue-800"
                       >
                         Hide
                       </Button>
@@ -645,7 +643,7 @@ const Quote = () => {
       </main>
 
       {/* Footer - consistent with home page */}
-      <footer className="bg-blue-900 text-white py-8 mt-16">
+      <footer className="bg-primary text-primary-foreground py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-sm opacity-90">
