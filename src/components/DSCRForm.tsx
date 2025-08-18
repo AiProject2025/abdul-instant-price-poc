@@ -420,7 +420,7 @@ const DSCRForm: React.FC<DSCRFormProps> = ({
     }, [formState.estimatedRehabCost]);
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-5xl mx-auto space-y-6  ">
             {/* Header Section */}
             <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-6 border border-primary/20">
                 <div className="flex items-center gap-3 mb-4">
