@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { statesAndCounties, statesWithAbbreviations, stateAbbreviations } from '@/utils/locationData';
-import { lookupCountyByZipCode, isValidZipCode } from '@/utils/zipCodeLookup';
+import { statesWithAbbreviations, stateAbbreviations } from '@/utils/locationData';
+import { lookupCountyByZipCode, isValidZipCode, listCountiesForState } from '@/utils/zipCodeLookup';
 
 interface StateCountySelectorProps {
   selectedState?: string;
@@ -58,34 +58,55 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
 
   const fullStateName = selectedState ? getStateNameFromAbbreviation(selectedState) : '';
   
+  const normalizeCounty = (s: string) => (s || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+(county|parish|borough|census area|city|municipality)$/i, '');
+
   // Dynamically build county list including any selected county that might not be in the predefined list
   const counties = useMemo(() => {
-    const baseCounties = fullStateName ? statesAndCounties[fullStateName] || [] : [];
-    
-    // If there's a selected county that's not in the base list, add it
-    if (selectedCounty && !baseCounties.includes(selectedCounty)) {
-      return [...baseCounties, selectedCounty].sort();
+    const dynamicCounties = selectedState ? listCountiesForState(selectedState) : [];
+
+    // If there's a selected county that's not in the dynamic list (case-insensitive, ignoring suffix), add it
+    if (selectedCounty) {
+      const exists = dynamicCounties.some(c => normalizeCounty(c) === normalizeCounty(selectedCounty));
+      if (!exists) {
+        return [...dynamicCounties, selectedCounty].sort((a, b) => a.localeCompare(b));
+      }
     }
-    
-    return baseCounties;
-  }, [fullStateName, selectedCounty]);
+
+    return dynamicCounties;
+  }, [selectedState, selectedCounty]);
+
+  // Ensure the Select value matches the canonical option casing when available
+  const selectedCountyValue = useMemo(() => {
+    if (!selectedCounty) return selectedCounty;
+    const baseCounties = selectedState ? listCountiesForState(selectedState) : [];
+    const match = baseCounties.find(c => normalizeCounty(c) === normalizeCounty(selectedCounty));
+    return match || selectedCounty;
+  }, [selectedState, selectedCounty]);
 
   const handleStateChange = (value: string) => {
     console.log('State changed to:', value);
     onStateChange(value); // This will be the abbreviation (e.g., "TX")
     
-    // Auto-populate with first county when state changes
-    const newFullStateName = getStateNameFromAbbreviation(value);
-    console.log('Full state name:', newFullStateName);
-    const newCounties = newFullStateName ? statesAndCounties[newFullStateName] || [] : [];
-    console.log('Counties for', newFullStateName, ':', newCounties);
-    
+    // Prefer selecting county by current ZIP if it matches the selected state
+    const byZip = zipCodeInput && zipCodeInput.length === 5 ? lookupCountyByZipCode(zipCodeInput) : null;
+    if (byZip && byZip.state === value) {
+      console.log('Selecting county from ZIP match:', byZip.county);
+      onCountyChange(byZip.county);
+      return;
+    }
+
+    // Otherwise, auto-populate with first county when state changes using dynamic list
+    const newCounties = listCountiesForState(value);
+    console.log('Counties for', value, ':', newCounties);
     if (newCounties.length > 0) {
       console.log('Setting first county to:', newCounties[0]);
-      onCountyChange(newCounties[0]); // Select the first county
+      onCountyChange(newCounties[0]);
     } else {
       console.log('No counties found, clearing county');
-      onCountyChange(''); // Clear if no counties available
+      onCountyChange('');
     }
   };
 
@@ -113,7 +134,7 @@ const StateCountySelector: React.FC<StateCountySelectorProps> = ({
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Property County *</label>
         <Select 
-          value={selectedCounty} 
+          value={selectedCountyValue} 
           onValueChange={onCountyChange}
           disabled={!selectedState}
         >

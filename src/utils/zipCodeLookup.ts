@@ -1671,3 +1671,21 @@ export const getZipCodesForCounty = (state: string, county: string): string[] =>
     .filter(([_, data]) => data.state === state && data.county === county)
     .map(([zipCode, _]) => zipCode);
 };
+
+/**
+ * Lists all counties for a given state abbreviation using the ZIP mapping
+ * Returns normalized county names (suffixes like "County", "Parish", etc. removed)
+ */
+export const listCountiesForState = (state: string): string[] => {
+  const normalize = (s: string) => (s || '')
+    .trim()
+    .replace(/\s+(County|Parish|Borough|Census Area|City|Municipality)$/i, '');
+
+  const set = new Set<string>();
+  for (const [, data] of Object.entries(zipCodeToCountyMap)) {
+    if (data.state === state) {
+      set.add(normalize(data.county));
+    }
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
+};

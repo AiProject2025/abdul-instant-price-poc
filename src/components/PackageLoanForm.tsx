@@ -463,7 +463,7 @@ const PackageLoanForm = ({ onSubmit, isLoading }: PackageLoanFormProps) => {
       purposeOfLoan: (item.purpose_of_loan || '').includes('Refinance') ? (item.purpose_of_loan?.includes('Cash-Out') ? 'Cash-Out' : 'Refinance') : 'Purchase',
       purchaseDate: item.purchase_date || '',
       purchasePrice: Number(item.purchase_price) || 0,
-      rehabCosts: Number(item.rehab_costs) || 0,
+      rehabCosts: Number(item.estimatedRehabCost) || 0,
       currentMarketValue: Number(item.current_market_value) || 0,
       existingMortgageBalance: Number(item.existing_mortgage_balance) || 0,
       currentMortgageRate: Number(item.current_mortgage_rate) || 0,

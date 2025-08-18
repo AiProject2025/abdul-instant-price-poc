@@ -118,14 +118,14 @@ const ModernNavigation = () => {
       <header 
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out",
-          "bg-transparent"
+          "bg-transparent h-20"
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 h-full flex items-center">
           {isMobile ? (
             // Mobile Single Island
             <div className={cn(
-              "flex items-center justify-between p-4 rounded-2xl transition-all duration-300",
+              "flex items-center justify-between p-4 rounded-2xl transition-all duration-300 w-full",
               isScrolled 
                 ? "bg-background/95 backdrop-blur-xl shadow-xl border border-border/50" 
                 : "bg-background/80 backdrop-blur-md shadow-lg"
@@ -167,7 +167,7 @@ const ModernNavigation = () => {
             </div>
           ) : (
             // Desktop Three Island Layout
-            <div className="flex items-center justify-center space-x-3">
+            <div className="flex items-center justify-center space-x-3 w-full">
               {/* Island 1: Logo */}
               <div className={cn(
                 "flex items-center px-4 py-3 h-14 rounded-2xl transition-all duration-300",

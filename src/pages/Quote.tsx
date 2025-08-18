@@ -503,7 +503,7 @@ const Quote = () => {
       {/* Modern Navigation Header */}
       <ModernNavigation />
 
-      <main className="py-8 px-4">
+      <main className="py-8 px-4 pt-24">
         <div className="max-w-7xl mx-auto">
           {currentStep === "upload" && (
             <div className="space-y-8">

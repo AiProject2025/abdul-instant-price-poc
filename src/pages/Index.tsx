@@ -13,14 +13,14 @@ const Index = () => {
       {/* Modern Navigation Header */}
       <ModernNavigation />
       
-      {/* Hero Section - Full Height */}
+      {/* Hero Section - Full Height with navbar spacing */}
       <section className="relative h-screen overflow-hidden">
         <AnimatedGradientBackground 
           Breathing={true}
           breathingRange={3}
           animationSpeed={0.01}
         />
-        <div className="relative z-10 flex items-center justify-center h-full pt-20">
+        <div className="relative z-10 flex items-center justify-center h-full pt-24">
           <Hero />
         </div>
       </section>
